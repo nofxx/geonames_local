@@ -9,7 +9,7 @@ module Geonames
     end
 
     def self.uncompress(code)
-      puts "Uncompressing #{code}"
+      info "Uncompressing #{code}"
       `unzip -qu /tmp/#{code.upcase}.zip -d /tmp`
     end
 
@@ -17,6 +17,7 @@ module Geonames
     def self.parse(code, filter=:main)
       db = Geonames::Tokyo.new
       red = 0
+      start = Time.now
       File.open("/tmp/#{code.upcase}.txt") do |f|
         while line = f.gets
           if filter != :all
@@ -24,10 +25,11 @@ module Geonames
           end
           red += 1
           db.write Spot.new(line.chomp).to_hash unless line =~ /^#|^iso/i
-            #puts "So far #{red} #{red/10}/s"
+            #info "So far #{red} #{red/10}/s"
           # end
         end
-        puts "Total #{red}"
+        total = Time.now - start
+        info "#{red} entries parsed in #{total} sec (#{(red/total).to_i}/s)"
       end
     end
 

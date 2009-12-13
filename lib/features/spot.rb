@@ -1,7 +1,7 @@
 module Geonames
   class Spot
     attr_accessor :geoname_id, :name, :ascii, :lat, :lon, :country,
-                  :code, :kind, :pop, :tz, :updated_at
+                  :code, :kind, :pop, :tz
     alias :x :lon
     alias :y :lat
 
@@ -14,8 +14,7 @@ module Geonames
       @alternates = tail.delete_at(0) unless tail[0] =~ /\d|-/
       lat, lon, @code, kind, @country, cc2, adm1, adm2, adm3, adm4,
          pop, ele, gtop, @tz, @up = tail
-      @lat = lat.to_f
-      @lon = lon.to_f
+      @lat, @lon =  lat.to_f, lon.to_f
       @geoname_id = gid.to_i
       @kind = human_code(kind)
     end
@@ -25,7 +24,8 @@ module Geonames
     end
 
     def to_hash
-      { "gid" => @geoname_id, "name" => @name, "lat" => @lat, "lon" => @lon }
+      { "gid" => @geoname_id, "kind" => @kind, "name" => @name,
+        "lat" => @lat, "lon" => @lon, "country" => @country }
     end
 
 

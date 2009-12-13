@@ -12,9 +12,9 @@ module Geonames
     def write(o)
       pkey = @rdb.genuid
       if @rdb.put(pkey, o.to_hash)
-       # puts "ok"
+       # info "ok"
       else
-        puts "err #{rdb.ecode}"
+        info "err #{rdb.ecode}"
       end
 
     end

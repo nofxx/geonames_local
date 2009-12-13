@@ -9,6 +9,7 @@ tmtags
 *~
 \#*
 .\#*
+*flymake.rb
 
 ## VIM
 *.swp
