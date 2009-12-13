@@ -2,31 +2,39 @@ module Geonames
   class Worker
     URL = "http://download.geonames.org/export/dump"
 
-    def self.download(code)
-      file = "/tmp/#{code.upcase}.zip"
-      return if File.exists? file
-      `curl #{URL}/#{code.upcase}.zip -o #{file}`
+    def self.get_file(code)
+      code == "country" ? "countryInfo.txt" : "#{code.upcase}.zip"
     end
 
-    def self.uncompress(code)
-      info "Uncompressing #{code}"
-      `unzip -qu /tmp/#{code.upcase}.zip -d /tmp`
+    def self.download(file)
+      return if File.exists?("/tmp/" + file)
+      `curl #{URL}/#{file} -o /tmp/#{file}`
     end
 
+    def self.uncompress(file)
+      info "Uncompressing #{file}"
+      `unzip -qu /tmp/#{file} -d /tmp`
+    end
 
-    def self.parse(code, filter=:main)
+    def self.parse_line(l)
+      if Opt[:level] != "all"
+        return unless l =~ /ADM\d/
+      end
+      return if l =~ /^#|^iso/i
+      obj = l =~ /^\D/ ? Country.parse(l) : Spot.new(l)
+
+    end
+
+    def self.parse(file)
       db = Geonames::Tokyo.new
       red = 0
       start = Time.now
-      File.open("/tmp/#{code.upcase}.txt") do |f|
+      File.open("/tmp/#{file.gsub("zip", "txt")}") do |f|
         while line = f.gets
-          if filter != :all
-            next unless line =~ /ADM\d/
+          if record = parse_line(line)
+            db.write record.to_hash
+            red += 1
           end
-          red += 1
-          db.write Spot.new(line.chomp).to_hash unless line =~ /^#|^iso/i
-            #info "So far #{red} #{red/10}/s"
-          # end
         end
         total = Time.now - start
         info "#{red} entries parsed in #{total} sec (#{(red/total).to_i}/s)"
@@ -37,9 +45,10 @@ module Geonames
     def self.dump(codes=:all)
       if codes.respond_to? :each
         for code in codes
-          download code
-          uncompress code
-          parse code
+          file = get_file(code)
+          download file
+          uncompress file unless code == "country"
+          parse file
         end
       end
     end

@@ -16,7 +16,7 @@ Commands:
    sync- Check and update/create as needed
 
 BANNER
-        opts.on("-l", "--level LEVEL", Logger::SEV_LABEL.map { |l| l.downcase }, "The level of logging to report" ) { |level| options[:level] = level }
+        opts.on("-l", "--level LEVEL", String, "The level of logging to report" ) { |level| options[:level] = level }
         opts.separator ""
         opts.separator "Config file:"
         opts.on("-c", "--config CONFIG", String, "Geonames Config file path" ) { |file|  options[:config] = file }
