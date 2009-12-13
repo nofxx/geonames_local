@@ -5,12 +5,13 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "geonames_local"
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.summary = "Dump and feed a tokyo local geonames db"
+    gem.description = "Dump and feed a tokyo cabinet for local geonames search"
     gem.email = "x@nofxx.com"
     gem.homepage = "http://github.com/nofxx/geonames_local"
     gem.authors = ["Marcos Piccinini"]
     gem.add_development_dependency "rspec", ">= 1.2.9"
+    gem.add_dependency "tokyotyrant", ">= 1.10"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new
@@ -43,3 +44,59 @@ Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
+
+#
+# Tokyo Tyrant rake tasks
+#
+namespace :tyrant do
+  TYRANT_DB_FILE  = File.join("tyrant.tct")
+  TYRANT_PID_FILE = File.join("tyrant.pid")
+  TYRANT_LOG_FILE = File.join("tyrant.log")
+
+  desc "Start Tyrant server"
+  task :start  do
+    raise RuntimeError, "Tyrant is already running." if tyrant_running?
+    system "ttserver -pid #{TYRANT_PID_FILE} -log #{TYRANT_LOG_FILE} #{TYRANT_DB_FILE}&"
+    sleep(2)
+    if tyrant_running?
+      puts "Tyrant started successfully (pid #{tyrant_pid})."
+    else
+      puts "Failed to start tyrant push server. Check logs."
+    end
+  end
+
+  desc "Stop Tyrant server"
+  task :stop do
+    raise RuntimeError, "Tyrant isn't running." unless tyrant_running?
+    system "kill #{tyrant_pid}"
+    sleep(2)
+    if tyrant_running?
+      puts "Tyrant didn't stopped. Check the logs."
+    else
+      puts "Tyrant stopped."
+    end
+  end
+
+  desc "Restart Tyrant server"
+  task :restart => [:stop, :start]
+
+  desc "Get Tyrant Server Status"
+  task :status do
+    puts tyrant_running? ? "Tyrant running. (#{tyrant_pid})" : "Tyrant not running."
+  end
+end
+
+def tyrant_pid
+  `cat #{TYRANT_PID_FILE}`.to_i
+end
+
+def tyrant_running?
+  return false unless File.exist?(TYRANT_PID_FILE)
+  process_check = `ps -p #{tyrant_pid} | wc -l`
+  if process_check.to_i < 2
+    puts "Erasing pidfile..."
+    `rm #{TYRANT_PID_FILE}`
+  end
+  tyrant_pid
+end
+

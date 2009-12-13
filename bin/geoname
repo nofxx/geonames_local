@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+$VERBOSE = true # -w
+$KCODE = "u" # -Ku
+
+# $LOAD_PATH << File.join(File.dirname(__FILE__), *%w[.. lib])
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
+require "geonames_local"
+include Geonames
+
+Geonames::Cli.work(ARGV)
