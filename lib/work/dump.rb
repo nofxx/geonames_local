@@ -13,7 +13,7 @@ module Geonames
 
     def self.uncompress(file)
       info "Uncompressing #{file}"
-      `unzip -qu /tmp/#{file} -d /tmp`
+      `unzip -quo /tmp/#{file} -d /tmp`
     end
 
     def self.parse_line(l)
@@ -29,7 +29,8 @@ module Geonames
     end
 
     def self.parse(file)
-      db = Geonames::Tokyo.new
+      p Opt
+      db = Geonames::Tokyo.new(Opt[:tyrant])
       red = 0
       start = Time.now
       File.open("/tmp/#{file.gsub("zip", "txt")}") do |f|

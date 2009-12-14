@@ -19,6 +19,7 @@ BANNER
         opts.on("-c", "--config CONFIG", String, "Geonames Config file path" ) { |file|  options[:config] = file }
         opts.separator ""
         opts.separator "Tyrant Options:"
+        opts.on("-t", "--tyrant", "Use tyrant" ) { options[:tyrant] = true }
         opts.on("-s", "--server SERVER", String, "Tyrant Server URL" ) { |url|  options[:server] = url }
         opts.on("-p", "--port PORT", Integer, "Tyrant Server Port")  { |val| options[:port] = val.to_i }
         opts.separator ""

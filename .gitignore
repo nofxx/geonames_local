@@ -24,3 +24,4 @@ pkg
 *.pid
 *.log
 *.qgr
+*.lex

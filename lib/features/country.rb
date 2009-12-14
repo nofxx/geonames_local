@@ -44,7 +44,7 @@ module Geonames
     end
 
     def to_hash
-      { "gid" => @gid, "name" => @name, "kind" => "country", "code" => @code}
+      { "gid" => @gid.to_s, "name" => @name, "kind" => "country", "code" => @code}
     end
 
   end

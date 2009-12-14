@@ -1,28 +1,39 @@
-require 'tokyotyrant'
 
 module Geonames
   class Tokyo
-    include TokyoTyrant
 
-    def initialize(addr = 'localhost', port=1978)
-      @rdb = RDBTBL.new
-      @rdb.open(addr, port)
+    def initialize(conn=nil, resource=nil, extra=nil)
+      if conn
+        require 'tokyotyrant'
+        resource ||= 'localhost'
+        extra ||= 1978
+        @tbl = TokyoTyrant::RDBTBL
+        @qry = TokyoTyrant::RDBQRY
+      else
+        require 'tokyocabinet'
+        resource ||= 'geonames.tct'
+        extra ||= (TokyoCabinet::TDB::OWRITER | TokyoCabinet::TDB::OCREAT)
+        @tbl = TokyoCabinet::TDB
+        @qry = TokyoCabinet::TDBQRY
+      end
+      @rdb = @tbl.new
+      @rdb.open(resource, extra)
       set_indexes
     end
 
     def all(params)
-      qry = RDBQRY.new(@rdb)
+      qry = @qry.new(@rdb)
       params.each do |k,v|
-        #qry.addcond(k.to_s, RDBQRY::QCNUMEQ, v.to_s)
-        qry.addcond(k.to_s, RDBQRY::QCSTREQ, v.to_s)
+        #qry.addcond(k.to_s, Q::QCNUMEQ, v.to_s)
+        qry.addcond(k.to_s, @qry::QCSTREQ, v.to_s)
       end
-      qry.setorder("name", RDBQRY::QOSTRASC)
+      qry.setorder("name", @qry::QOSTRASC)
       qry.search.map { |id| to_obj(@rdb.get(id)) }
     end
 
     def find(id)
-      #qry = RDBQRY.new(@rdb)
-      #qry.addcond("gid", RDBQRY::QCNUMEQ, id.to_s)
+      #qry = Q.new(@rdb)
+      #qry.addcond("gid", Q::QCNUMEQ, id.to_s)
       #qry.setlimit(10)
       #id = qry.search.pop
       if res = @rdb.get(id)
@@ -41,12 +52,12 @@ module Geonames
       if @rdb.put(o.gid, o.to_hash)
        # info "ok"
       else
-        info "err #{rdb.ecode}"
+        info "err #{@rdb.errmsg(@rdb.ecode)}"
       end
     end
 
     def count
-      RDBQRY.new(@rdb).search.length
+      @qry.new(@rdb).search.length
     end
 
     def close
@@ -58,14 +69,18 @@ module Geonames
 
     def set_indexes
       #for index in indexes
-      @rdb.setindex("gid", RDBTBL::ITOPT)
-      @rdb.setindex("kind", RDBTBL::ITQGRAM)
-      @rdb.setindex("name", RDBTBL::ITQGRAM)
+      # @rdb.setindex("gid", @tbl::ITOPT)
+      @rdb.setindex("kind", @tbl::ITLEXICAL)
+      @rdb.setindex("name", @tbl::ITQGRAM)
+      @rdb.setindex("country", @tbl::ITLEXICAL)
 
       #end
 
     end
 
+    def flush
+      @rdb.vanish
+    end
 
 
   end

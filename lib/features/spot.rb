@@ -7,9 +7,8 @@ module Geonames
     alias :gid :geoname_id
 
     def initialize(params)
-        parse(params) if params.instance_of? String
+      parse(params) if params.instance_of? String
     end
-
 
     def parse(row)
       gid, @name, @ascii, *tail = row.split(/\t/)
@@ -26,8 +25,8 @@ module Geonames
     end
 
     def to_hash
-      { "gid" => @geoname_id, "kind" => @kind, "name" => @name,
-        "lat" => @lat, "lon" => @lon, "country" => @country }
+      { "gid" => @geoname_id.to_s, "kind" => @kind.to_s, "name" => @name, "ascii" => @ascii,
+        "lat" => @lat.to_s, "lon" => @lon.to_s, "tz" => @tz, "country" => @country }
     end
 
 
