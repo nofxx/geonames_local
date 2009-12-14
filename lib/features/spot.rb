@@ -4,10 +4,12 @@ module Geonames
                   :code, :kind, :pop, :tz
     alias :x :lon
     alias :y :lat
+    alias :gid :geoname_id
 
     def initialize(params)
-      parse(params)
+        parse(params) if params.instance_of? String
     end
+
 
     def parse(row)
       gid, @name, @ascii, *tail = row.split(/\t/)

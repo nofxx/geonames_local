@@ -22,7 +22,7 @@ module Geonames
       qry.setorder("x", TDBQRY::QONUMASC)
 
       res = qry.search
-      puts res.length # number of results found
+      info res.length # number of results found
       return res
     end
 

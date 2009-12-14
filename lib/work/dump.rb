@@ -17,12 +17,15 @@ module Geonames
     end
 
     def self.parse_line(l)
-      if Opt[:level] != "all"
-        return unless l =~ /ADM\d/
-      end
       return if l =~ /^#|^iso/i
-      obj = l =~ /^\D/ ? Country.parse(l) : Spot.new(l)
-
+      if l =~ /^\D/
+        Country.parse(l)
+      else
+        if Opt[:level] != "all"
+          return unless l =~ /ADM\d/
+        end
+        Spot.new(l)
+      end
     end
 
     def self.parse(file)
@@ -32,7 +35,7 @@ module Geonames
       File.open("/tmp/#{file.gsub("zip", "txt")}") do |f|
         while line = f.gets
           if record = parse_line(line)
-            db.write record.to_hash
+            db.write record unless db.find record.gid
             red += 1
           end
         end

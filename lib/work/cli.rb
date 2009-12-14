@@ -6,17 +6,14 @@ module Geonames
 
       ARGV.options do |opts|
         opts.banner = <<BANNER
-Geonames Gem Usage:
+Geonames Command Line Usage:
 
-geonames [command] <code(s)> <opts>
+geonames <code(s)> <opts>
 
-Commands:
-
-   dump - Dump store and create all new
-   sync- Check and update/create as needed
 
 BANNER
         opts.on("-l", "--level LEVEL", String, "The level of logging to report" ) { |level| options[:level] = level }
+        opts.on("-d", "--dump", "Dump DB before all" ) { options[:dump] = true }
         opts.separator ""
         opts.separator "Config file:"
         opts.on("-c", "--config CONFIG", String, "Geonames Config file path" ) { |file|  options[:config] = file }
@@ -48,9 +45,8 @@ BANNER
 #      Opt.autoload_config(
        Opt.merge! parse_options(argv)
 
-      comm = argv.shift || "dump"
       codes = argv
-      Geonames::Worker.send(comm, codes) #rescue puts "Command not found: #{comm} #{@usage}"
+      Geonames::Worker.dump(codes) #rescue puts "Command not found: #{comm} #{@usage}"
     end
 
     def self.stop!
