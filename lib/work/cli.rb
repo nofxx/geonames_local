@@ -45,9 +45,12 @@ BANNER
 
 #      Opt.autoload_config(
        Opt.merge! parse_options(argv)
-
-      codes = argv
-      Geonames::Worker.dump(codes) #rescue puts "Command not found: #{comm} #{@usage}"
+      p argv
+      if argv[0] =~ /csv|json/
+        Geonames::Export.new(Country.all).to_csv
+      else
+        Geonames::Worker.dump(argv) #rescue puts "Command not found: #{comm} #{@usage}"
+      end
     end
 
     def self.stop!

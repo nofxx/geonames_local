@@ -28,7 +28,7 @@ module Geonames
         qry.addcond(k.to_s, @qry::QCSTREQ, v.to_s)
       end
       qry.setorder("name", @qry::QOSTRASC)
-      qry.search.map { |id| to_obj(@rdb.get(id)) }
+      qry.search.map { |id| @rdb.get(id) }
     end
 
     def find(id)
@@ -36,16 +36,12 @@ module Geonames
       #qry.addcond("gid", Q::QCNUMEQ, id.to_s)
       #qry.setlimit(10)
       #id = qry.search.pop
-      if res = @rdb.get(id)
-        to_obj(res)
-      else
-        nil
-      end
+      @rdb.get(id)
     end
 
-    def to_obj(hsh)
-      hsh["kind"] == "country" ? Country.new(hsh) : Spot.new(hsh)
-    end
+    # def to_obj(hsh)
+    #   hsh["kind"] == "country" ? Country.new(hsh) : Spot.new(hsh)
+    # end
 
     def write(o)
       # pkey = @rdb.genuid

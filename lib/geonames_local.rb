@@ -6,6 +6,7 @@ require 'logger'
 require 'data/tokyo'
 require 'work/cli'
 require 'work/dump'
+require 'work/export'
 
 module Geonames
   Opt = {}

@@ -47,5 +47,12 @@ module Geonames
       { "gid" => @gid.to_s, "name" => @name, "kind" => "country", "code" => @code}
     end
 
+    def export
+      [@gid, @code, @name]
+    end
+
+    def export_header
+      ["gid", "code", "name"]
+    end
   end
 end

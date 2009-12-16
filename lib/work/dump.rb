@@ -29,7 +29,6 @@ module Geonames
     end
 
     def self.parse(file)
-      p Opt
       db = Geonames::Tokyo.new(Opt[:tyrant])
       red = 0
       start = Time.now

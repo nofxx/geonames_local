@@ -11,10 +11,10 @@ module Geonames
     end
 
     def parse(row)
-      gid, @name, @ascii, *tail = row.split(/\t/)
-      @alternates = tail.delete_at(0) unless tail[0] =~ /\d|-/
-      lat, lon, @code, kind, @country, cc2, adm1, adm2, adm3, adm4,
-         pop, ele, gtop, @tz, @up = tail
+      gid, @name, @ascii, @alternates, lat, lon, @code, kind,
+        @country, cc2, adm1, adm2, adm3, adm4, pop, ele,
+        gtop, @tz, @up = row.split(/\t/)
+
       @lat, @lon =  lat.to_f, lon.to_f
       @geoname_id = gid.to_i
       @kind = human_code(kind)
