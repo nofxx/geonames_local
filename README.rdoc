@@ -1,6 +1,9 @@
 = geonames_local
 
-Description goes here.
+A sample:
+
+  cd /path/of/geonames
+  ./bin/geoname br
 
 == Note on Patches/Pull Requests
  
