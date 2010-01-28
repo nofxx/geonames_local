@@ -98,6 +98,7 @@ BANNER
            end
 
       groups = Cache[:dump].group_by(&:kind)
+      Cache[:provinces] = groups[:provinces]
       # ensure this order....
       do_write(db, groups[:provinces])
       do_write(db, groups[:cities])
@@ -110,7 +111,7 @@ BANNER
       info "Writing #{key}..."
       val.each do |v|
         unless db.find v.kind, v.gid
-          db.write v
+          db.insert v
           writt += 1
         end
       end

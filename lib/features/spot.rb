@@ -6,6 +6,10 @@ module Geonames
     alias :y :lat
     alias :gid :geoname_id
 
+    #
+    # = Geonames Spot
+    #
+    # Every geoname type will be parsed as a spot
     def initialize(params, k)
       return unless params.instance_of? String
       k == :zip ? parse_zip(params) :  parse(params)
@@ -26,6 +30,8 @@ module Geonames
       end
     end
 
+    #
+    # Parse Geonames Dump Export
     def parse(row)
       gid, @name, @ascii, @alternates, lat, lon, feat, kind,
         @country, cc2, adm1, adm2, adm3, adm4, pop, ele,
@@ -38,6 +44,8 @@ module Geonames
       @code = adm2
     end
 
+    #
+    # Parse Geonames Zip Export
     def parse_zip(row)
       country, zip, @name, province, cc, dunno, adm1, adm2, lat, lon  = row.split(/\t/)
       parse_geom(lat, lon)
@@ -46,6 +54,8 @@ module Geonames
       @zip = zip.split("-")[0]
     end
 
+    #
+    # Parse Geom to float or GeoRuby Point
     def parse_geom(lat, lon)
       @lat, @lon = lat.to_f, lon.to_f
       if defined?("GeoRuby")
@@ -53,10 +63,13 @@ module Geonames
       end
     end
 
+    #
+    # Parse Time
     def updated_at
       Time.utc(*@up.split("-"))
     end
 
+    # For tokyo
     def to_hash
       { "gid" => @geoname_id.to_s, "kind" => @kind.to_s, "name" => @name, "ascii" => @ascii,
         "lat" => @lat.to_s, "lon" => @lon.to_s, "tz" => @tz, "country" => @country }
