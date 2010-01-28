@@ -1,10 +1,10 @@
 module Geonames
   class Spot
-    attr_accessor :gid, :geoname_id, :name, :ascii, :lat, :lon, :country,
-                  :code, :kind, :pop, :tz, :geom, :province, :zip, :abbr
+    attr_accessor :gid, :name, :ascii, :lat, :lon, :country, :kind,
+                  :code,  :pop, :tz, :geom, :province, :zip, :abbr
     alias :x :lon
     alias :y :lat
-    alias :gid :geoname_id
+    alias :geoname_id :gid
 
     #
     # = Geonames Spot
@@ -58,6 +58,7 @@ module Geonames
     # Parse Geom to float or GeoRuby Point
     def parse_geom(lat, lon)
       @lat, @lon = lat.to_f, lon.to_f
+      
       if defined?("GeoRuby")
         @geom = GeoRuby::SimpleFeatures::Point.from_x_y(@lon, @lat)
       end

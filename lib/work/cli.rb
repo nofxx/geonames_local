@@ -66,9 +66,12 @@ BANNER
       end
 
       if argv[0] =~ /scaff|conf/
-        puts "Writing to geonames.yml"
-        File.open("geonames.yml", "w+") do |f|
-          f << Opt.to_yaml
+        fname = (argv[1] || "geonames") + ".yml"
+        if File.exist?(fname)
+          puts "File exists."
+        else
+          puts "Writing to #{fname}"
+          `cp #{File.join(File.dirname(__FILE__), '..', 'config', 'geonames.yml')} #{fname}`
         end
         exit
       end
@@ -77,12 +80,10 @@ BANNER
       if argv[0] =~ /csv|json/
         Geonames::Export.new(Country.all).to_csv
       else
-        puts "Dumping zip for #{Opt[:codes]}"
         Geonames::Dump.work(Opt[:codes], :zip) #rescue puts "Command not found: #{comm} #{@usage}"
-        puts "Dumping all for #{Opt[:codes]}"
         Geonames::Dump.work(Opt[:codes], :dump) #rescue puts "Command not found: #{comm} #{@usage}"
-        puts "Total #{Cache[:zip].length}"
-        puts "Join dump << zip"
+        info "\n---\nTotal #{Cache[:dump].length} parsed. #{Cache[:zip].length} zips."
+        info "Join dump << zip"
         unify!
         write_to_store!
       end
@@ -108,7 +109,7 @@ BANNER
       key = val[0].kind
       start = Time.now
       writt = 0
-      info "Writing #{key}..."
+      info "\nWriting #{key}..."
       val.each do |v|
         unless db.find v.kind, v.gid
           db.insert v
@@ -120,6 +121,7 @@ BANNER
     end
 
     def self.unify!
+      start = Time.now
       Cache[:dump].map! do |spot|
         if other = Cache[:zip].find { |d| d.code == spot.code }
           spot.zip = other.zip
@@ -128,11 +130,12 @@ BANNER
           spot
         end
       end
-
+      info "Done. #{(Time.now-start).to_i}s"
     end
 
     def self.stop!
       puts "Closing Geonames..."
+      exit
     end
 
   end

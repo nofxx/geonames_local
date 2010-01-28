@@ -8,6 +8,7 @@ No hit limit, fast as possible.
 
 - Local relational mapping of geonames data
 - Map geonames fields to your db scheme UNDONE
+- Countries are a static yml file :/
 
 == Usage
 
@@ -18,9 +19,12 @@ The file is self explanatory.
 
   geonames -c geonames.yml
 
-Work.
+Work. Use -v for verbose.
 
-Use -v for verbose.
+If you are not sure your country code, use:
+
+  geonames list <search>
+
 
 == Relational Mapping
 
@@ -42,14 +46,14 @@ Default PG migration:
     create_table :cities do |t|
       t.references :country, :null => false
       t.references :province
-      t.string  :name,   :limit => 50, :null => false
+      t.string  :name, :null => false
       t.point   :geom,   :srid => 4326
       t.integer :gid, :zip
     end
 
     create_table :provinces do |t|
       t.references :country, :null => false
-      t.string :name, :limit => 30, :null => false
+      t.string :name, :null => false
       t.string :abbr, :limit => 2, :null => false
       t.integer :gid
     end
@@ -66,7 +70,7 @@ Default PG migration:
     add_index :cities, :province_id
     add_index :cities, :geom, :spatial => true
     add_index :provinces, :name
-    add_index :provinces, :abbr
+    add_index :provinces, :abbrg
     add_index :provinces, :gid
     add_index :provinces, :country_id
 

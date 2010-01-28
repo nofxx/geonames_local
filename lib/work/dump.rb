@@ -8,6 +8,7 @@ module Geonames
       @kind = kind
       if codes.respond_to? :each
         for code in codes
+          info "\nWorking on #{kind} for #{code}"
           file = get_file(code)
           download file
           uncompress file unless code == "country"
@@ -61,6 +62,8 @@ module Geonames
         total = Time.now - start
         info "#{red} #{@kind} entries parsed in #{total} sec (#{(red/total).to_i}/s)"
       end
+      rescue Errno::ENOENT => e
+      info "Failed to download #{file}, skipping."
     end
 
 

@@ -14,9 +14,8 @@ module Geonames
     def get_some_ids(some)
       c = Countries[some.country] ||=
           @conn.exec("SELECT countries.id FROM countries WHERE UPPER(countries.abbr) = UPPER('#{some.country}')")[0]["id"] rescue nil
-      unless c
-        write("countries", {:name => Codes[country.downcase.to_sym][:pt_br], :abbr => some.country })
-      end
+      c ||= write("countries", {:name => Codes[some.country.downcase.to_sym][:pt_br], :abbr => some.country })
+
       p = Provinces[some.province] ||= find("provinces", Cache[:provinces].
                                        find{ |p| p.province == some.province}.gid)
       [c, p]
@@ -64,7 +63,7 @@ module Geonames
     # Naive PG insert ORM =D
     def write(table, hsh)
       for_pg = pg_values(hsh.values)
-      @conn.exec("INSERT INTO #{table} (#{hsh.keys.join(",")}) VALUES(#{for_pg})")
+      @conn.exec("INSERT INTO #{table} (#{hsh.keys.join(",")}) VALUES(#{for_pg}) RETURNING id")[0]["id"]
     end
   end
 end
