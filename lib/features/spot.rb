@@ -5,6 +5,7 @@ module Geonames
     alias :x :lon
     alias :y :lat
     alias :geoname_id :gid
+    alias :table :kind
 
     #
     # = Geonames Spot

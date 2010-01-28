@@ -18,7 +18,7 @@ describe Road do
     end
 
     it "should parse kind" do
-      @road.kind.should eql("AV")
+      @road.kind.should eql(:avenue)
     end
 
     it "should parse geom" do
@@ -50,7 +50,7 @@ describe Road do
     end
 
     it "should parse kind" do
-      @road.kind.should eql("MS-380")
+      @road.kind.should eql(:road)
     end
 
     it "should parse geom" do

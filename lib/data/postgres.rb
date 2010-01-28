@@ -16,35 +16,54 @@ module Geonames
           @conn.exec("SELECT countries.id FROM countries WHERE UPPER(countries.abbr) = UPPER('#{some.country}')")[0]["id"] rescue nil
       c ||= write("countries", {:name => Codes[some.country.downcase.to_sym][:pt_br], :abbr => some.country })
 
-      p = Provinces[some.province] ||= find("provinces", Cache[:provinces].
+      p = nil
+      ci = nil
+      if some.kind_of? Spot
+        p = Provinces[some.province] ||= find("provinces", Cache[:provinces].
                                        find{ |p| p.province == some.province}.gid)
-      [c, p]
+      else
+        ci = find("cities", some.city)
+        p = @conn.exec("SELECT cities.province_id FROM cities WHERE cities.id = #{ci}")[0]["province_id"] rescue nil
+      end
+      [c, p, ci]
     end
 
     #
     # Insert a record
     def insert(some)
-      country_id, province_id = get_some_ids(some)
-      if some.kind == :cities
+      country_id, province_id, city_id = get_some_ids(some)
+      case some.table
+      when :cities
         write("cities", {:name => some.name, :country_id => country_id,
                  :geom => some.geom.as_hex_ewkb, :gid => some.gid,
                  :zip => some.zip, :province_id => province_id})
-      else
+      when :provinces
         write("provinces", { :name => some.name, :abbr => some.abbr,
                  :country_id => country_id, :gid => some.gid })
+      when :roads
+        write("roads", { :name => some.name, :geom => some.geom.as_hex_ewkb, :kind => some.kind,
+                 :country_id => country_id, :city_id => city_id, :province_id => province_id })
       end
     end
 
     #
     # Find a record`s ID
-    def find(kind, id)
-      @conn.exec("SELECT #{kind}.id FROM #{kind} WHERE #{kind}.gid = #{id}")[0]["id"] rescue nil
+    def find(table, id, name=nil)
+      begin
+        if name
+          @conn.exec("SELECT #{table}.id FROM #{table} WHERE (#{table}.name = E'#{id}')")[0]["id"]
+        else
+          @conn.exec("SELECT #{table}.id FROM #{table} WHERE #{table}.gid = #{id}")[0]["id"]
+        end
+      rescue => e
+        nil
+      end
     end
 
     #
     # F'oo -> F''oo  (for pg)
     def escape_name(name)
-      name.gsub("'", "''")
+      name.to_s.gsub("'", "''")
     end
 
     #
@@ -52,9 +71,9 @@ module Geonames
     def pg_values(arr)
       arr.map do |v|
         case v
-        when String then "E'#{escape_name(v)}'"
+        when Symbol, String then "E'#{escape_name(v)}'"
         when NilClass then 'NULL'
-        else v
+        else
         end
       end.join(",")
     end

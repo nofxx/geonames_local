@@ -20,11 +20,18 @@ BANNER
         opts.separator ""
         opts.separator "Config file:"
         opts.on("-c", "--config CONFIG", String, "Geonames Config file path" ) { |file|  options[:config] = file }
+        opts.on("-i", "--import CONFIG", String, "Geonames Import SHP/DBF/GPX" ) { |file|  options[:shp] = file }
         opts.separator ""
         opts.separator "Tyrant Options:"
         opts.on("-t", "--tyrant", "Use tyrant" ) { options[:tyrant] = true }
         opts.on("-s", "--server SERVER", String, "Tyrant Server URL" ) { |url|  options[:server] = url }
         opts.on("-p", "--port PORT", Integer, "Tyrant Server Port")  { |val| options[:port] = val.to_i }
+        opts.separator ""
+        opts.separator "SHP Options:"
+        opts.on("--map TYPE", Array, "Use zone/road to import" ) { |s| options[:map] = s.map(&:to_sym) }
+        opts.on("--type TYPE", String, "Use zone/road to import" ) { |s| options[:type] = s }
+        opts.on("--city CITY", String, "Use city gid to import" ) { |s| options[:city] = s }
+        opts.on("--country COUNTRY", String, "Use country gid to import" ) { |s| options[:country] = s }
         opts.separator ""
         opts.separator "Common Options:"
         opts.on("-h", "--help", "Show this message" ) { puts opts; exit }
@@ -46,6 +53,7 @@ BANNER
     end
     private_class_method :parse_options
 
+    # Ugly but works?
     def self.work(argv)
       trap(:INT) { stop! }
       trap(:TERM) { stop! }
@@ -53,6 +61,11 @@ BANNER
 
       if Opt[:config]
         Opt.merge! YAML.load(File.read(Opt[:config]))
+      end
+
+      if shp = Opt[:shp]
+        SHP.import(shp)
+        exit
       end
 
       if argv[0] =~ /list|codes/
@@ -107,13 +120,15 @@ BANNER
     end
 
     def self.do_write(db, val)
-      key = val[0].kind
+      return if val.empty?
+      key = val[0].table
       start = Time.now
       writt = 0
-      info "\nWriting #{key}..."
+      info "\nWriting #{val.length} #{key}..."
       val.each do |v|
-        unless db.find v.kind, v.gid
-          db.insert v
+        meth = v.respond_to?(:gid) ? [v.gid] : [v.name, true]
+        unless db.find(v.table, *meth)
+          db.insert(v)
           writt += 1
         end
       end
