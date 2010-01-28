@@ -1,13 +1,14 @@
 #
 # Geonames Local
 #
+require 'optparse'
 module Geonames
   class CLI
 
     def self.parse_options(argv)
       options = {}
 
-      ARGV.options do |opts|
+      argv.options do |opts|
         opts.banner = <<BANNER
 Geonames Command Line Usage:
 

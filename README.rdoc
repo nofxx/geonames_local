@@ -74,6 +74,7 @@ Default PG migration:
     add_index :provinces, :gid
     add_index :provinces, :country_id
 
+
 == Note on Patches/Pull Requests
 
 * Fork the project.
