@@ -1,6 +1,6 @@
 module Geonames
   class Country
-    attr_accessor :code, :name, :gid
+    attr_accessor :code, :name, :gid, :iso, :capital, :pop
 
     def self.all
       Tokyo.new.all({ :kind => "country" }).map do |c|
@@ -29,14 +29,17 @@ module Geonames
     # [18] Equivalent Fips Code
     #
     def self.parse(row)
-      entry = row.split(/\t/)
-      new({ "code" => entry[0], "name" => entry[4], "gid" => entry[16]})
+      new(row)
     end
 
     def initialize(params)
-      @code = params["code"]
-      @name = params["name"]
-      @gid = params["gid"]
+      parse(params)
+    end
+
+    def parse
+      @iso, @iso3, @ison, @fips, @name, @capital, @area, @pop, continent, tld,
+      currency, phone, postal, langs, gid, neighbours = row.split(/\t/)
+      @code = iso
     end
 
     def cities

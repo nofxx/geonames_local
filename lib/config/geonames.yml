@@ -1,0 +1,11 @@
+#
+# Geonames Local Config Example
+#
+:store: pg
+:codes: br, cl
+:level: city
+:db:
+  :host: localhost
+  :dbname: db
+  :user: postgres
+  :password:

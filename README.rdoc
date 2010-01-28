@@ -1,9 +1,15 @@
-= geonames_local
+= Geonames Local
 
-Description goes here.
+Download and store in tokyo or postgresql Geonames.org data.
+
+
+== Usage
+
+  geonames br --store pg
+
 
 == Note on Patches/Pull Requests
- 
+
 * Fork the project.
 * Make your feature addition or bug fix.
 * Add tests for it. This is important so I don't break it in a
