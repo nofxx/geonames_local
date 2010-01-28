@@ -1,6 +1,8 @@
 require 'features/spot'
 require 'features/country'
 require 'features/city'
+require 'features/road'
+require 'features/zone'
 require 'rubygems'
 require 'logger'
 require 'data/tokyo'

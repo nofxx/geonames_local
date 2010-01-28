@@ -65,5 +65,9 @@ module Geonames
       for_pg = pg_values(hsh.values)
       @conn.exec("INSERT INTO #{table} (#{hsh.keys.join(",")}) VALUES(#{for_pg}) RETURNING id")[0]["id"]
     end
+
+    def exec(comm)
+      @conn.exec(comm)
+    end
   end
 end

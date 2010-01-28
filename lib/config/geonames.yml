@@ -2,7 +2,7 @@
 # Geonames Local Config Example
 #
 :store: pg
-:codes: [br, cl]
+:codes: [br, it]
 :level: city
 :mapping:
   :name: name

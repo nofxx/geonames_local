@@ -58,7 +58,7 @@ module Geonames
     # Parse Geom to float or GeoRuby Point
     def parse_geom(lat, lon)
       @lat, @lon = lat.to_f, lon.to_f
-      
+
       if defined?("GeoRuby")
         @geom = GeoRuby::SimpleFeatures::Point.from_x_y(@lon, @lat)
       end

@@ -1,8 +1,8 @@
 require "rubygems"
 require "geo_ruby"
 
-class Road
-  attr_reader :city, :zone, :name, :geom, :kind
+class Zone
+  attr_reader :city, :name, :geom, :kind
 
   def initialize(keys, vals, city=nil)
     s = vals.split("\t")
@@ -12,8 +12,7 @@ class Road
     end
     @name = r[:name]
     @zone = r[:zone]
-    kind  = r[:kind]
-    @kind = @name.split(" ")[0] unless kind
+    @kind = :zone # @name.split(" ")[0] unless kind
     @city = city
     parse_geom(r[:geom])
   end
