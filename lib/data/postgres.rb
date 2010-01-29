@@ -71,6 +71,7 @@ module Geonames
     def pg_values(arr)
       arr.map do |v|
         case v
+        when Numeric then v.to_s
         when Symbol, String then "E'#{escape_name(v)}'"
         when NilClass then 'NULL'
         else

@@ -1,0 +1,14 @@
+#
+# Geonames Local Config Example
+#
+:store: pg
+:codes: [br]
+:level: city
+:mapping:
+  :name: name
+  :geom: true
+:db:
+  :host: localhost
+  :dbname: rtrac_development
+  :user: nofxx
+  :password:

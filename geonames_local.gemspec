@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{geonames_local}
-  s.version = "0.0.3"
+  s.version = "0.0.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Marcos Piccinini"]
-  s.date = %q{2010-01-28}
+  s.date = %q{2010-01-29}
   s.default_executable = %q{geonames}
   s.description = %q{Dump and feed a tokyo cabinet for local geonames search}
   s.email = %q{x@nofxx.com}
@@ -26,24 +26,35 @@ Gem::Specification.new do |s|
      "Rakefile",
      "VERSION",
      "bin/geonames",
+     "geonames_local.gemspec",
      "lib/config/codes.yml",
      "lib/config/geonames.yml",
+     "lib/data/cache.rb",
      "lib/data/geoquery.rb",
      "lib/data/postgres.rb",
+     "lib/data/shp.rb",
      "lib/data/tokyo.rb",
      "lib/features/city.rb",
      "lib/features/country.rb",
      "lib/features/province.rb",
      "lib/features/road.rb",
      "lib/features/spot.rb",
+     "lib/features/zone.rb",
      "lib/geonames_local.rb",
      "lib/work/cli.rb",
      "lib/work/dump.rb",
      "lib/work/export.rb",
+     "spec/data/cache_spec.rb",
+     "spec/data/postgres_spec.rb",
+     "spec/data/shp_spec.rb",
      "spec/data/tokyo_spec.rb",
+     "spec/features/road_spec.rb",
+     "spec/features/spot_spec.rb",
+     "spec/features/zone_spec.rb",
      "spec/geonames_local_spec.rb",
      "spec/spec.opts",
      "spec/spec_helper.rb",
+     "spec/work/cli_spec.rb",
      "task/benchmark.rb",
      "task/benchmark_cabinet.rb"
   ]
@@ -53,9 +64,16 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.5}
   s.summary = %q{Dump and feed a tokyo local geonames db}
   s.test_files = [
-    "spec/data/tokyo_spec.rb",
+    "spec/data/cache_spec.rb",
+     "spec/data/postgres_spec.rb",
+     "spec/data/shp_spec.rb",
+     "spec/data/tokyo_spec.rb",
+     "spec/features/road_spec.rb",
+     "spec/features/spot_spec.rb",
+     "spec/features/zone_spec.rb",
      "spec/geonames_local_spec.rb",
-     "spec/spec_helper.rb"
+     "spec/spec_helper.rb",
+     "spec/work/cli_spec.rb"
   ]
 
   if s.respond_to? :specification_version then
