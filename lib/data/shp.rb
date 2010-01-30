@@ -11,9 +11,9 @@ module Geonames
       @type = Object.module_eval("::#{Opt[:type].capitalize}", __FILE__, __LINE__)
       @ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
       @sample = nil
-      shp2pg if file
-      parse if file
-      write if file
+      if file
+        shp2pg; parse; write
+      end
     end
 
     def shp2pg

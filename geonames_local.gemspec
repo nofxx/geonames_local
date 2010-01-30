@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{geonames_local}
-  s.version = "0.0.4"
+  s.version = "0.0.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Marcos Piccinini"]
-  s.date = %q{2010-01-29}
+  s.date = %q{2010-01-30}
   s.default_executable = %q{geonames}
   s.description = %q{Dump and feed a tokyo cabinet for local geonames search}
   s.email = %q{x@nofxx.com}

@@ -13,15 +13,18 @@ class Road
     @name = r[:name]
     @zone = r[:zone]
     kind  = r[:kind] || @name.split(" ")[0]
+    @geom = parse_geom(r[:geom])
     @kind = parse_kind(kind)
     @city = city
     @country = country
-    parse_geom(r[:geom])
     @table = :roads
   end
 
   def parse_geom(hex)
-    @geom = GeoRuby::SimpleFeatures::Geometry.from_hex_ewkb(hex)
+    if hex =~ /^SRID/ # PG 8.3 support
+      hex = hex.split(";")[1]
+    end
+    GeoRuby::SimpleFeatures::Geometry.from_hex_ewkb(hex)
   end
 
   def geom=(g)
