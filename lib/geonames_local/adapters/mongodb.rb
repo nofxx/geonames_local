@@ -9,6 +9,16 @@ module Geonames
       port = params[:port] || 27017
       @conn = Mongo::Connection.new(params[:host], port)
       @db = @conn.db(params[:dbname])
+      purge
+      setup
+    end
+
+    def setup
+      for re in RESOURCES
+        coll = @db.collection(re)
+        coll.create_index(["id", Mongo::ASCENDING])
+        coll.create_index(["geom", Mongo::GEO2D], :min => 0, :max => 180)
+      end
     end
 
     def find(resource, id, name=nil)

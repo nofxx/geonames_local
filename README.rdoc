@@ -5,14 +5,27 @@ Making every Geoname API operation possible on your servers.
 No hit limit, fast as possible.
 
 
-== Features/Problems
-
-- Local relational mapping of geonames data
-- Map geonames fields to your db scheme UNDONE
-- Countries are a static yml file :/
-
-
 == Usage
+
+To use the adapter, install the corresponding gem:
+
+  PostgreSQL   =>   pg
+  MongoDB      =>   mongodb (optional: mongo_ext)
+  Tokyo        =>   tokyocabinet
+
+
+=== PostgreSQL
+
+Be sure to use a database based on the PostGIS template.
+
+
+=== MongoDB
+
+MongoDB 2D support is new, only mongo >= 1.3.3 mongodb gem >= 0.19.2
+http://github.com/mongodb/mongo-ruby-driver
+
+
+=== Config YML
 
   geonames conf
 
@@ -75,6 +88,13 @@ Default PG migration:
     add_index :provinces, :abbrg
     add_index :provinces, :gid
     add_index :provinces, :country_id
+
+
+== Features/Problems
+
+- Local relational mapping of geonames data
+- Map geonames fields to your db scheme UNDONE
+- Countries are a static yml file :/
 
 
 == Note on Patches/Pull Requests

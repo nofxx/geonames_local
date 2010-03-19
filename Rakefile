@@ -12,6 +12,30 @@ begin
     gem.authors = ["Marcos Piccinini"]
     gem.add_development_dependency "rspec", ">= 1.2.9"
     gem.add_dependency "nofxx-georuby", ">= 1.7.1"
+    gem.post_install_message = <<-POST_INSTALL_MESSAGE
+
+Geonames Local
+--------------
+
+To use the adapter, install the corresponding gem:
+
+  PostgreSQL   =>   pg
+  MongoDB      =>   mongodb (optional: mongo_ext)
+  Tokyo        =>   tokyocabinet
+
+PostgreSQL
+----------
+
+Be sure to use a database based on the PostGIS template.
+
+MongoDB
+-------
+
+MongoDB 2D support is new, only mongo >= 1.3.3 mongodb gem >= 0.19.2
+http://github.com/mongodb/mongo-ruby-driver
+
+Have fun because:
+POST_INSTALL_MESSAGE
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError

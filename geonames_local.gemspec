@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{geonames_local}
-  s.version = "0.1.0"
+  s.version = "0.2.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Marcos Piccinini"]
@@ -28,15 +28,15 @@ Gem::Specification.new do |s|
      "bin/geonames",
      "geonames_local.gemspec",
      "lib/geonames_local.rb",
+     "lib/geonames_local/adapters/mongodb.rb",
+     "lib/geonames_local/adapters/postgres.rb",
+     "lib/geonames_local/adapters/tokyo.rb",
      "lib/geonames_local/cli.rb",
      "lib/geonames_local/config/codes.yml",
      "lib/geonames_local/config/geonames.yml",
      "lib/geonames_local/data/cache.rb",
      "lib/geonames_local/data/geoquery.rb",
-     "lib/geonames_local/data/mongo.rb",
-     "lib/geonames_local/data/postgres.rb",
      "lib/geonames_local/data/shp.rb",
-     "lib/geonames_local/data/tokyo.rb",
      "lib/geonames_local/dump.rb",
      "lib/geonames_local/export.rb",
      "lib/geonames_local/features/city.rb",
@@ -60,6 +60,29 @@ Gem::Specification.new do |s|
      "task/benchmark_cabinet.rb"
   ]
   s.homepage = %q{http://github.com/nofxx/geonames_local}
+  s.post_install_message = %q{
+Geonames Local
+--------------
+
+To use the adapter, install the corresponding gem:
+
+  PostgreSQL   =>   pg
+  MongoDB      =>   mongodb (optional: mongo_ext)
+  Tokyo        =>   tokyocabinet
+
+PostgreSQL
+----------
+
+Be sure to use a database based on the PostGIS template.
+
+MongoDB
+-------
+
+MongoDB 2D support is new, only mongo >= 1.3.3 mongodb gem >= 0.19.2
+http://github.com/mongodb/mongo-ruby-driver
+
+Have fun because:
+}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.6}
