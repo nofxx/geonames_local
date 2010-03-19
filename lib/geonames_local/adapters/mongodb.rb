@@ -17,7 +17,10 @@ module Geonames
       for re in RESOURCES
         coll = @db.collection(re)
         coll.create_index(["id", Mongo::ASCENDING], ["gid", Mongo::ASCENDING])
-        coll.create_index([["geom", Mongo::GEO2D]], :min => 0, :max => 180)
+
+        # Geometric index, more info:
+        # http://www.mongodb.org/display/DOCS/Geospatial+Indexing#GeospatialIndexing-Implementation
+        coll.create_index([["geom", Mongo::GEO2D]], :min => -180, :max => 180)
       end
     end
 
@@ -29,16 +32,38 @@ module Geonames
       @db.collection(resource.to_s).find_one("id" => id)
     end
 
-    def find_near(resource, x, y)
-      @db.collection(resource.to_s).find("geom" => { "$near" => { "x" => x, "y" => y }}).to_a
-    end
-
     def insert(resource, spot)
-      @db.collection(resource.to_s).insert(spot.to_hash)
+      hsh = spot.to_hash
+      hsh["geom"][0] = sin_proj(hsh["geom"])[0] if hsh["geom"]
+      @db.collection(resource.to_s).insert(hsh)
     end
 
     def count(resource)
       @db.collection(resource).count
+    end
+
+    def find_near(resource, x, y, limit=nil)
+      coll = @db.collection(resource.to_s).find("geom" => { "$near" => { "x" => x, "y" => y }})
+      coll.limit(limit) if limit
+      coll.to_a
+    end
+
+    # +1.3.4
+    def find_within(resource, geom, limit=nil)
+      op = geom[1].kind_of?(Numeric) ? "$center" : "$box"
+      coll = @db.collection(resource.to_s).find("geom" => { "$within" => { op => geom }})
+      coll.limit(limit) if limit
+      coll.to_a
+    end
+
+    # getNear command returns distance too
+    # <1.9 needs OrderedHash
+    def near(resource, x, y, limit=nil)
+      cmd = OrderedHash.new
+      cmd["geoNear"] = resource
+      cmd["near"] = sin_proj(x,y)
+      cmd["num"] = limit if limit
+      @db.command(cmd)["results"].to_a
     end
 
     def purge
@@ -51,19 +76,11 @@ module Geonames
       @db.collection(resource).index_information
     end
 
-    def near(resource, x,y)
-      cmd = OrderedHash.new
-      cmd["geoNear"] = resource
-      cmd["near"] = sin_proj(x,y)
-      @db.command(cmd) #{"command" => OrderedHash.new({ "geoNear" => resource, "near" => sin_proj(x,y) })})
-    end
-
     private
 
-    def sin_proj(x,y)
-      x_sin = x * Math.cos(y * Math::PI/180)
-      { :x => x_sin, :y => y}
-      #[x_sin, y]
+    def sin_proj(x,y=nil)
+      x,y = x unless y
+      [x * Math.cos(y * Math::PI/180), y]
     end
   end
 end
