@@ -73,8 +73,9 @@ module Geonames
 
     # For tokyo
     def to_hash
-      { "gid" => @geoname_id.to_s, "kind" => @kind.to_s, "name" => @name, "ascii" => @ascii,
-        "lat" => @lat.to_s, "lon" => @lon.to_s, "tz" => @tz, "country" => @country }
+      { "id" => @geoname_id, "gid" => @geoname_id.to_s, "kind" => @kind.to_s,
+        "name" => @name, "ascii" => @ascii, "country" => @country,
+        "lat" => @lat.to_s, "lon" => @lon.to_s, "tz" => @tz }
     end
 
 

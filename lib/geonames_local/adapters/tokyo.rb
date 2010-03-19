@@ -1,3 +1,4 @@
+require "tokyocabinet"
 
 module Geonames
   class Tokyo

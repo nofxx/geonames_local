@@ -30,9 +30,9 @@ module Geonames
 
     #
     # Insert a record
-    def insert(some)
+    def insert(table, some)
       country_id, province_id, city_id = get_some_ids(some)
-      case some.table
+      case table
       when :cities
         write("cities", {:name => some.name, :country_id => country_id,
                  :geom => some.geom.as_hex_ewkb, :gid => some.gid,

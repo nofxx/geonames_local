@@ -91,17 +91,11 @@ BANNER
       end
       require "geo_ruby" if Opt[:mapping] && Opt[:mapping][:geom]
 
-      store = Opt[:store].capitalize
-      if Geonames.const_defined?(store)
-        db = Geonames.class_eval(store).new(Opt[:db])
-      else
-        puts "Can't find adapter #{store}"
-        stop!
-      end
-
       if argv[0] =~ /csv|json/
         Geonames::Export.new(Country.all).to_csv
       else
+        db = load_adapter(Opt[:store])
+        info "Using adapter #{Opt[:store]}.."
         Geonames::Dump.work(Opt[:codes], :zip) #rescue puts "Command not found: #{comm} #{@usage}"
         Geonames::Dump.work(Opt[:codes], :dump) #rescue puts "Command not found: #{comm} #{@usage}"
         info "\n---\nTotal #{Cache[:dump].length} parsed. #{Cache[:zip].length} zips."
@@ -111,8 +105,17 @@ BANNER
       end
     end
 
-    def write_to_store!(db)
+    def load_adapter(name)
+      begin
+        require "geonames_local/adapters/#{name}"
+        Geonames.class_eval(name.capitalize).new(Opt[:db])
+      rescue LoadError
+        puts "Can't find adapter #{name}"
+        stop!
+      end
+    end
 
+    def write_to_store!(db)
       groups = Cache[:dump].group_by(&:kind)
       Cache[:provinces] = groups[:provinces]
       # ensure this order....
@@ -120,16 +123,16 @@ BANNER
       do_write(db, groups[:cities])
     end
 
-    def do_write(db, val)
-      return if val.empty?
-      key = val[0].table
+    def do_write(db, values)
+      return if values.empty?
+      key = values[0].table
       start = Time.now
       writt = 0
-      info "\nWriting #{val.length} #{key}..."
-      val.each do |v|
-        meth = v.respond_to?(:gid) ? [v.gid] : [v.name, true]
-        unless db.find(v.table, *meth)
-          db.insert(v)
+      info "\nWriting #{values.length} #{key}..."
+      values.each do |val|
+        meth = val.respond_to?(:gid) ? [val.gid] : [val.name, true]
+        unless db.find(val.table, *meth)
+          db.insert(val.table, val)
           writt += 1
         end
       end
