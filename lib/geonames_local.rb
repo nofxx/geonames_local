@@ -1,12 +1,12 @@
-require 'features/spot'
-require 'features/country'
-require 'features/city'
 require 'rubygems'
 require 'logger'
-require 'data/tokyo'
-require 'work/cli'
-require 'work/dump'
-require 'work/export'
+require 'geonames_local/features/spot'
+require 'geonames_local/features/country'
+require 'geonames_local/features/city'
+require 'geonames_local/data/tokyo'
+require 'geonames_local/work/cli'
+require 'geonames_local/work/dump'
+require 'geonames_local/work/export'
 
 module Geonames
   Opt = {}
