@@ -1,6 +1,6 @@
 = Geonames Local
 
-Download and store in tokyo or postgresql Geonames.org data.
+Download and store Geonames.org data.
 Making every Geoname API operation possible on your servers.
 No hit limit, fast as possible.
 

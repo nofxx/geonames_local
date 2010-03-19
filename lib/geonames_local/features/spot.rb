@@ -75,7 +75,7 @@ module Geonames
     def to_hash
       { "id" => @geoname_id, "gid" => @geoname_id.to_s, "kind" => @kind.to_s,
         "name" => @name, "ascii" => @ascii, "country" => @country,
-        "geom" => {"y" => @lat.to_s, "x" => @lon.to_s}, "tz" => @tz }
+        "geom" => {"x" => @geom.x, "y" => @geom.y}, "tz" => @tz }
     end
 
 

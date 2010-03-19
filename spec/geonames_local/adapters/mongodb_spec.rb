@@ -3,8 +3,10 @@ require File.expand_path(File.dirname(__FILE__) + '/../../../lib/geonames_local/
 
 describe Mongodb do
 
+  SPECDB = "geonames_spec"
+
   before(:all) do
-    Mongodb.new({:dbname => "geonames_spec"}).purge
+    #Mongodb.new({:dbname => SPECDB}).purge
   end
 
   def mock_spot(name)
@@ -13,11 +15,15 @@ describe Mongodb do
 
   describe "Parsing Dump" do
     before do
-      @mong = Mongodb.new({:dbname => "geonames_spec"})
+      @mong = Mongodb.new({:dbname => SPECDB})
+    end
+
+    it "should find all" do
+     @mong.all("cities").each { |c| p c["geom"]} #should eql([])
     end
 
     it "should store something" do
-      @mong.insert("cities", {"id" => 7, "name" => "Sao Tome"})
+      @mong.insert("cities", {"id" => 7, "name" => "Sao Tome", "geom" => [5,5]})
       @mong.count("cities").should eql(1)
     end
 
@@ -26,8 +32,28 @@ describe Mongodb do
       @mong.find("cities", 1)["name"].should eql("Loco")
     end
 
+    it "should store geom" do
+      @mong.insert("cities", {"id" => 8, "name" => "Sao Tome", "geom" => { "x" => 5, "y" => 5}})
+      @mong.find("cities", 8)["geom"]["x"].should eql(5)
+      @mong.find("cities", 8)["geom"]["y"].should eql(5)
+    end
+
     it "should have some indexes" do
       @mong.index_info("cities").to_a.length.should eql(4)
+    end
+
+    it "should find geo" do
+      p @mong.index_info('cities')
+      @mong.insert("cities", {"id" => 9, "name" => "Sao Paulo", "geom" => [15,15]})
+      @mong.insert("cities", {"id" => 10, "name" => "Sao Tome", "geom" => [5,5]})
+      @mong.find_near("cities", -5, -35).should eql(1)
+    end
+
+    it "should find near" do
+      p @mong.index_info('cities')
+      @mong.insert("cities", {"id" => 9, "name" => "Sao Paulo", "geom" => [15,15]})
+      @mong.insert("cities", {"id" => 10, "name" => "Sao Tome", "geom" => [5,5]})
+      @mong.near("cities", -5, -35).should eql(1)
     end
   end
 end
