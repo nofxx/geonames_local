@@ -1,9 +1,82 @@
-= geonames_local
+= Geonames Local
 
-Description goes here.
+Download and store in tokyo or postgresql Geonames.org data.
+Making every Geoname API operation possible on your servers.
+No hit limit, fast as possible.
+
+== Features/Problems
+
+- Local relational mapping of geonames data
+- Map geonames fields to your db scheme UNDONE
+- Countries are a static yml file :/
+
+== Usage
+
+  geonames conf
+
+Will generate a "geonames.yml" file on your folder.
+The file is self explanatory.
+
+  geonames -c geonames.yml
+
+Work. Use -v for verbose.
+
+If you are not sure your country code, use:
+
+  geonames list <search>
+
+
+== Relational Mapping
+
+When using PG, this gem will (try) to relational map Geonames
+data on your scheme. Postgresql done, tokyo still need heavy work.
+
+
+== PostgreSQL
+
+So, supposing ActiveRecord, something like this is possible:
+
+  City.first.province.country.abbr
+  => "BR"
+
+=== Migration
+
+Default PG migration:
+
+    create_table :cities do |t|
+      t.references :country, :null => false
+      t.references :province
+      t.string  :name, :null => false
+      t.point   :geom,   :srid => 4326
+      t.integer :gid, :zip
+    end
+
+    create_table :provinces do |t|
+      t.references :country, :null => false
+      t.string :name, :null => false
+      t.string :abbr, :limit => 2, :null => false
+      t.integer :gid
+    end
+
+    create_table :countries do |t|
+      t.string :name, :limit => 30, :null => false
+      t.string :abbr, :limit => 2,  :null => false
+    end
+
+    add_index :cities, :name
+    add_index :cities, :gid
+    add_index :cities, :zip
+    add_index :cities, :country_id
+    add_index :cities, :province_id
+    add_index :cities, :geom, :spatial => true
+    add_index :provinces, :name
+    add_index :provinces, :abbrg
+    add_index :provinces, :gid
+    add_index :provinces, :country_id
+
 
 == Note on Patches/Pull Requests
- 
+
 * Fork the project.
 * Make your feature addition or bug fix.
 * Add tests for it. This is important so I don't break it in a

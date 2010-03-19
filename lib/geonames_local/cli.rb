@@ -1,15 +1,18 @@
+#
+# Geonames Local
+#
+require 'optparse'
 module Geonames
-  class Cli
+  class CLI
 
     def self.parse_options(argv)
       options = {}
 
-      ARGV.options do |opts|
+      argv.options do |opts|
         opts.banner = <<BANNER
 Geonames Command Line Usage:
 
-geonames <code(s)> <opts>
-
+geonames <country code(s)> <opts>
 
 BANNER
         opts.on("-l", "--level LEVEL", String, "The level of logging to report" ) { |level| options[:level] = level }
@@ -17,6 +20,13 @@ BANNER
         opts.separator ""
         opts.separator "Config file:"
         opts.on("-c", "--config CONFIG", String, "Geonames Config file path" ) { |file|  options[:config] = file }
+        opts.on("-i", "--import CONFIG", String, "Geonames Import SHP/DBF/GPX" ) { |file|  options[:shp] = file }
+        opts.separator ""
+        opts.separator "SHP Options:"
+        opts.on("--map TYPE", Array, "Use zone/road to import" ) { |s| options[:map] = s.map(&:to_sym) }
+        opts.on("--type TYPE", String, "Use zone/road to import" ) { |s| options[:type] = s }
+        opts.on("--city CITY", String, "Use city gid to import" ) { |s| options[:city] = s }
+        opts.on("--country COUNTRY", String, "Use country gid to import" ) { |s| options[:country] = s }
         opts.separator ""
         opts.separator "Common Options:"
         opts.on("-h", "--help", "Show this message" ) { puts opts; exit }
@@ -25,6 +35,10 @@ BANNER
         opts.separator ""
         begin
           opts.parse!
+          if argv.empty? && !options[:config]
+            puts opts
+            exit
+          end
         rescue
           puts opts
           exit
@@ -34,20 +48,105 @@ BANNER
     end
     private_class_method :parse_options
 
+    # Ugly but works?
     def self.work(argv)
       trap(:INT) { stop! }
       trap(:TERM) { stop! }
       Opt.merge! parse_options(argv)
 
+      if Opt[:config]
+        Opt.merge! YAML.load(File.read(Opt[:config]))
+      end
+
+      if shp = Opt[:shp]
+        SHP.import(shp)
+        exit
+      end
+
+      if argv[0] =~ /list|codes/
+         Codes.each do |key,val|
+          str = [val.values, key.to_s].join(" ").downcase
+          if s = argv[1]
+            next unless str =~ /#{s.downcase}/
+          end
+          puts "#{val[:en_us]}: #{key}"
+        end
+        exit
+      end
+
+      if argv[0] =~ /scaff|conf/
+        fname = (argv[1] || "geonames") + ".yml"
+        if File.exist?(fname)
+          puts "File exists."
+        else
+          puts "Writing to #{fname}"
+          `cp #{File.join(File.dirname(__FILE__), '..', 'config', 'geonames.yml')} #{fname}`
+        end
+        exit
+      end
+      require "geo_ruby" if Opt[:mapping] && Opt[:mapping][:geom]
+
       if argv[0] =~ /csv|json/
         Geonames::Export.new(Country.all).to_csv
       else
-        Geonames::Worker.dump(argv) #rescue puts "Command not found: #{comm} #{@usage}"
+        Geonames::Dump.work(Opt[:codes], :zip) #rescue puts "Command not found: #{comm} #{@usage}"
+        Geonames::Dump.work(Opt[:codes], :dump) #rescue puts "Command not found: #{comm} #{@usage}"
+        info "\n---\nTotal #{Cache[:dump].length} parsed. #{Cache[:zip].length} zips."
+        info "Join dump << zip"
+        unify!
+        write_to_store!
       end
+    end
+
+    def self.write_to_store!
+      db = case Opt[:store].to_sym
+           when :tyrant then Geonames::Tokyo.new(Opt[:tyrant])
+           when :pg     then Geonames::Postgres.new(Opt[:db])
+           else
+             info "No store defined!"
+             exit
+           end
+
+      groups = Cache[:dump].group_by(&:kind)
+      Cache[:provinces] = groups[:provinces]
+      # ensure this order....
+      do_write(db, groups[:provinces])
+      do_write(db, groups[:cities])
+    end
+
+    def self.do_write(db, val)
+      return if val.empty?
+      key = val[0].table
+      start = Time.now
+      writt = 0
+      info "\nWriting #{val.length} #{key}..."
+      val.each do |v|
+        meth = v.respond_to?(:gid) ? [v.gid] : [v.name, true]
+        unless db.find(v.table, *meth)
+          db.insert(v)
+          writt += 1
+        end
+      end
+      total = Time.now - start
+      info "#{writt} #{key} written in #{total} sec (#{(writt/total).to_i}/s)"
+    end
+
+    def self.unify!
+      start = Time.now
+      Cache[:dump].map! do |spot|
+        if other = Cache[:zip].find { |d| d.code == spot.code }
+          spot.zip = other.zip
+          spot
+        else
+          spot
+        end
+      end
+      info "Done. #{(Time.now-start).to_i}s"
     end
 
     def self.stop!
       puts "Closing Geonames..."
+      exit
     end
 
   end
