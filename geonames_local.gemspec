@@ -33,6 +33,7 @@ Gem::Specification.new do |s|
      "lib/geonames_local/config/geonames.yml",
      "lib/geonames_local/data/cache.rb",
      "lib/geonames_local/data/geoquery.rb",
+     "lib/geonames_local/data/mongo.rb",
      "lib/geonames_local/data/postgres.rb",
      "lib/geonames_local/data/shp.rb",
      "lib/geonames_local/data/tokyo.rb",
@@ -44,17 +45,17 @@ Gem::Specification.new do |s|
      "lib/geonames_local/features/road.rb",
      "lib/geonames_local/features/spot.rb",
      "lib/geonames_local/features/zone.rb",
-     "spec/data/cache_spec.rb",
-     "spec/data/postgres_spec.rb",
-     "spec/data/shp_spec.rb",
-     "spec/data/tokyo_spec.rb",
-     "spec/features/road_spec.rb",
-     "spec/features/spot_spec.rb",
-     "spec/features/zone_spec.rb",
+     "spec/geonames_local/cli_spec.rb",
+     "spec/geonames_local/data/cache_spec.rb",
+     "spec/geonames_local/data/postgres_spec.rb",
+     "spec/geonames_local/data/shp_spec.rb",
+     "spec/geonames_local/data/tokyo_spec.rb",
+     "spec/geonames_local/features/road_spec.rb",
+     "spec/geonames_local/features/spot_spec.rb",
+     "spec/geonames_local/features/zone_spec.rb",
      "spec/geonames_local_spec.rb",
      "spec/spec.opts",
      "spec/spec_helper.rb",
-     "spec/work/cli_spec.rb",
      "task/benchmark.rb",
      "task/benchmark_cabinet.rb"
   ]
@@ -64,15 +65,15 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.6}
   s.summary = %q{Dump and feed a tokyo local geonames db}
   s.test_files = [
-    "spec/data/shp_spec.rb",
-     "spec/data/postgres_spec.rb",
-     "spec/data/tokyo_spec.rb",
-     "spec/data/cache_spec.rb",
-     "spec/work/cli_spec.rb",
-     "spec/spec_helper.rb",
-     "spec/features/spot_spec.rb",
-     "spec/features/zone_spec.rb",
-     "spec/features/road_spec.rb",
+    "spec/spec_helper.rb",
+     "spec/geonames_local/data/shp_spec.rb",
+     "spec/geonames_local/data/postgres_spec.rb",
+     "spec/geonames_local/data/tokyo_spec.rb",
+     "spec/geonames_local/data/cache_spec.rb",
+     "spec/geonames_local/cli_spec.rb",
+     "spec/geonames_local/features/spot_spec.rb",
+     "spec/geonames_local/features/zone_spec.rb",
+     "spec/geonames_local/features/road_spec.rb",
      "spec/geonames_local_spec.rb"
   ]
 
@@ -82,14 +83,14 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
       s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
-      s.add_runtime_dependency(%q<tokyotyrant>, [">= 1.10"])
+      s.add_runtime_dependency(%q<nofxx-georuby>, [">= 1.7.1"])
     else
       s.add_dependency(%q<rspec>, [">= 1.2.9"])
-      s.add_dependency(%q<tokyotyrant>, [">= 1.10"])
+      s.add_dependency(%q<nofxx-georuby>, [">= 1.7.1"])
     end
   else
     s.add_dependency(%q<rspec>, [">= 1.2.9"])
-    s.add_dependency(%q<tokyotyrant>, [">= 1.10"])
+    s.add_dependency(%q<nofxx-georuby>, [">= 1.7.1"])
   end
 end
 

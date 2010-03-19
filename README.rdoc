@@ -4,11 +4,13 @@ Download and store in tokyo or postgresql Geonames.org data.
 Making every Geoname API operation possible on your servers.
 No hit limit, fast as possible.
 
+
 == Features/Problems
 
 - Local relational mapping of geonames data
 - Map geonames fields to your db scheme UNDONE
 - Countries are a static yml file :/
+
 
 == Usage
 

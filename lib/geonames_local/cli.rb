@@ -4,7 +4,6 @@
 require 'optparse'
 module Geonames
   class CLI
-
     def self.parse_options(argv)
       options = {}
 
@@ -14,6 +13,7 @@ Geonames Command Line Usage:
 
 geonames <country code(s)> <opts>
 
+geonames
 BANNER
         opts.on("-l", "--level LEVEL", String, "The level of logging to report" ) { |level| options[:level] = level }
         opts.on("-d", "--dump", "Dump DB before all" ) { options[:dump] = true }
@@ -48,8 +48,10 @@ BANNER
     end
     private_class_method :parse_options
 
+    class << self
+
     # Ugly but works?
-    def self.work(argv)
+    def work(argv)
       trap(:INT) { stop! }
       trap(:TERM) { stop! }
       Opt.merge! parse_options(argv)
@@ -74,17 +76,28 @@ BANNER
         exit
       end
 
+      #
+      # If arguments scaffold, config, write down yml.
+      #
       if argv[0] =~ /scaff|conf/
         fname = (argv[1] || "geonames") + ".yml"
         if File.exist?(fname)
           puts "File exists."
         else
           puts "Writing to #{fname}"
-          `cp #{File.join(File.dirname(__FILE__), '..', 'config', 'geonames.yml')} #{fname}`
+          `cp #{File.join(File.dirname(__FILE__), 'config', 'geonames.yml')} #{fname}`
         end
         exit
       end
       require "geo_ruby" if Opt[:mapping] && Opt[:mapping][:geom]
+
+      store = Opt[:store].capitalize
+      if Geonames.const_defined?(store)
+        db = Geonames.class_eval(store).new(Opt[:db])
+      else
+        puts "Can't find adapter #{store}"
+        stop!
+      end
 
       if argv[0] =~ /csv|json/
         Geonames::Export.new(Country.all).to_csv
@@ -94,18 +107,11 @@ BANNER
         info "\n---\nTotal #{Cache[:dump].length} parsed. #{Cache[:zip].length} zips."
         info "Join dump << zip"
         unify!
-        write_to_store!
+        write_to_store!(db)
       end
     end
 
-    def self.write_to_store!
-      db = case Opt[:store].to_sym
-           when :tyrant then Geonames::Tokyo.new(Opt[:tyrant])
-           when :pg     then Geonames::Postgres.new(Opt[:db])
-           else
-             info "No store defined!"
-             exit
-           end
+    def write_to_store!(db)
 
       groups = Cache[:dump].group_by(&:kind)
       Cache[:provinces] = groups[:provinces]
@@ -114,7 +120,7 @@ BANNER
       do_write(db, groups[:cities])
     end
 
-    def self.do_write(db, val)
+    def do_write(db, val)
       return if val.empty?
       key = val[0].table
       start = Time.now
@@ -131,7 +137,7 @@ BANNER
       info "#{writt} #{key} written in #{total} sec (#{(writt/total).to_i}/s)"
     end
 
-    def self.unify!
+    def unify!
       start = Time.now
       Cache[:dump].map! do |spot|
         if other = Cache[:zip].find { |d| d.code == spot.code }
@@ -144,9 +150,10 @@ BANNER
       info "Done. #{(Time.now-start).to_i}s"
     end
 
-    def self.stop!
+    def stop!
       puts "Closing Geonames..."
       exit
+    end
     end
 
   end

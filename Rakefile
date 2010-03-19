@@ -11,8 +11,7 @@ begin
     gem.homepage = "http://github.com/nofxx/geonames_local"
     gem.authors = ["Marcos Piccinini"]
     gem.add_development_dependency "rspec", ">= 1.2.9"
-    gem.add_dependency "tokyotyrant", ">= 1.10"
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
+    gem.add_dependency "nofxx-georuby", ">= 1.7.1"
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError

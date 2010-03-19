@@ -1,7 +1,8 @@
 #
 # Geonames Local Config Example
 #
-:store: pg
+# Stores: postgres, mongodb, tokyo, redis
+:store: postgres
 :codes: [br, it]
 :level: city
 :mapping:
@@ -9,6 +10,6 @@
   :geom: true
 :db:
   :host: localhost
-  :dbname: db
+  :dbname: dbname
   :user: postgres
   :password:
