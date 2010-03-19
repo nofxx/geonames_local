@@ -16,9 +16,8 @@ module Geonames
     def setup
       for re in RESOURCES
         coll = @db.collection(re)
-        coll.create_index(["id", Mongo::ASCENDING])
-        coll.create_index(["gid", Mongo::ASCENDING])
-        coll.create_index(["geom", Mongo::GEO2D])#, :min => 0, :max => 180)
+        coll.create_index(["id", Mongo::ASCENDING], ["gid", Mongo::ASCENDING])
+        coll.create_index([["geom", Mongo::GEO2D]], :min => 0, :max => 180)
       end
     end
 
