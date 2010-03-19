@@ -18,11 +18,6 @@ BANNER
         opts.separator "Config file:"
         opts.on("-c", "--config CONFIG", String, "Geonames Config file path" ) { |file|  options[:config] = file }
         opts.separator ""
-        opts.separator "Tyrant Options:"
-        opts.on("-t", "--tyrant", "Use tyrant" ) { options[:tyrant] = true }
-        opts.on("-s", "--server SERVER", String, "Tyrant Server URL" ) { |url|  options[:server] = url }
-        opts.on("-p", "--port PORT", Integer, "Tyrant Server Port")  { |val| options[:port] = val.to_i }
-        opts.separator ""
         opts.separator "Common Options:"
         opts.on("-h", "--help", "Show this message" ) { puts opts; exit }
         opts.on("-v", "--verbose", "Turn on logging to STDOUT" ) { |bool| options[:verbose] = bool }
@@ -42,10 +37,8 @@ BANNER
     def self.work(argv)
       trap(:INT) { stop! }
       trap(:TERM) { stop! }
+      Opt.merge! parse_options(argv)
 
-#      Opt.autoload_config(
-       Opt.merge! parse_options(argv)
-      p argv
       if argv[0] =~ /csv|json/
         Geonames::Export.new(Country.all).to_csv
       else

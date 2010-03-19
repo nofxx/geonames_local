@@ -56,6 +56,6 @@ module Geonames
       end
     end
 
-
   end
+
 end
