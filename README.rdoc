@@ -85,7 +85,7 @@ Default PG migration:
     add_index :cities, :province_id
     add_index :cities, :geom, :spatial => true
     add_index :provinces, :name
-    add_index :provinces, :abbrg
+    add_index :provinces, :abbr
     add_index :provinces, :gid
     add_index :provinces, :country_id
 

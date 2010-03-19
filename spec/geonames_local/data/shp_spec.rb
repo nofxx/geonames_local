@@ -10,6 +10,7 @@ describe SHP do
   Opt[:type] = "road"
 
   it "should merge two records linestrings" do
+    pending
     @s = SHP.new(nil)
     r = @s.reduce!
     r.length.should eql(1)
