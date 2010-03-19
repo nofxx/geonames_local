@@ -5,19 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{geonames_local}
-<<<<<<< HEAD
   s.version = "0.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Marcos Piccinini"]
   s.date = %q{2010-03-19}
-=======
-  s.version = "0.0.5"
-
-  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Marcos Piccinini"]
-  s.date = %q{2010-01-30}
->>>>>>> 95997d8548c72dcb9ae0a5ddaa1c80f0451430bf
   s.default_executable = %q{geonames}
   s.description = %q{Dump and feed a tokyo cabinet for local geonames search}
   s.email = %q{x@nofxx.com}
@@ -33,33 +25,25 @@ Gem::Specification.new do |s|
      "README.rdoc",
      "Rakefile",
      "VERSION",
-<<<<<<< HEAD
-     "geonames_local.gemspec",
-     "lib/geonames_local.rb",
-     "spec/data/tokyo_spec.rb",
-     "spec/geonames_local_spec.rb",
-     "spec/spec.opts",
-     "spec/spec_helper.rb",
-=======
      "bin/geonames",
      "geonames_local.gemspec",
-     "lib/config/codes.yml",
-     "lib/config/geonames.yml",
-     "lib/data/cache.rb",
-     "lib/data/geoquery.rb",
-     "lib/data/postgres.rb",
-     "lib/data/shp.rb",
-     "lib/data/tokyo.rb",
-     "lib/features/city.rb",
-     "lib/features/country.rb",
-     "lib/features/province.rb",
-     "lib/features/road.rb",
-     "lib/features/spot.rb",
-     "lib/features/zone.rb",
      "lib/geonames_local.rb",
-     "lib/work/cli.rb",
-     "lib/work/dump.rb",
-     "lib/work/export.rb",
+     "lib/geonames_local/cli.rb",
+     "lib/geonames_local/config/codes.yml",
+     "lib/geonames_local/config/geonames.yml",
+     "lib/geonames_local/data/cache.rb",
+     "lib/geonames_local/data/geoquery.rb",
+     "lib/geonames_local/data/postgres.rb",
+     "lib/geonames_local/data/shp.rb",
+     "lib/geonames_local/data/tokyo.rb",
+     "lib/geonames_local/dump.rb",
+     "lib/geonames_local/export.rb",
+     "lib/geonames_local/features/city.rb",
+     "lib/geonames_local/features/country.rb",
+     "lib/geonames_local/features/province.rb",
+     "lib/geonames_local/features/road.rb",
+     "lib/geonames_local/features/spot.rb",
+     "lib/geonames_local/features/zone.rb",
      "spec/data/cache_spec.rb",
      "spec/data/postgres_spec.rb",
      "spec/data/shp_spec.rb",
@@ -71,7 +55,6 @@ Gem::Specification.new do |s|
      "spec/spec.opts",
      "spec/spec_helper.rb",
      "spec/work/cli_spec.rb",
->>>>>>> 95997d8548c72dcb9ae0a5ddaa1c80f0451430bf
      "task/benchmark.rb",
      "task/benchmark_cabinet.rb"
   ]
@@ -81,22 +64,16 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.6}
   s.summary = %q{Dump and feed a tokyo local geonames db}
   s.test_files = [
-<<<<<<< HEAD
-    "spec/data/tokyo_spec.rb",
-     "spec/spec_helper.rb",
-     "spec/geonames_local_spec.rb"
-=======
-    "spec/data/cache_spec.rb",
+    "spec/data/shp_spec.rb",
      "spec/data/postgres_spec.rb",
-     "spec/data/shp_spec.rb",
      "spec/data/tokyo_spec.rb",
-     "spec/features/road_spec.rb",
+     "spec/data/cache_spec.rb",
+     "spec/work/cli_spec.rb",
+     "spec/spec_helper.rb",
      "spec/features/spot_spec.rb",
      "spec/features/zone_spec.rb",
-     "spec/geonames_local_spec.rb",
-     "spec/spec_helper.rb",
-     "spec/work/cli_spec.rb"
->>>>>>> 95997d8548c72dcb9ae0a5ddaa1c80f0451430bf
+     "spec/features/road_spec.rb",
+     "spec/geonames_local_spec.rb"
   ]
 
   if s.respond_to? :specification_version then
