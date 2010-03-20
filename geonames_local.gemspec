@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{geonames_local}
-  s.version = "0.2.1"
+  s.version = "0.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Marcos Piccinini"]
-  s.date = %q{2010-03-19}
+  s.date = %q{2010-03-20}
   s.default_executable = %q{geonames}
   s.description = %q{Dump and feed a tokyo cabinet for local geonames search}
   s.email = %q{x@nofxx.com}
@@ -37,17 +37,17 @@ Gem::Specification.new do |s|
      "lib/geonames_local/config/codes.yml",
      "lib/geonames_local/config/geonames.sql",
      "lib/geonames_local/config/geonames.yml",
-     "lib/geonames_local/data/cache.rb",
-     "lib/geonames_local/data/geoquery.rb",
+     "lib/geonames_local/data/dump.rb",
+     "lib/geonames_local/data/export.rb",
      "lib/geonames_local/data/shp.rb",
-     "lib/geonames_local/dump.rb",
-     "lib/geonames_local/export.rb",
-     "lib/geonames_local/features/city.rb",
-     "lib/geonames_local/features/country.rb",
-     "lib/geonames_local/features/province.rb",
      "lib/geonames_local/features/road.rb",
      "lib/geonames_local/features/spot.rb",
      "lib/geonames_local/features/zone.rb",
+     "lib/geonames_local/geonames.rb",
+     "lib/geonames_local/model/city.rb",
+     "lib/geonames_local/model/conn.rb",
+     "lib/geonames_local/model/country.rb",
+     "lib/geonames_local/model/province.rb",
      "spec/geonames_local/adapters/mongodb_spec.rb",
      "spec/geonames_local/adapters/postgres_spec.rb",
      "spec/geonames_local/adapters/tokyo_spec.rb",
@@ -57,8 +57,10 @@ Gem::Specification.new do |s|
      "spec/geonames_local/features/road_spec.rb",
      "spec/geonames_local/features/spot_spec.rb",
      "spec/geonames_local/features/zone_spec.rb",
+     "spec/geonames_local/model/city_spec.rb",
      "spec/geonames_local_spec.rb",
      "spec/spec.opts",
+     "spec/spec_ext_helper.rb",
      "spec/spec_helper.rb",
      "task/benchmark.rb",
      "task/benchmark_cabinet.rb"
@@ -95,6 +97,7 @@ Have fun because:
     "spec/spec_helper.rb",
      "spec/geonames_local/data/shp_spec.rb",
      "spec/geonames_local/data/cache_spec.rb",
+     "spec/geonames_local/model/city_spec.rb",
      "spec/geonames_local/cli_spec.rb",
      "spec/geonames_local/adapters/postgres_spec.rb",
      "spec/geonames_local/adapters/tokyo_spec.rb",
@@ -102,7 +105,8 @@ Have fun because:
      "spec/geonames_local/features/spot_spec.rb",
      "spec/geonames_local/features/zone_spec.rb",
      "spec/geonames_local/features/road_spec.rb",
-     "spec/geonames_local_spec.rb"
+     "spec/geonames_local_spec.rb",
+     "spec/spec_ext_helper.rb"
   ]
 
   if s.respond_to? :specification_version then
@@ -110,15 +114,15 @@ Have fun because:
     s.specification_version = 3
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
-      s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
       s.add_runtime_dependency(%q<nofxx-georuby>, [">= 1.7.1"])
+      s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
     else
-      s.add_dependency(%q<rspec>, [">= 1.2.9"])
       s.add_dependency(%q<nofxx-georuby>, [">= 1.7.1"])
+      s.add_dependency(%q<rspec>, [">= 1.2.9"])
     end
   else
-    s.add_dependency(%q<rspec>, [">= 1.2.9"])
     s.add_dependency(%q<nofxx-georuby>, [">= 1.7.1"])
+    s.add_dependency(%q<rspec>, [">= 1.2.9"])
   end
 end
 

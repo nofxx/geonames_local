@@ -5,10 +5,10 @@ module Geonames
 
     RESOURCES = ["countries", "provinces", "cities"]
 
-    def initialize(params)
+    def initialize(params={})
       host, port = params[:host] || "localhost", params[:port] || 27017
       @conn = Mongo::Connection.new(host, port)
-      @db = @conn.db(params[:dbname])
+      @db = @conn.db(params[:dbname] || "geonames")
       #purge
       setup
     end
@@ -19,17 +19,29 @@ module Geonames
         coll.create_index(["id", Mongo::ASCENDING], ["gid", Mongo::ASCENDING])
 
         # Geometric index, more info:
-        # http://www.mongodb.org/display/DOCS/Geospatial+Indexing#GeospatialIndexing-Implementation
+        # http://www.mongodb.org/display/DOCS/Geospatial+Indexing
         coll.create_index([["geom", Mongo::GEO2D]], :min => -180, :max => 180)
       end
     end
 
-    def all(resource)
+    def all(resource, limit=nil, skip=0)
       @db.collection(resource.to_s).find().to_a
     end
 
     def find(resource, id, name=nil)
       @db.collection(resource.to_s).find_one("id" => id)
+    end
+
+    def find_by_name(resource, name)
+      do_find(resource, "name" => /#{name}/)
+    end
+
+    def find_by_zip(resource, zip)
+      do_find(resource, "zip" => /#{zip}/)
+    end
+
+    def do_find(resource, hsh)
+      @db.collection(resource.to_s).find(hsh).to_a
     end
 
     def insert(resource, spot)

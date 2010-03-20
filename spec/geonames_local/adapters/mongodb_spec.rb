@@ -7,7 +7,7 @@ describe Mongodb do
 
   before(:all) do
     Mongodb.new({:dbname => SPECDB}).purge
-      @mong = Mongodb.new({:dbname => SPECDB})
+    @mong = Mongodb.new({:dbname => SPECDB})
   end
 
   def mock_spot(name)

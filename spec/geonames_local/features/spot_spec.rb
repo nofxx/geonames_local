@@ -35,7 +35,7 @@ describe Spot do
     end
 
     it "should parse spot kind" do
-      @spot.kind.should eql(:cities)
+      @spot.kind.should eql(:city)
     end
 
     it "should parse spot country" do
@@ -97,7 +97,7 @@ describe Spot do
     end
 
     it "should be kind of province" do
-      @spot.kind.should eql(:provinces)
+      @spot.kind.should eql(:province)
     end
 
     it "should parse geoid" do
@@ -178,7 +178,8 @@ describe Spot do
     end
 
     it "should set the geom" do
-      @spot.geom.should eql([15, 15])
+      @spot.geom.should be_instance_of(GeoRuby::SimpleFeatures::Point)
+      @spot.geom.x.should eql(15)
     end
 
     it "should set the tz" do

@@ -14,7 +14,7 @@ module Geonames
     def initialize(params=nil, k=nil)
       return unless params.instance_of? String
       k == :zip ? parse_zip(params) :  parse(params)
-      if @kind == :provinces
+      if @kind == :province
         @name.gsub!(/Estado d\w\s/, "")
         @abbr = get_abbr
       end
@@ -78,18 +78,46 @@ module Geonames
         "geom" => [@geom.x, @geom.y], "tz" => @tz }
     end
 
-    def self.from_hash(hsh)
-      spot =  Spot.new
+    def human_code(code)
+      case code
+        when 'ADM1' then :province
+        when 'ADM2' then :city
+        else :other
+      end
+    end
+
+    class << self
+
+    def all
+      Adapter.all(@coll)
+    end
+
+    def find(id)
+      Adapter.find(@coll, id)
+    end
+
+    def find_by_name(name)
+      Adapter.find_by_name(@coll, name).map { |hsh| from_hash(hsh) }
+    end
+
+    def nearest(x,y)
+      from_hash(Adapter.find_near(@coll, x, y, 1)[0])
+    end
+
+    def from_hash(hsh)
+      spot = self.new
       hsh.each { |key, val| spot.instance_variable_set("@"+key, val) }
+      spot.geom = GeoRuby::SimpleFeatures::Point.from_x_y(*spot.geom)
       spot
     end
 
-    def human_code(code)
-      case code
-        when 'ADM1' then :provinces
-        when 'ADM2' then :cities
-        else :other
-      end
+    def set_coll(name)
+      @coll = name
+    end
+
+    def collection
+      @coll
+    end
     end
   end
 end
