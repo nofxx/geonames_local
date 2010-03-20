@@ -10,8 +10,10 @@ begin
     gem.email = "x@nofxx.com"
     gem.homepage = "http://github.com/nofxx/geonames_local"
     gem.authors = ["Marcos Piccinini"]
+
+    gem.add_dependency "nofxx-georuby",     ">= 1.7.1"
     gem.add_development_dependency "rspec", ">= 1.2.9"
-    gem.add_dependency "nofxx-georuby", ">= 1.7.1"
+
     gem.post_install_message = <<-POST_INSTALL_MESSAGE
 
 Geonames Local

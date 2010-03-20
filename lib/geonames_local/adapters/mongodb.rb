@@ -42,8 +42,8 @@ module Geonames
       @db.collection(resource).count
     end
 
-    def find_near(resource, x, y, limit=nil)
-      coll = @db.collection(resource.to_s).find("geom" => { "$near" => { "x" => x, "y" => y }})
+    def find_near(resource, x, y, limit=nil, skip=0)
+      coll = @db.collection(resource.to_s).find("geom" => { "$near" => { "x" => x, "y" => y }}).skip(skip)
       coll.limit(limit) if limit
       coll.to_a
     end

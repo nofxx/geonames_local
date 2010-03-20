@@ -2,11 +2,9 @@ require 'rubygems'
 require 'logger'
 require 'yaml'
 
-require 'features/spot'
-require 'features/country'
-require 'features/city'
-require 'features/road'
-require 'features/zone'
+require 'geonames_local/features/spot'
+require 'geonames_local/features/road'
+require 'geonames_local/features/zone'
 
 module Geonames
   Opt = {}

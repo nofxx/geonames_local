@@ -132,7 +132,7 @@ describe Spot do
   describe "Parsing Zip" do
 
     before do
-      @spot =  Geonames::Spot.new("BR\t76375-000\tHidrolina\tGoias\t29\t\t5209804\t\t-14.7574\t-49.3596\t\n", :zip)
+      @spot = Geonames::Spot.new("BR\t76375-000\tHidrolina\tGoias\t29\t\t5209804\t\t-14.7574\t-49.3596\t\n", :zip)
     end
 
     it "should parse zip oO" do
@@ -163,6 +163,38 @@ describe Spot do
 
   end
 
+  describe "From Hash" do
+
+    before do
+      @spot = Spot.from_hash({"id" => 9, "name" => "Sao Rock", "geom" => [15,15], "kind" => "cities", "country" => "BR", "gid" => 13232, "tz" => "America/Foo", "ascii" => "Rock"})
+    end
+
+    it "should be an spot" do
+      @spot.should be_instance_of Spot
+    end
+
+    it "should set the name" do
+      @spot.name.should eql("Sao Rock")
+    end
+
+    it "should set the geom" do
+      @spot.geom.should eql([15, 15])
+    end
+
+    it "should set the tz" do
+      @spot.tz.should eql("America/Foo")
+    end
+
+    it "should set the ascii" do
+      @spot.ascii.should eql("Rock")
+    end
+
+    it "should set the country abbr" do
+      @spot.country.should eql("BR")
+    end
+
+  end
+
 end
 
 # 6319037 Maxaranguape  Maxaranguape    -5.46874226086957 -35.3565714695652 A ADM2  BR    22  2407500     6593    12  America/Recife  2006-12-17
@@ -189,3 +221,4 @@ end
 # "3165361\tToscana\tToscana\tTaskana,Toscan-a,Toscana,Toscane,Toscann-a,Toskana,Toskania,Toskanio,Toskansko,Toskánsko,Toskāna,Toszkana,Toszkána,Tuscany,Tuschena,Tuschèna,Tuscia,toseukana ju,tosukana zhou,tuo si ka na,twsqnh,Таскана,Тоскана,טוסקנה,تسکانہ,ტოსკანა,トスカーナ州,托斯卡纳,토스카나 주\t43.4166667\t11.0\tA\tADM1\tIT\t\t16\t\t\t\t3718210\t\t249\tEurope/Rome\t2010-01-17\n"
 # "3169778\tRegione Puglia\tRegione Puglia\tApulia,Apulie,Apulien,Apulië,Pouilles,Puglia\t41.25\t16.25\tA\tADM1\tIT\t\t13\t\t\t\t4021957\t\t95\tEurope/Rome\t2009-03-11\n"
 # "3170831\tRegione Piemonte\tRegione Piemonte\tPedemons,Pedemontium,Piamonte,Piedmont,Piemont,Piemonte,Piémont,Piëmont,Regione Piemonte\t45.0\t8.0\tA\tADM1\tIT\t\t12\t\t\t\t4294081\t\t185\tEurope/Rome\t2008-08-18\n"
+

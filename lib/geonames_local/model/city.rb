@@ -1,0 +1,7 @@
+class City < Spot
+
+
+
+
+
+end

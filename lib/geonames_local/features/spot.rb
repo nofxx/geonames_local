@@ -1,7 +1,7 @@
 module Geonames
   class Spot
     attr_accessor :gid, :name, :ascii, :lat, :lon, :country, :kind,
-                  :code,  :pop, :tz, :geom, :province, :zip, :abbr
+                  :code,  :pop, :tz, :geom, :province, :zip, :abbr, :id
     alias :x :lon
     alias :y :lat
     alias :geoname_id :gid
@@ -11,7 +11,7 @@ module Geonames
     # = Geonames Spot
     #
     # Every geoname type will be parsed as a spot
-    def initialize(params, k)
+    def initialize(params=nil, k=nil)
       return unless params.instance_of? String
       k == :zip ? parse_zip(params) :  parse(params)
       if @kind == :provinces
@@ -78,6 +78,11 @@ module Geonames
         "geom" => [@geom.x, @geom.y], "tz" => @tz }
     end
 
+    def self.from_hash(hsh)
+      spot =  Spot.new
+      hsh.each { |key, val| spot.instance_variable_set("@"+key, val) }
+      spot
+    end
 
     def human_code(code)
       case code
