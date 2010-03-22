@@ -32,4 +32,8 @@ describe City do
   it "should find by name" do
     City.find_by_name("Rock")[0].name.should eql("Rock City")
   end
+
+  it "should find by name" do
+    City.find_by_name("rock")[0].name.should eql("Rock City")
+  end
 end

@@ -33,7 +33,7 @@ module Geonames
     end
 
     def find_by_name(resource, name)
-      do_find(resource, "name" => /#{name}/)
+      do_find(resource, "name" => /#{name}/i)
     end
 
     def find_by_zip(resource, zip)
