@@ -28,6 +28,10 @@ module Geonames
       @db.collection(resource.to_s).find().to_a
     end
 
+    def first(resource)
+      @db.collection(resource.to_s).find_one
+    end
+
     def find(resource, id, name=nil)
       @db.collection(resource.to_s).find_one("id" => id)
     end

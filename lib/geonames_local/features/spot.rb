@@ -92,6 +92,10 @@ module Geonames
       Adapter.all(@coll)
     end
 
+    def first
+      from_hash(Adapter.first(@coll))
+    end
+
     def find(id)
       Adapter.find(@coll, id)
     end
