@@ -9,6 +9,9 @@ module Geonames
       host, port = params[:host] || "localhost", params[:port] || 27017
       @conn = Mongo::Connection.new(host, port)
       @db = @conn.db(params[:dbname] || "geonames")
+      if params[:user] || params[:password]
+        @db.authenticate(params[:user], params[:password])
+      end
       #purge
       setup
     end
