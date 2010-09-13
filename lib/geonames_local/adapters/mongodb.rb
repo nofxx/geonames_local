@@ -19,7 +19,7 @@ module Geonames
     def setup
       for re in RESOURCES
         coll = @db.collection(re)
-        coll.create_index(["id", Mongo::ASCENDING], ["gid", Mongo::ASCENDING])
+        coll.create_index([["id", Mongo::ASCENDING], ["gid", Mongo::ASCENDING]])
 
         # Geometric index, more info:
         # http://www.mongodb.org/display/DOCS/Geospatial+Indexing
