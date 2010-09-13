@@ -13,6 +13,7 @@ To use the adapter, install the corresponding gem:
   MongoDB      =>   mongodb (optional: mongo_ext)
   Tokyo        =>   tokyocabinet
 
+Don't forget to install **unzip** and **curl**.
 
 === PostgreSQL
 
