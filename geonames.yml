@@ -2,7 +2,7 @@
 # Geonames Local Config Example
 #
 :store: mongodb
-:codes: [br]
+:codes: [br] # to store all countries informations in the countries table, just write [country]
 :level: city
 :mapping:
   :name: name
