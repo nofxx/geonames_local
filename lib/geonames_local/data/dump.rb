@@ -39,7 +39,7 @@ module Geonames
       return if l =~ /^#|^iso/i
       if @kind == :dump
         if l =~ /^\D/
-          Country.parse(l)
+          return Country.parse(l)
         else
           if Opt[:level] != "all"
             return unless l =~ /ADM\d/ # ADM2 => cities
