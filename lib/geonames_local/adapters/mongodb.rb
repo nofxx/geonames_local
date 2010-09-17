@@ -12,7 +12,10 @@ module Geonames
       if params[:user] || params[:password]
         @db.authenticate(params[:user], params[:password])
       end
-      #purge
+      if params[:purge]
+		info "Purging database.."
+		purge
+	  end
       setup
     end
 
