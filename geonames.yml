@@ -12,3 +12,4 @@
   :dbname: rtrac_development
   :user: postgres
   :password:
+  :purge: false
