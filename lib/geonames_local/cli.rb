@@ -96,8 +96,14 @@ BANNER
       else
         db = load_adapter(Opt[:store])
         info "Using adapter #{Opt[:store]}.."
-        Geonames::Dump.work(Opt[:codes], :zip) #rescue puts "Command not found: #{comm} #{@usage}"
-        Geonames::Dump.work(Opt[:codes], :dump) #rescue puts "Command not found: #{comm} #{@usage}"
+		
+		if Opt[:codes][0] == "country"
+			Geonames::Dump.work(Opt[:codes], :dump)
+		else
+			Geonames::Dump.work(Opt[:codes], :zip) #rescue puts "Command not found: #{comm} #{@usage}"
+			Geonames::Dump.work(Opt[:codes], :dump) #rescue puts "Command not found: #{comm} #{@usage}"
+		end
+		
         info "\n---\nTotal #{Cache[:dump].length} parsed. #{Cache[:zip].length} zips."
         info "Join dump << zip"
         unify!
@@ -108,31 +114,60 @@ BANNER
     def load_adapter(name)
       begin
         require "geonames_local/adapters/#{name}"
+		load_models(name)
         Geonames.class_eval(name.capitalize).new(Opt[:db])
       rescue LoadError
         puts "Can't find adapter #{name}"
         stop!
       end
     end
+	
+	
+    def load_models(adapter)
+      if adapter == "mongodb"
+		begin 
+		  require "geonames_local/mongo/country"
+		  require "geonames_local/mongo/province"
+		  require "geonames_local/mongo/city"
+		rescue LoadError
+		  puts "Can't find models for #{adapter} adapter"
+		  stop!
+		end
+	  end
+    end
 
     def write_to_store!(db)
-      groups = Cache[:dump].group_by(&:kind)
-      Cache[:provinces] = groups[:provinces]
-      # ensure this order....
-      do_write(db, groups[:provinces])
-      do_write(db, groups[:cities])
+	
+		if Opt[:codes][0] == "country"
+			Cache[:countries] = Cache[:dump]
+			do_write(db, Cache[:countries])
+		else
+			groups = Cache[:dump].group_by(&:kind)
+			
+			Cache[:provinces] = groups[:provinces]
+			Cache[:cities] = groups[:cities]
+			
+			do_write(db, Cache[:provinces])
+			do_write(db, Cache[:cities])
+		end
+      
     end
 
     def do_write(db, values)
       return if values.empty?
-      key = values[0].table
+	  
+	  if Opt[:codes][0] == "country"
+		key = table = "countries"
+	  else
+	    key = values[0].table
+	  end
       start = Time.now
       writt = 0
       info "\nWriting #{values.length} #{key}..."
       values.each do |val|
         meth = val.respond_to?(:gid) ? [val.gid] : [val.name, true]
-        unless db.find(val.table, *meth)
-          db.insert(val.table, val)
+        unless db.find(table || val.table, *meth)
+          db.insert(table || val.table, val)
           writt += 1
         end
       end
