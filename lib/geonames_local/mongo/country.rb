@@ -1,6 +1,6 @@
 module Geonames
   class Country
-    attr_accessor :code, :name, :gid, :iso, :capital, :pop
+    attr_accessor :code, :name, :gid, :iso, :capital, :pop, :currency
 
     def self.all
       Tokyo.new.all({ :kind => "country" }).map do |c|
@@ -36,9 +36,9 @@ module Geonames
       parse(params)
     end
 
-    def parse
-      @iso, @iso3, @ison, @fips, @name, @capital, @area, @pop, continent, tld,
-      currency, phone, postal, langs, gid, neighbours = row.split(/\t/)
+    def parse(row)
+      @iso, @iso3, @ison, @fips, @name, @capital, @area, @pop, @continent, @tld,
+      @currency, @currency_name, @phone, @postal_format, @postal_regex, @langs, @gid, @neighbours = row.split(/\t/)
       @code = iso
     end
 
@@ -47,7 +47,12 @@ module Geonames
     end
 
     def to_hash
-      { "gid" => @gid.to_s, "name" => @name, "kind" => "country", "code" => @code}
+      # { "gid" => @gid.to_s, "name" => @name, "kind" => "country", "code" => @code, "currency" => @currency}
+	  { "gid" => @gid.to_s, "iso" => @iso, "iso3" => @iso3, "iso_num" => @ison, "fips" => @fips,
+		"name" => @name, "capital" => @capital, "area" => @area, "population" => @pop,
+		"continent" => @continent, "tld" => @tld, "currency_code" => @currency, "currency_name" => @currency_name,
+		"phone" => @phone, "postal_code_format" => @postal_format, "postal_code_regex" => @postal_regex,
+		"languagues" => @langs, "neighbours" => @neighbours }
     end
 
     def export
