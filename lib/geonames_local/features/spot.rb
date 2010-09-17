@@ -43,14 +43,18 @@ module Geonames
       @kind = human_code(kind)
       @province = adm1
       @code = adm2
+	  
+	  # puts "#{@kind} - #{@code} - #{@province}"
     end
 
     #
     # Parse Geonames Zip Export
     def parse_zip(row)
-      country, zip, @name, province, cc, dunno, adm1, adm2, lat, lon  = row.split(/\t/)
+      # country, zip, @name, province, cc, dunno, adm1, adm2, lat, lon  = row.split(/\t/)
+      # country, zip, @name, state, state_code, procince, province_code, community, community_code, lat, lon, acc  = row.split(/\t/)
+      country, zip, @name, adm1, adm1_code, adm2, adm2_code, adm3, adm3_code, lat, lon, acc  = row.split(/\t/)
       parse_geom(lat, lon)
-      @code = adm1
+      @code = adm1_code
       @kind = :cities
       @zip = zip.split("-")[0]
     end
@@ -80,8 +84,8 @@ module Geonames
 
     def human_code(code)
       case code
-        when 'ADM1' then :province
-        when 'ADM2' then :city
+        when 'ADM1' then :provinces
+        when 'ADM2', 'ADM3', 'ADM4' then :cities
         else :other
       end
     end
