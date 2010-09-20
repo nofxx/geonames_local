@@ -52,7 +52,7 @@ module Geonames
 		"name" => @name, "capital" => @capital, "area" => @area, "population" => @pop,
 		"continent" => @continent, "tld" => @tld, "currency_code" => @currency, "currency_name" => @currency_name,
 		"phone" => @phone, "postal_code_format" => @postal_format, "postal_code_regex" => @postal_regex,
-		"languagues" => @langs, "neighbours" => @neighbours }
+		"languages" => @langs, "neighbours" => @neighbours }
     end
 
     def export
