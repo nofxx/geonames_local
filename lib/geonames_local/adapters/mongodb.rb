@@ -78,7 +78,8 @@ module Geonames
     # getNear command returns distance too
     # <1.9 needs OrderedHash
     def near(resource, x, y, limit=nil)
-      cmd = OrderedHash.new
+      # FIXME: Better explicity require OrderedHash?
+      cmd = Object.const_defined?("OrderedHash") ? OrderedHash.new : { }
       cmd["geoNear"] = resource
       cmd["near"] = sin_proj(x,y)
       cmd["num"] = limit if limit

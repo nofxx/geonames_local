@@ -29,9 +29,9 @@ describe Spot do
     end
 
     it "should parse geostuff" do
-      @spot.lat.should be_close(-5.4687, 0.001)
-      @spot.y.should be_close(-5.4687, 0.001)
-      @spot.lon.should be_close(-35.3565, 0.001)
+      @spot.lat.should be_within(0.001).of(-5.4687)
+      @spot.y.should be_within(0.001).of(-5.4687)
+      @spot.lon.should be_within(0.001).of(-35.3565)
     end
 
     it "should parse spot kind" do
@@ -68,8 +68,8 @@ describe Spot do
     end
 
     it "should parse geostuff" do
-      @spot.lat.should be_close(-9.4333333, 0.001)
-      @spot.lon.should be_close(-37.6666667, 0.001)
+      @spot.lat.should be_within(0.001).of(-9.4333333)
+      @spot.lon.should be_within(0.001).of(-37.6666667)
     end
 
     it "should parse spot kind" do
@@ -123,8 +123,8 @@ describe Spot do
     end
 
     it "should parse geostuff" do
-      @spot.lat.should be_close(-18.0, 0.001)
-      @spot.lon.should be_close(-44.0, 0.001)
+      @spot.lat.should be_within(0.001).of(-18.0)
+      @spot.lon.should be_within(0.001).of(-44.0)
     end
 
   end
@@ -157,8 +157,8 @@ describe Spot do
     end
 
     it "should parse geostuff" do
-      @spot.lat.should be_close(-14.7574, 0.001)
-      @spot.lon.should be_close(-49.3596, 0.001)
+      @spot.lat.should be_within(0.001).of(-14.7574)
+      @spot.lon.should be_within(0.001).of(-49.3596)
     end
 
   end

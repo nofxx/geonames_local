@@ -15,6 +15,4 @@ module Geonames
 
 end
 
-require 'geonames_local/mongo/country'
-require 'geonames_local/mongo/province'
-require 'geonames_local/mongo/city'
+require 'geonames_local/models/mongo'

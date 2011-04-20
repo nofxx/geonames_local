@@ -1,5 +1,8 @@
 module Geonames
-  class Country
+  module Models
+    module Tokyo
+
+class Country
     attr_accessor :code, :name, :gid, :iso, :capital, :pop
 
     def self.all
@@ -57,5 +60,24 @@ module Geonames
     def export_header
       ["gid", "code", "name"]
     end
+
+    end
   end
+      class Province
+    attr_accessor :code, :name, :gid
+
+    def self.all
+      Tokyo.new.all({ :kind => "province" }).map do |c|
+        new(c)
+      end
+    end
+
+    def initialize(params)
+      @code = params["code"]
+      @name = params["name"]
+      @gid = params["gid"]
+    end
+
+  end
+
 end

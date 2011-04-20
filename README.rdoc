@@ -10,10 +10,14 @@ No hit limit, fast as possible.
 To use the adapter, install the corresponding gem:
 
   PostgreSQL   =>   pg
-  MongoDB      =>   mongodb (optional: mongo_ext)
+  MongoDB      =>   mongo (optional: mongo_ext)
   Tokyo        =>   tokyocabinet
 
-Don't forget to install *unzip* and *curl*.
+You will also need in your system:
+
+* unzip
+* curl
+
 
 === PostgreSQL
 
@@ -96,6 +100,7 @@ Default PG migration:
 - Local relational mapping of geonames data
 - Map geonames fields to your db scheme UNDONE
 - Countries are a static yml file :/
+- IP Geonames? http://ipinfodb.com
 
 
 == Note on Patches/Pull Requests

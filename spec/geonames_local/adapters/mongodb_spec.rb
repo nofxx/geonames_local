@@ -37,7 +37,7 @@ describe Mongodb do
     it "should store geom with sinusoidal projection" do
       @mock_spot.should_receive(:to_hash).and_return({"id" => 8, "name" => "Sao Tome", "geom" => [5,8]})
       @mong.insert("cities", @mock_spot)
-      @mong.find("cities", 8)["geom"][0].should be_close(4.95, 0.1)
+      @mong.find("cities", 8)["geom"][0].should be_within(0.01).of(4.95)
       @mong.find("cities", 8)["geom"][1].should eql(8)
     end
 
@@ -59,7 +59,7 @@ describe Mongodb do
 
       it "should find geo" do
         @mong.find_near("cities", -5, -35).first["name"].should eql("Sao Tome")
-        @mong.find_near("cities", -5, -35).first["geom"][0].should be_close(-5.80, 0.1)
+        @mong.find_near("cities", -5, -35).first["geom"][0].should be_within(0.1).of(-5.80)
         @mong.find_near("cities", -5, -35).first["geom"][1].should eql(-34)
       end
 
@@ -85,12 +85,12 @@ describe Mongodb do
       end
 
       it "should find geoNear" do
-        @mong.near("cities", -5, -35).first["dis"].should be_close(1.97, 0.01)
+        @mong.near("cities", -5, -35).first["dis"].should be_within(0.01).of(1.97)
         @mong.near("cities", -5, -35).first["obj"]["name"].should eql("Sao Tome")
       end
 
       it "should find geoNear" do
-        @mong.near("cities", -5, -35).first["dis"].should be_close(1.97, 0.01)
+        @mong.near("cities", -5, -35).first["dis"].should be_within(0.01).of(1.97)
         @mong.near("cities", -5, -35).first["obj"]["name"].should eql("Sao Tome")
       end
 

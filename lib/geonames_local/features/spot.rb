@@ -62,6 +62,8 @@ module Geonames
 
       if defined?("GeoRuby")
         @geom = GeoRuby::SimpleFeatures::Point.from_x_y(@lon, @lat)
+      else
+        { :lat => @lat, :lon => @lon }
       end
     end
 

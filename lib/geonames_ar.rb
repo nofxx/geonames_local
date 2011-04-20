@@ -7,8 +7,6 @@ $:.unshift(File.dirname(__FILE__)) unless
 # Require Libs
 require 'geonames_local/geonames'
 
-require 'geonames_local/model/country'
-require 'geonames_local/model/province'
-require 'geonames_local/model/city'
+require 'geonames_local/models/ar'
 #require 'geonames_local/data/shp'
 

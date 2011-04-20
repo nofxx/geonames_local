@@ -1,33 +1,15 @@
 module Geonames
-  class Country
-    attr_accessor :code, :name, :gid, :iso, :capital, :pop
+  module Models
+    module Mongo
 
-    def self.all
-      Tokyo.new.all({ :kind => "country" }).map do |c|
-        new(c)
+      class City < Geonames::Spot
+        set_coll "cities"
       end
-    end
 
-    # [0] iso alpha2
-    # [1] iso alpha3
-    # [2] iso numeric
-    # [3] fips code
-    # [4] name
-    # [5] capital
-    # [6] areaInSqKm
-    # [7] population
-    # [8] continent
-    # [9] top level domain
-    # [10] Currency code
-    # [11] Currency name
-    # [12] Phone
-    # [13] Postal Code Format
-    # [14] Postal Code Regex
-    # [15] Languages
-    # [16] Geoname id
-    # [17] Neighbours
-    # [18] Equivalent Fips Code
-    #
+      class Country < Geonames::Spot
+        attr_accessor :code, :name, :gid, :iso, :capital, :pop
+        set_coll "countries"
+
     def self.parse(row)
       new(row)
     end
@@ -56,6 +38,25 @@ module Geonames
 
     def export_header
       ["gid", "code", "name"]
+    end
+  end
+
+      class Province
+    attr_accessor :code, :name, :gid
+
+    def self.all
+      Tokyo.new.all({ :kind => "province" }).map do |c|
+        new(c)
+      end
+    end
+
+    def initialize(params)
+      @code = params["code"]
+      @name = params["name"]
+      @gid = params["gid"]
+    end
+
+  end
     end
   end
 end
