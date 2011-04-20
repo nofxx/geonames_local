@@ -1,16 +1,34 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-require 'spec'
-require 'spec/autorun'
+require 'rspec'
+require 'rspec/autorun'
 require 'active_record'
 require 'postgis_adapter'
 require 'geonames_ar'
 
 ActiveRecord::Base.logger = $logger
-ActiveRecord::Base.establish_connection({ :adapter => "postgresql",
+
+begin
+  ActiveRecord::Base.establish_connection({ :adapter => "postgresql",
                                           :database => "geonames_ar",
                                           :username => "postgres",
                                           :password => "" })
+  ActiveRecord::Migration.verbose = false
+  PG_VERSION = ActiveRecord::Base.connection.select_value("SELECT version()").scan(/PostgreSQL ([\d\.]*)/)[0][0]
+
+  puts "Running against PostgreSQL #{PG_VERSION}"
+
+  require File.dirname(__FILE__) + '/db/schema_postgis.rb'
+  require File.dirname(__FILE__) + '/db/models_postgis.rb'
+
+rescue PGError
+  puts "Test DB not found, creating one for you..."
+  `createdb -U postgres geonames_ar -T template_postgis`
+  puts "Done. Please run spec again."
+  exit
+end
+
+
 
 ActiveRecord::Schema.define() do
 
