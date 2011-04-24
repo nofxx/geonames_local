@@ -60,6 +60,11 @@ BANNER
         Opt.merge! YAML.load(File.read(Opt[:config]))
       end
 
+      # Load config/geonames.yml if there's one
+      if File.exists?(cfg = File.join("config", "geonames.yml"))
+        Opt.merge! YAML.load(File.read(cfg))
+      end
+
       if shp = Opt[:shp]
         SHP.import(shp)
         exit
@@ -94,13 +99,12 @@ BANNER
       if argv[0] =~ /csv|json/
         Geonames::Export.new(Country.all).to_csv
       else
-        db = load_adapter(Opt[:store])
         info "Using adapter #{Opt[:store]}.."
         Geonames::Dump.work(Opt[:codes], :zip) #rescue puts "Command not found: #{comm} #{@usage}"
         Geonames::Dump.work(Opt[:codes], :dump) #rescue puts "Command not found: #{comm} #{@usage}"
         info "\n---\nTotal #{Cache[:dump].length} parsed. #{Cache[:zip].length} zips."
         unify!
-        write_to_store!(db)
+        write_to_store!
       end
     end
 
@@ -114,23 +118,25 @@ BANNER
       end
     end
 
-    def write_to_store!(db)
+    def write_to_store!
       groups = Cache[:dump].group_by(&:kind)
-      Cache[:provinces] = groups[:provinces]
+      Cache[:provinces] = groups[:province]
       # ensure this order....
-      do_write(db, groups[:provinces])
-      do_write(db, groups[:cities])
+      do_write(groups[:province])
+      do_write(groups[:city])
     end
 
-    def do_write(db, values)
+    def do_write(values)
+
       return if values.empty?
+      db = load_adapter(Opt[:store])
       key = values[0].table
       start = Time.now
       writt = 0
       info "\nWriting #{values.length} #{key}..."
       values.each do |val|
-        meth = val.respond_to?(:gid) ? [val.gid] : [val.name, true]
-        unless db.find(val.table, *meth)
+        arg = val.respond_to?(:gid) ? [val.gid] : [val.name, true]
+        unless db.find(val.table, *arg)
           db.insert(val.table, val)
           writt += 1
         end

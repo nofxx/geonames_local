@@ -50,7 +50,7 @@ module Geonames
       country, zip, @name, province, cc, dunno, adm1, adm2, lat, lon  = row.split(/\t/)
       parse_geom(lat, lon)
       @code = adm1
-      @kind = :cities
+      @kind = :city
       @zip = zip.split("-")[0]
     end
 

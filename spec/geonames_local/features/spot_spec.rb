@@ -225,7 +225,7 @@ describe Spot do
     end
 
     it "should be a city" do
-      @spot.kind.should eql(:cities)
+      @spot.kind.should eql(:city)
     end
 
     it "should parse code" do
