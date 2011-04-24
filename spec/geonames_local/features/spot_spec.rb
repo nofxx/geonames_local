@@ -6,87 +6,83 @@ describe Spot do
 
   describe "Parsing Dump" do
 
-    before do
-      @spot = Spot.new("6319037\tMaxaranguape\tMaxaranguape\t\t-5.46874226086957\t-35.3565714695652\tA\tADM2\tBR\t22\t2407500\t6593\t\t12\t\t\t\tAmerica/Recife\t2006-12-17", :dump)
-    end
+    let(:spot) { Spot.new("6319037\tMaxaranguape\tMaxaranguape\t\t-5.46874226086957\t-35.3565714695652\tA\tADM2\tBR\t22\t2407500\t6593\t\t12\t\t\t\tAmerica/Recife\t2006-12-17", :dump) }
 
     it "should parse geoid integer" do
-      @spot.geoname_id.should eql(6319037)
-      @spot.gid.should eql(6319037)
+      spot.geoname_id.should eql(6319037)
+      spot.gid.should eql(6319037)
     end
 
     it "should parse code" do
-      @spot.code.should eql("6593")
+      spot.code.should eql("6593")
     end
 
     it "should parse province code" do
-      @spot.province.should eql("2407500")
+      spot.province.should eql("2407500")
     end
 
     it "should parse name" do
-      @spot.name.should eql("Maxaranguape")
-      @spot.ascii.should eql("Maxaranguape")
+      spot.name.should eql("Maxaranguape")
+      spot.ascii.should eql("Maxaranguape")
     end
 
     it "should parse geostuff" do
-      @spot.lat.should be_within(0.001).of(-5.4687)
-      @spot.y.should be_within(0.001).of(-5.4687)
-      @spot.lon.should be_within(0.001).of(-35.3565)
+      spot.lat.should be_within(0.001).of(-5.4687)
+      spot.y.should be_within(0.001).of(-5.4687)
+      spot.lon.should be_within(0.001).of(-35.3565)
     end
 
     it "should parse spot kind" do
-      @spot.kind.should eql(:city)
+      spot.kind.should eql(:city)
     end
 
     it "should parse spot country" do
-      @spot.country.should eql("BR")
+      spot.country.should eql("BR")
     end
 
     it "shuold parse timezone" do
-      @spot.tz.should eql("America/Recife")
+      spot.tz.should eql("America/Recife")
     end
 
     it "should parse updated_at" do
-      @spot.updated_at.should be_instance_of(Time)
-      @spot.updated_at.day.should eql(17)
+      spot.updated_at.should be_instance_of(Time)
+      spot.updated_at.day.should eql(17)
     end
   end
 
-  describe "More Parseing" do
+  describe "More Parsing" do
 
-    before do
-      @spot =  Geonames::Spot.new("3384862\tRiacho Zuza\tRiacho Zuza\t\t-9.4333333\t-37.6666667\tH\tSTMI\tBR\t\t02\t\t\t\t0\t\t241\tAmerica/Maceio\t1993-12-17\n", :dump)
-    end
+    let(:spot) { Geonames::Spot.new("3384862\tRiacho Zuza\tRiacho Zuza\t\t-9.4333333\t-37.6666667\tH\tSTMI\tBR\t\t02\t\t\t\t0\t\t241\tAmerica/Maceio\t1993-12-17\n", :dump) }
 
     it "should parse geoid integer" do
-      @spot.geoname_id.should eql(3384862)
+      spot.geoname_id.should eql(3384862)
     end
 
     it "should parse name" do
-      @spot.name.should eql("Riacho Zuza")
-      @spot.ascii.should eql("Riacho Zuza")
+      spot.name.should eql("Riacho Zuza")
+      spot.ascii.should eql("Riacho Zuza")
     end
 
     it "should parse geostuff" do
-      @spot.lat.should be_within(0.001).of(-9.4333333)
-      @spot.lon.should be_within(0.001).of(-37.6666667)
+      spot.lat.should be_within(0.001).of(-9.4333333)
+      spot.lon.should be_within(0.001).of(-37.6666667)
     end
 
     it "should parse spot kind" do
-      @spot.kind.should eql(:other)
+      spot.kind.should eql(:other)
     end
 
     it "should parse spot country" do
-      @spot.country.should eql("BR")
+      spot.country.should eql("BR")
     end
 
     it "shuold parse timezone" do
-      @spot.tz.should eql("America/Maceio")
+      spot.tz.should eql("America/Maceio")
     end
 
     it "should parse updated_at" do
-      @spot.updated_at.should be_instance_of(Time)
-      @spot.updated_at.day.should eql(17)
+      spot.updated_at.should be_instance_of(Time)
+      spot.updated_at.day.should eql(17)
     end
   end
 
@@ -216,67 +212,66 @@ describe Spot do
 
   describe "Parsing Zip" do
 
-    before do
-      @spot = Geonames::Spot.new("BR\t76375-000\tHidrolina\tGoias\t29\t\t5209804\t\t-14.7574\t-49.3596\t\n", :zip)
-    end
+    let(:spot) { Geonames::Spot.new("BR\t76375-000\tHidrolina\tGoias\t29\t\t5209804\t\t-14.7574\t-49.3596\t\n", :zip) }
 
     it "should parse zip oO" do
-      @spot.zip.should eql("76375")
+      spot.zip.should eql("76375")
     end
 
     it "should be a city" do
-      @spot.kind.should eql(:city)
+      spot.kind.should eql(:city)
     end
 
     it "should parse code" do
-      @spot.code.should eql("5209804")
+      spot.code.should eql("5209804")
     end
 
     it "should parse geoid integer" do
-      @spot.gid.should be_nil # eql(3384862)
+      spot.gid.should be_nil # eql(3384862)
     end
 
     it "should parse name" do
-      @spot.name.should eql("Hidrolina")
-      @spot.ascii.should be_nil # eql("Hidrolina")
+      spot.name.should eql("Hidrolina")
+      spot.ascii.should be_nil # eql("Hidrolina")
     end
 
-    it "should parse geostuff" do
-      @spot.lat.should be_within(0.001).of(-14.7574)
-      @spot.lon.should be_within(0.001).of(-49.3596)
+    it "should parse lat" do
+      spot.lat.should be_within(0.001).of(-14.7574)
+    end
+
+    it "should parse lon" do
+      spot.lon.should be_within(0.001).of(-49.3596)
     end
 
   end
 
   describe "From Hash" do
 
-    before do
-      @spot = Spot.from_hash({"id" => 9, "name" => "Sao Rock", "geom" => [15,15], "kind" => "cities", "country" => "BR", "gid" => 13232, "tz" => "America/Foo", "ascii" => "Rock"})
-    end
+    let(:spot) { Spot.from_hash({"id" => 9, "name" => "Sao Rock", "geom" => [15,15], "kind" => "cities", "country" => "BR", "gid" => 13232, "tz" => "America/Foo", "ascii" => "Rock"}) }
 
     it "should be an spot" do
-      @spot.should be_instance_of Spot
+      spot.should be_instance_of Spot
     end
 
     it "should set the name" do
-      @spot.name.should eql("Sao Rock")
+      spot.name.should eql("Sao Rock")
     end
 
     it "should set the geom" do
-      @spot.geom.should be_instance_of(GeoRuby::SimpleFeatures::Point)
-      @spot.geom.x.should eql(15)
+      spot.geom.should be_instance_of(GeoRuby::SimpleFeatures::Point)
+      spot.geom.x.should eql(15)
     end
 
     it "should set the tz" do
-      @spot.tz.should eql("America/Foo")
+      spot.tz.should eql("America/Foo")
     end
 
     it "should set the ascii" do
-      @spot.ascii.should eql("Rock")
+      spot.ascii.should eql("Rock")
     end
 
     it "should set the country abbr" do
-      @spot.country.should eql("BR")
+      spot.country.should eql("BR")
     end
 
   end

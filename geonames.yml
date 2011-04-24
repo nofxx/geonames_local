@@ -4,6 +4,7 @@
 :store: postgres
 :codes: [br]
 :level: city
+:min_pop: 100000
 :mapping:
   :name: name
   :geom: true

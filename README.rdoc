@@ -1,13 +1,13 @@
 = Geonames Local
 
-Download and store Geonames.org data.
+Download and store (pg, mongo, tokyo) Geonames.org data.
 Making every Geoname API operation possible on your servers.
 No hit limit, fast as possible.
 
 
 == Usage
 
-To use the adapter, install the corresponding gem:
+To use one adapter, install the corresponding gem:
 
   PostgreSQL   =>   pg
   MongoDB      =>   mongo (optional: mongo_ext)
@@ -39,7 +39,7 @@ The file is self explanatory.
 
   geonames -c geonames.yml
 
-Work. Use -v for verbose.
+To run it. Use -v for verbose.
 
 If you are not sure your country code, use:
 
@@ -49,7 +49,14 @@ If you are not sure your country code, use:
 == Relational Mapping
 
 When using PG, this gem will (try) to relational map Geonames
-data on your scheme. Postgresql done, tokyo still need heavy work.
+data on your scheme.
+
+== ActiveRecord
+
+Check out lib/geonames/models/ar.rb
+
+I`m wondering the best way (and if it`s a good idea) to auto include'em on rails.
+For now, just copy as you see fit.
 
 
 == PostgreSQL
@@ -59,6 +66,7 @@ So, supposing ActiveRecord, something like this is possible:
   City.first.province.country.abbr
   => "BR"
 
+
 === Migration
 
 Default PG migration:
@@ -66,7 +74,7 @@ Default PG migration:
     create_table :cities do |t|
       t.references :country, :null => false
       t.references :province
-      t.string  :name, :null => false
+      t.string  :name,   :null => false
       t.point   :geom,   :srid => 4326
       t.integer :gid, :zip
     end
@@ -84,21 +92,23 @@ Default PG migration:
     end
 
     add_index :cities, :name
-    add_index :cities, :gid
     add_index :cities, :zip
     add_index :cities, :country_id
     add_index :cities, :province_id
+    add_index :cities, :gid,  :unique  => true
     add_index :cities, :geom, :spatial => true
     add_index :provinces, :name
     add_index :provinces, :abbr
-    add_index :provinces, :gid
     add_index :provinces, :country_id
+    add_index :provinces, :gid,  :unique => true
+    add_index :countries, :abbr, :unique => true
+    add_index :countries, :name, :unique => true
 
 
-== Features/Problems
+== TODO/Problems
 
 - Local relational mapping of geonames data
-- Map geonames fields to your db scheme UNDONE
+- Map geonames fields to your db scheme
 - Countries are a static yml file :/
 - IP Geonames? http://ipinfodb.com
 
