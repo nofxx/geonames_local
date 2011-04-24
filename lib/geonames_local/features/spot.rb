@@ -35,9 +35,8 @@ module Geonames
     # Parse Geonames Dump Export
     def parse(row)
       gid, @name, @ascii, @alternates, lat, lon, feat, kind,
-        @country, cc2, adm1, adm2, adm3, adm4, pop, ele,
-        gtop, @tz, @up = row.split(/\t/)
-
+        @country, cc2, adm1, adm2, adm3, adm4, @pop, @ele,
+        @gtop, @tz, @up = row.split(/\t/)
       parse_geom(lat, lon)
       @gid = @geoname_id = gid.to_i
       @kind = human_code(kind)
@@ -65,6 +64,10 @@ module Geonames
       else
         { :lat => @lat, :lon => @lon }
       end
+    end
+
+    def alt
+      @ele || @gtop
     end
 
     #

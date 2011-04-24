@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 $VERBOSE = true # -w
-$KCODE = "u" # -Ku
+# $KCODE = "u" # -Ku
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 require "geonames_cli"

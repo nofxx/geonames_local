@@ -1,7 +1,7 @@
 #
 # Geonames Local Config Example
 #
-:store: mongodb
+:store: postgres
 :codes: [br]
 :level: city
 :mapping:
@@ -9,6 +9,6 @@
   :geom: true
 :db:
   :host: localhost
-  :dbname: rtrac_development
+  :dbname: geonames_ar
   :user: postgres
   :password:

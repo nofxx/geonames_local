@@ -3,6 +3,10 @@ module Geonames
     URL = "http://download.geonames.org/export/"
     TMP = "/tmp/geonames/"
 
+    def self.work(codes=:all, kind=:dump)
+      new(codes, kind)
+    end
+
     def initialize(codes, kind)
       @codes = codes
       @kind = kind
@@ -66,10 +70,6 @@ module Geonames
       info "Failed to download #{file}, skipping."
     end
 
-
-    def self.work(codes=:all, kind=:dump)
-      new(codes, kind)
-    end
 
   end
 

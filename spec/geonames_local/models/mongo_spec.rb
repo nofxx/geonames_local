@@ -2,7 +2,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/../../spec_mongo_helper')
 require "geo_ruby"
 
-describe City do
+describe "City" do
 
   before(:all) do
     Adapter.insert("cities", {"id" => 9, "name" => "Sao Paulo", "geom" => [15,15]})
@@ -14,26 +14,26 @@ describe City do
   end
 
   it "should set a collection name" do
-    City.collection.should eql("cities")
+    Models::Mongo::City.collection.should eql("cities")
   end
 
   it "should find all cities" do
-    City.all.should_not be_empty
+    Models::Mongo::City.all.should_not be_empty
   end
 
   it "should be a city instance" do
-    City.nearest(1,1).should be_instance_of(City)
+    Models::Mongo::City.nearest(1,1).should be_instance_of(Models::Mongo::City)
   end
 
   it "should find city nearest point" do
-    City.nearest(1,1).name.should eql("Rock City")
+    Models::Mongo::City.nearest(1,1).name.should eql("Rock City")
   end
 
   it "should find by name" do
-    City.find_by_name("Rock")[0].name.should eql("Rock City")
+    Models::Mongo::City.find_by_name("Rock")[0].name.should eql("Rock City")
   end
 
   it "should find by name" do
-    City.find_by_name("rock")[0].name.should eql("Rock City")
+    Models::Mongo::City.find_by_name("rock")[0].name.should eql("Rock City")
   end
 end

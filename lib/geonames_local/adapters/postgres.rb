@@ -5,7 +5,7 @@ module Geonames
     Countries = {}
     Provinces = {}
 
-    def initialize(opts) #table, addr = "localhost", port = 5432)
+    def initialize(opts={}) #table, addr = "localhost", port = 5432)
       @conn = PGconn.new(opts)
     end
 
@@ -16,16 +16,16 @@ module Geonames
           @conn.exec("SELECT countries.id FROM countries WHERE UPPER(countries.abbr) = UPPER('#{some.country}')")[0]["id"] rescue nil
       c ||= write("countries", {:name => Codes[some.country.downcase.to_sym][:pt_br], :abbr => some.country })
 
-      p = nil
+      pr = nil
       ci = nil
       if some.kind_of? Spot
-        p = Provinces[some.province] ||= find("provinces", Cache[:provinces].
+        pr = Provinces[some.province] ||= find("provinces", Cache[:provinces].
                                        find{ |p| p.province == some.province}.gid)
       else
         ci = find("cities", some.city)
-        p = @conn.exec("SELECT cities.province_id FROM cities WHERE cities.id = #{ci}")[0]["province_id"] rescue nil
+        pr = @conn.exec("SELECT cities.province_id FROM cities WHERE cities.id = #{ci}")[0]["province_id"] rescue nil
       end
-      [c, p, ci]
+      [c, pr, ci]
     end
 
     #

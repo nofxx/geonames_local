@@ -92,40 +92,125 @@ describe Spot do
 
   describe "Parsing Province" do
 
-    before do
-      @spot =  Geonames::Spot.new("3457153\tEstado de Minas Gerais\tEstado de Minas Gerais\tMinas,Minas Geraes,Minas Gerais\t-18.0\t-44.0\tA\tADM1\tBR\tBR\t15\t\t\t\t16672613\t\t1219\tAmerica/Sao_Paulo\t2007-05-15\n", :dump)
-    end
+    let(:spot) { Geonames::Spot.new("3457153\tEstado de Minas Gerais\tEstado de Minas Gerais\tMinas,Minas Geraes,Minas Gerais\t-18.0\t-44.0\tA\tADM1\tBR\tBR\t15\t\t\t\t16672613\t\t1219\tAmerica/Sao_Paulo\t2007-05-15\n", :dump) }
 
     it "should be kind of province" do
-      @spot.kind.should eql(:province)
+      spot.kind.should eql(:province)
     end
 
     it "should parse geoid" do
-      @spot.geoname_id.should eql(3457153)
-      @spot.gid.should eql(3457153)
+    spot.geoname_id.should eql(3457153)
+      spot.gid.should eql(3457153)
     end
 
     it "should parse code" do
-      @spot.code.should be_empty
+      spot.code.should be_empty
     end
 
     it "should parse province code" do
-      @spot.province.should eql("15")
+      spot.province.should eql("15")
     end
 
     it "should create abbr" do
-      @spot.abbr.should eql("MG")
+      spot.abbr.should eql("MG")
     end
 
     it "should parse name" do
-      @spot.name.should eql("Minas Gerais")
-      @spot.ascii.should eql("Estado de Minas Gerais")
+      spot.name.should eql("Minas Gerais")
+      spot.ascii.should eql("Estado de Minas Gerais")
     end
 
     it "should parse geostuff" do
-      @spot.lat.should be_within(0.001).of(-18.0)
-      @spot.lon.should be_within(0.001).of(-44.0)
+      spot.lat.should be_within(0.001).of(-18.0)
+      spot.lon.should be_within(0.001).of(-44.0)
     end
+
+  end
+
+  describe "Parsing City" do
+
+    let(:spot) {  Spot.new "3386859\tTamboril\tTamboril\t\t-4.9931\t-40.26738\tA\tADM2\tBR\t\t06\t2313203\t\t\t25455\t\t401\tAmerica/Fortaleza\t2011-04-21" }
+
+    it "should parse name" do
+      spot.name.should eql("Tamboril")
+    end
+
+    it "should parse ascii name" do
+      spot.name.should eql("Tamboril")
+    end
+
+    it "should parse x" do
+      spot.x.should be_within(0.001).of(-40.26738)
+    end
+
+    it "should parse y" do
+      spot.y.should be_within(0.001).of(-4.9931)
+    end
+
+    it "should parse tz" do
+      spot.tz.should eql("America/Fortaleza")
+    end
+
+    it "should parse kind" do
+      spot.kind.should eql(:city)
+    end
+
+    it "should parse country" do
+      spot.country.should eql("BR")
+    end
+
+    it "should parse province" do
+      pending
+      spot.province.should eql("C")
+    end
+
+    it "should parse pop" do
+      spot.pop.should eql("25455")
+    end
+
+  end
+
+  describe "Parsing Big City" do
+
+    let(:spot) {  Spot.new "6322846\tLondrina\tLondrina\t\t-23.58643\t-51.08739\tA\tADM2\tBR\t\t18\t4113700\t\t\t506645\t\t544\tAmerica/Sao_Paulo\t2011-04-21" }
+
+    it "should parse name" do
+      spot.name.should eql("Londrina")
+    end
+
+    it "should parse ascii name" do
+      spot.name.should eql("Londrina")
+    end
+
+    it "should parse x" do
+      spot.x.should be_within(0.001).of(-51.08739)
+    end
+
+    it "should parse y" do
+      spot.y.should be_within(0.001).of(-23.58643)
+    end
+
+    it "should parse tz" do
+      spot.tz.should eql("America/Sao_Paulo")
+    end
+
+    it "should parse kind" do
+      spot.kind.should eql(:city)
+    end
+
+    it "should parse country" do
+      spot.country.should eql("BR")
+    end
+
+    it "should parse province" do
+      pending
+      spot.province.should eql("C")
+    end
+
+    it "should parse pop" do
+      spot.pop.should eql("506645")
+    end
+
 
   end
 

@@ -4,15 +4,20 @@ require 'rspec'
 require 'rspec/autorun'
 require 'active_record'
 require 'postgis_adapter'
+require 'database_cleaner'
+Opt[:db] = { :adapter => "postgresql",
+                                          :database => "geonames_ar",
+                                          :username => "postgres",
+                                          :password => "" }
 require 'geonames_ar'
+include Geonames::Models
+
+ # DatabaseCleaner.strategy = :truncation
 
 ActiveRecord::Base.logger = $logger
 
 begin
-  ActiveRecord::Base.establish_connection({ :adapter => "postgresql",
-                                          :database => "geonames_ar",
-                                          :username => "postgres",
-                                          :password => "" })
+  ActiveRecord::Base.establish_connection(Opt[:db])
   ActiveRecord::Migration.verbose = false
   PG_VERSION = ActiveRecord::Base.connection.select_value("SELECT version()").scan(/PostgreSQL ([\d\.]*)/)[0][0]
 
@@ -47,7 +52,7 @@ ActiveRecord::Schema.define() do
   create_table :provinces, :force => true do |t|
     t.references :country, :null => false
     t.string :name, :null => false
-    t.string :abbr, :limit => 2, :null => false
+    t.string :abbr, :limit => 3
     t.integer :gid
   end
 
@@ -68,5 +73,24 @@ ActiveRecord::Schema.define() do
   add_index :provinces, :country_id
   add_index :countries, :abbr, :unique => true
   add_index :countries, :name, :unique => true
+
+end
+
+RSpec.configure do |c|
+
+  c.before(:suite) do
+    DatabaseCleaner.strategy = :transaction
+    DatabaseCleaner.clean_with(:truncation,
+    {:except => %w[geography_columns schema_migrations spatial_ref_sys geometry_columns]})
+  end
+
+  c.before(:each) do
+    DatabaseCleaner.start
+  end
+
+  c.after(:each) do
+    DatabaseCleaner.clean
+  end
+
 
 end

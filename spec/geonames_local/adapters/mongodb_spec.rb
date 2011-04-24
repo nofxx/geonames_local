@@ -1,20 +1,21 @@
 require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 require File.expand_path(File.dirname(__FILE__) + '/../../../lib/geonames_local/adapters/mongodb')
 
-describe Mongodb do
+describe "Mongo Models" do
 
   SPECDB = "geonames_spec"
 
-  before(:all) do
+  before() do
     Mongodb.new({:dbname => SPECDB}).purge
     @mong = Mongodb.new({:dbname => SPECDB})
+
   end
 
   def mock_spot(name)
     Spot.new("1\t#{name}\t#{name}\t\t-5.46874226086957\t-35.3565714695652\tA\tADM2\tBR\t22\t2407500\t6593\t\t12\t\t\t\tAmerica/Recife\t2006-12-17", :dump)
   end
 
-  describe "Parsing Dump" do
+  describe "Parsing dump" do
     before do
       @mock_spot = mock("Spot")
     end
@@ -47,7 +48,7 @@ describe Mongodb do
 
     describe "Finds" do
 
-      before(:all) do
+      before() do
         @mong.insert("cities", {"id" => 9, "name" => "Sao Paulo", "geom" => [15,15]})
         @mong.insert("cities", {"id" => 10, "name" => "Sao Tome", "geom" => [-7,-34]})
         @mong.insert("cities", {"id" => 11, "name" => "Sao Benedito", "geom" => [-9,-39]})
@@ -59,7 +60,7 @@ describe Mongodb do
 
       it "should find geo" do
         @mong.find_near("cities", -5, -35).first["name"].should eql("Sao Tome")
-        @mong.find_near("cities", -5, -35).first["geom"][0].should be_within(0.1).of(-5.80)
+        @mong.find_near("cities", -5, -35).first["geom"][0].should be_within(0.1).of(-5.80,)
         @mong.find_near("cities", -5, -35).first["geom"][1].should eql(-34)
       end
 
@@ -72,8 +73,12 @@ describe Mongodb do
         @mong.find_within("cities", [[10, 10],[20, 20]]).first["name"].should eql("Sao Paulo")
       end
 
+      it "should find within tiny radius" do
+        @mong.find_within("cities", [[-6, -36], 2]).length.should eql(0)
+      end
+
       it "should find within radius" do
-        @mong.find_within("cities", [[-6, -36], 2]).length.should eql(1)
+        @mong.find_within("cities", [[-6, -36], 3]).length.should eql(1)
       end
 
       it "should find within wider radius" do

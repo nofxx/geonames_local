@@ -99,7 +99,6 @@ BANNER
         Geonames::Dump.work(Opt[:codes], :zip) #rescue puts "Command not found: #{comm} #{@usage}"
         Geonames::Dump.work(Opt[:codes], :dump) #rescue puts "Command not found: #{comm} #{@usage}"
         info "\n---\nTotal #{Cache[:dump].length} parsed. #{Cache[:zip].length} zips."
-        info "Join dump << zip"
         unify!
         write_to_store!(db)
       end
@@ -141,6 +140,7 @@ BANNER
     end
 
     def unify!
+      info "Join dump << zip"
       start = Time.now
       Cache[:dump].map! do |spot|
         if other = Cache[:zip].find { |d| d.code == spot.code }
