@@ -70,6 +70,9 @@ BANNER
         exit
       end
 
+      #
+      # Return Codes and Exit
+      #
       if argv[0] =~ /list|codes/
          Codes.each do |key,val|
           str = [val.values, key.to_s].join(" ").downcase
@@ -94,19 +97,31 @@ BANNER
         end
         exit
       end
+
+      #
+      # Require georuby optionally
+      #
       require "geo_ruby" if Opt[:mapping] && Opt[:mapping][:geom]
 
+      #
+      # Export Data as CSV or JSON
+      #
       if argv[0] =~ /csv|json/
         Geonames::Export.new(Country.all).to_csv
+
+      #
+      # Do the magic! Import Geonames Data
+      #
       else
+        db = load_adapter(Opt[:store])
         info "Using adapter #{Opt[:store]}.."
 
-    if Opt[:codes][0] == "country"
-      Geonames::Dump.work(Opt[:codes], :dump)
-    else
-      Geonames::Dump.work(Opt[:codes], :zip) #rescue puts "Command not found: #{comm} #{@usage}"
-      Geonames::Dump.work(Opt[:codes], :dump) #rescue puts "Command not found: #{comm} #{@usage}"
-    end
+        if Opt[:codes][0] == "country"
+          Geonames::Dump.work(Opt[:codes], :dump)
+        else
+          Geonames::Dump.work(Opt[:codes], :zip)
+          Geonames::Dump.work(Opt[:codes], :dump)
+        end
 
         info "\n---\nTotal #{Cache[:dump].length} parsed. #{Cache[:zip].length} zips."
         # Sync.work!
@@ -119,7 +134,7 @@ BANNER
     def load_adapter(name)
       begin
         require "geonames_local/adapters/#{name}"
-    load_models(name)
+        require "geonames_local/models/#{name}"
         Geonames.class_eval(name.capitalize).new(Opt[:db])
       rescue LoadError
         puts "Can't find adapter #{name}"
@@ -127,45 +142,29 @@ BANNER
       end
     end
 
-
-    def load_models(adapter)
-      if adapter == "mongodb"
-    begin
-      require "geonames_local/mongo/country"
-      require "geonames_local/mongo/province"
-      require "geonames_local/mongo/city"
-    rescue LoadError
-      puts "Can't find models for #{adapter} adapter"
-      stop!
-    end
-    end
-    end
-
     def write_to_store!(db)
+      if Opt[:codes][0] == "country"
+        Cache[:countries] = Cache[:dump]
+        do_write(db, Cache[:countries])
+      else
+        groups = Cache[:dump].group_by(&:kind)
 
-    if Opt[:codes][0] == "country"
-      Cache[:countries] = Cache[:dump]
-      do_write(db, Cache[:countries])
-    else
-      groups = Cache[:dump].group_by(&:kind)
+        Cache[:provinces] = groups[:provinces]
+        Cache[:cities] = groups[:cities]
 
-      Cache[:provinces] = groups[:provinces]
-      Cache[:cities] = groups[:cities]
-
-      do_write(db, Cache[:provinces])
-      do_write(db, Cache[:cities])
-    end
-
+        do_write(db, Cache[:provinces])
+        do_write(db, Cache[:cities])
+      end
     end
 
     def do_write(db, values)
       return if values.empty?
 
-    if Opt[:codes][0] == "country"
-    key = table = "countries"
-    else
-      key = values[0].table
-    end
+      if Opt[:codes][0] == "country"
+        key = table = "countries"
+      else
+        key = values[0].table
+      end
       start = Time.now
       writt = 0
       info "\nWriting #{values.length} #{key}..."
