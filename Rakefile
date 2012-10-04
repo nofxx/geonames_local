@@ -1,67 +1,22 @@
-require 'rubygems'
-require 'rake'
+#!/usr/bin/env rake
+require "bundler/gem_tasks"
 
-begin
-  require 'jeweler'
-  Jeweler::Tasks.new do |gem|
-    gem.name = "geonames_local"
-    gem.summary = "Dump and feed a tokyo local geonames db"
-    gem.description = "Dump and feed a tokyo cabinet for local geonames search"
-    gem.email = "x@nofxx.com"
-    gem.homepage = "http://github.com/nofxx/geonames_local"
-    gem.authors = ["Marcos Piccinini"]
+require 'rspec/core'
+require 'rspec/core/rake_task'
 
-    gem.add_dependency "nofxx-georuby",     ">= 1.7.1"
-    gem.add_development_dependency "rspec", ">= 1.2.9"
-
-    gem.post_install_message = <<-POST_INSTALL_MESSAGE
-
-Geonames Local
---------------
-
-To use the adapter, install the corresponding gem:
-
-  PostgreSQL   =>   pg
-  MongoDB      =>   mongodb (optional: mongo_ext)
-  Tokyo        =>   tokyocabinet
-
-PostgreSQL
-----------
-
-Be sure to use a database based on the PostGIS template.
-
-MongoDB
--------
-
-MongoDB 2D support is new, only mongo >= 1.3.3 mongodb gem >= 0.19.2
-http://github.com/mongodb/mongo-ruby-driver
-
-Have fun because:
-POST_INSTALL_MESSAGE
-  end
-  Jeweler::GemcutterTasks.new
-rescue LoadError
-  puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
+RSpec::Core::RakeTask.new(:spec) do |spec|
+  spec.pattern = FileList['spec/**/*_spec.rb']
 end
 
-require 'rspec/core/rake_task'
-desc "Runs spec suite"
-RSpec::Core::RakeTask.new(:spec) do |spec|
-  spec.pattern = 'spec/*_spec.rb'
-  spec.rspec_opts = ['--backtrace --colour']
+RSpec::Core::RakeTask.new(:rcov) do |spec|
+  spec.pattern = 'spec/**/*_spec.rb'
+  spec.rcov = true
 end
 
 task :default => :spec
 
-require 'rake/rdoctask'
-Rake::RDocTask.new do |rdoc|
-  version = File.exist?('VERSION') ? File.read('VERSION') : ""
+require 'yard'
 
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "geonames_local #{version}"
-  rdoc.rdoc_files.include('README*')
-  rdoc.rdoc_files.include('lib/**/*.rb')
-end
 
 #
 # Tokyo Tyrant rake tasks
@@ -117,4 +72,3 @@ def tyrant_running?
   end
   tyrant_pid
 end
-

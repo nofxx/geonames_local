@@ -10,6 +10,7 @@ module Geonames
 
         validates_presence_of :country
         validates_presence_of :name
+        # validates_uniqueness_of :name, :scope => :province_id
 
         def abbr
           province.try(:abbr) || country.abbr
@@ -29,19 +30,26 @@ module Geonames
             self.geom = Point.from_x_y(@x.to_f, @y.to_f)
           end
         end
-
       end
 
       class Province < ActiveRecord::Base
         has_many :cities
         belongs_to :country
+
+        validates_uniqueness_of :name, :abbr,  :scope => :country_id
       end
 
       class Country < ActiveRecord::Base
-        attr_accessor :code, :gid, :iso, :capital, :pop
         has_many :provinces
         has_many :cities
+        validates_presence_of :name, :abbr
+        validates_uniqueness_of :name, :abbr
       end
+
+      class Spot < ActiveRecord::Base
+        validates_presence_of :name
+      end
+
 
     end
   end
