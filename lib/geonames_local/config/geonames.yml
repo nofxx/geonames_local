@@ -1,15 +1,15 @@
 #
 # Geonames Local Config Example
 #
-# Stores: postgres, mongodb, tokyo, redis
-:store: postgres
-:codes: [br, it]
+:store: mongodb
+:codes: [br] # to store all countries informations in the countries table, just write [country]
 :level: city
 :mapping:
   :name: name
   :geom: true
 :db:
   :host: localhost
-  :dbname: dbname
+  :dbname: rtrac_development
   :user: postgres
   :password:
+  :purge: false

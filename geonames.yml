@@ -1,8 +1,8 @@
 #
 # Geonames Local Config Example
 #
-:store: postgres
-:codes: [br]
+:store: mongodb # postgres / tokyo
+:codes: [br] # to store all countries informations in the countries table, just write [country]
 :level: city
 :min_pop: 100000
 :mapping:
@@ -13,3 +13,4 @@
   :dbname: geonames_ar
   :user: postgres
   :password:
+  :purge: false
