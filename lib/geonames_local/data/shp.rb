@@ -63,7 +63,7 @@ module Geonames
     end
 
     def write
-      db = Postgres.new(Opt[:db])
+      db = Postgis.new(Opt[:db])
       Geonames::CLI.do_write(db, Cache[:zones])
       Geonames::CLI.do_write(db, reduce!)
     end

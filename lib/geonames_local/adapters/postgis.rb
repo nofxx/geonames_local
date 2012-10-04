@@ -1,7 +1,7 @@
 require "pg"
 
 module Geonames
-  class Postgres
+  class Postgis
     Countries = {}
     Provinces = {}
 

@@ -6,13 +6,3 @@ $:.unshift(File.dirname(__FILE__)) unless
 
 # Require Libs
 require 'geonames_local/geonames'
-
-require 'geonames_local/adapters/mongodb'
-
-module Geonames
-
-  Adapter = Geonames::Mongodb.new
-
-end
-
-require 'geonames_local/models/mongo'
