@@ -1,4 +1,4 @@
-require 'iconv'
+# require 'iconv'
 #---
 # Iconv cool tip from http://po-ru.com/diary/fixing-invalid-utf-8-in-ruby-revisited/
 
@@ -9,7 +9,7 @@ module Geonames
       @file = file
       @fname = file.split("/")[-1] rescue nil
       @type = Object.module_eval("::#{Opt[:type].capitalize}", __FILE__, __LINE__)
-      @ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
+      # @ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
       @sample = nil
       if file
         shp2pg; parse; write
@@ -23,7 +23,7 @@ module Geonames
 
     def parse_line(l)
       return if l =~ /^SET\s|^BEGIN;|^COPY\s|^END;|^\\/
-      utf = @ic.iconv(l)
+      utf = l.encode('UTF-8')
       unless @sample
         info "Free sample\n" + utf.inspect
         @sample = true
@@ -73,4 +73,3 @@ module Geonames
     end
   end
 end
-
