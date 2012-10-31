@@ -126,71 +126,39 @@ BANNER
         info "Using adapter #{Opt[:store]}.."
 
         if argv[0] =~ /coun|nati/
-          Geonames::Dump.work(Opt[:codes], :dump)
-          data = :countries
+          dump = Geonames::Dump.new(:country, :dump)
+          info "\n---\nTotal #{dump.data.length} parsed."
+          info "Writing to DB"
+          # Cache[:countries] = Cache[:dump]
+          Geonames::Models::Country.from_batch(dump.data)
         else
-          Geonames::Dump.work(Opt[:codes], :zip)
-          Geonames::Dump.work(Opt[:codes], :dump)
-          data = :cities
-        end
+          zip = Geonames::Dump.new(Opt[:codes], :zip).data
+          dump = Geonames::Dump.new(Opt[:codes], :dump).data
+          info "Join dump << zip"
+          unify! dump, zip
+          info "\n---\nTotal #{dump.data.length} parsed. #{dump.data[:zip].length} zips."
+          groups = Cache[:dump].group_by(&:kind)
 
-        info "\n---\nTotal #{Cache[:dump].length} parsed. #{Cache[:zip].length} zips."
-        # Sync.work!
-        info "Join dump << zip"
-        unify!
-        info "Writing to DB"
-        write_to_store! data
+          Geonames::Models::Province.from_batch groups[:provinces]
+          City.from_batch groups[:city]
+
+        end
       end
     end
 
     def load_adapter(name)
       begin
-        require "geonames_local/adapters/#{name}"
         require "geonames_local/models/#{name}"
       rescue LoadError
-        puts "Can't find adapter #{name}"
+        puts "Can't find adapter for #{name}"
         stop!
       end
     end
 
-    def write_to_store! data
-      if data == :countries
-        Cache[:countries] = Cache[:dump]
-        Country.from_batch(Cache[:dump])
-      else
-        groups = Cache[:dump].group_by(&:kind)
-
-        Province.from_batch groups[:provinces]
-        City.from_batch groups[:city]
-      end
-    end
-
-    def do_write(db, values)
-      return if values.empty?
-
-      if Opt[:codes][0] == "country"
-        key = table = "countries"
-      else
-        key = values[0].table
-      end
+    def unify! dump, zip
       start = Time.now
-      writt = 0
-      info "\nWriting #{values.length} #{key}..."
-      values.each do |val|
-        meth = val.respond_to?(:gid) ? [val.gid] : [val.name, true]
-        unless db.find(table || val.table, *meth)
-          db.insert(table || val.table, val)
-          writt += 1
-        end
-      end
-      total = Time.now - start
-      info "#{writt} #{key} written in #{total} sec (#{(writt/total).to_i}/s)"
-    end
-
-    def unify!
-      start = Time.now
-      Cache[:dump].map! do |spot|
-        if other = Cache[:zip].find { |d| d.code == spot.code }
+      dump.map! do |spot|
+        if other = zip.find { |d| d.code == spot.code }
           spot.zip = other.zip
           spot
         else

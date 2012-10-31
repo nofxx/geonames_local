@@ -3,23 +3,37 @@ module Geonames
     URL = "http://download.geonames.org/export/"
     TMP = "/tmp/geonames/"
 
-    def self.work(codes=:all, kind=:dump)
-      new(codes, kind)
-    end
-
     def initialize(codes, kind)
       @codes = codes
       @kind = kind
+      @data = []
       if codes.respond_to? :each
         for code in codes
-          info "\nWorking on #{kind} for #{code}"
-          file = get_file(code)
-          download file
-          uncompress file unless code == "country"
-          parse file
+          work code
         end
+      elsif codes == :country
+        countries
       end
+    end
 
+    def countries
+      info "\nDumping country database"
+      file = get_file('country')
+      download file
+      parse file
+    end
+
+    def work code
+      info "\nWorking on #{@kind} for #{code}"
+      file = get_file(code)
+      download file
+      uncompress file
+      parse file
+      new(codes, kind)
+    end
+
+    def data
+      @data
     end
 
     def get_file(code)
@@ -43,7 +57,7 @@ module Geonames
       return if l =~ /^#|^iso/i
       if @kind == :dump
         if l =~ /^\D/
-          return Country.parse(l)
+          return l
         else
           if Opt[:level] != "all"
             return unless l =~ /ADM\d/ # ADM2 => cities
@@ -59,7 +73,7 @@ module Geonames
       File.open("/tmp/geonames/#{@kind}/#{file.gsub("zip", "txt")}") do |f|
         while line = f.gets
           if record = parse_line(line)
-            Cache[@kind] << record
+            @data << record
             red += 1
           end
         end
