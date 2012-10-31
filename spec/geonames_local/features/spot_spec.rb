@@ -156,8 +156,7 @@ describe Spot do
     end
 
     it "should parse province" do
-      pending
-      spot.province.should eql("C")
+      spot.province.should eql("06")
     end
 
     it "should parse pop" do
@@ -200,7 +199,7 @@ describe Spot do
 
     it "should parse province" do
       pending
-      spot.province.should eql("C")
+      spot.province.should eql("18")
     end
 
     it "should parse pop" do
@@ -212,7 +211,7 @@ describe Spot do
 
   describe "Parsing Zip" do
 
-    let(:spot) { Geonames::Spot.new("BR\t76375-000\tHidrolina\tGoias\t29\t\t5209804\t\t-14.7574\t-49.3596\t\n", :zip) }
+    let(:spot) { Geonames::Spot.new("BR\t76375-000\tHidrolina\tGoias\t29\t\t5209804\t\t\t-14.7574\t-49.3596\t\n", :zip) }
 
     it "should parse zip oO" do
       spot.zip.should eql("76375")
@@ -223,7 +222,7 @@ describe Spot do
     end
 
     it "should parse code" do
-      spot.code.should eql("5209804")
+      spot.code.should eql("29")
     end
 
     it "should parse geoid integer" do
@@ -247,7 +246,7 @@ describe Spot do
 
   describe "From Hash" do
 
-    let(:spot) { Spot.from_hash({"id" => 9, "name" => "Sao Rock", "geom" => [15,15], "kind" => "cities", "country" => "BR", "gid" => 13232, "tz" => "America/Foo", "ascii" => "Rock"}) }
+    let(:spot) { Spot.from_hash({"id" => 9, "name" => "Sao Rock", "geom" => [15,15], "kind" => "city", "country" => "BR", "gid" => 13232, "tz" => "America/Foo", "ascii" => "Rock"}) }
 
     it "should be an spot" do
       spot.should be_instance_of Spot
@@ -302,4 +301,3 @@ end
 # "3165361\tToscana\tToscana\tTaskana,Toscan-a,Toscana,Toscane,Toscann-a,Toskana,Toskania,Toskanio,Toskansko,Toskánsko,Toskāna,Toszkana,Toszkána,Tuscany,Tuschena,Tuschèna,Tuscia,toseukana ju,tosukana zhou,tuo si ka na,twsqnh,Таскана,Тоскана,טוסקנה,تسکانہ,ტოსკანა,トスカーナ州,托斯卡纳,토스카나 주\t43.4166667\t11.0\tA\tADM1\tIT\t\t16\t\t\t\t3718210\t\t249\tEurope/Rome\t2010-01-17\n"
 # "3169778\tRegione Puglia\tRegione Puglia\tApulia,Apulie,Apulien,Apulië,Pouilles,Puglia\t41.25\t16.25\tA\tADM1\tIT\t\t13\t\t\t\t4021957\t\t95\tEurope/Rome\t2009-03-11\n"
 # "3170831\tRegione Piemonte\tRegione Piemonte\tPedemons,Pedemontium,Piamonte,Piedmont,Piemont,Piemonte,Piémont,Piëmont,Regione Piemonte\t45.0\t8.0\tA\tADM1\tIT\t\t12\t\t\t\t4294081\t\t185\tEurope/Rome\t2008-08-18\n"
-

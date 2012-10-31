@@ -1,10 +1,5 @@
-require 'rubygems'
 require 'logger'
 require 'yaml'
-
-require 'geonames_local/features/spot'
-require 'geonames_local/features/road'
-require 'geonames_local/features/zone'
 
 module Geonames
   Opt = {}

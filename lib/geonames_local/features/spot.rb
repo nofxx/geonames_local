@@ -11,16 +11,16 @@ module Geonames
     # = Geonames Spot
     #
     # Every geoname type will be parsed as a spot
-    def initialize(params=nil, k=nil)
+    def initialize(params = nil, kind = nil)
       return unless params.instance_of? String
-      k == :zip ? parse_zip(params) :  parse(params)
+      kind == :zip ? parse_zip(params) : parse(params)
       if @kind == :province
         @name.gsub!(/Estado d\w\s/, "")
         @abbr = get_abbr
       end
     end
 
-    # Geonames donest have province/state abbr..#fail!
+    # Geonames does not have province/state abbr..#fail!
     # This works 75% of the time in brazil heh
     def get_abbr
       s = @name.split(" ")
@@ -49,14 +49,11 @@ module Geonames
     #
     # Parse Geonames Zip Export
     def parse_zip(row)
-      # country, zip, @name, province, cc, dunno, adm1, adm2, lat, lon  = row.split(/\t/)
       # country, zip, @name, state, state_code, procince, province_code, community, community_code, lat, lon, acc  = row.split(/\t/)
-      country, zip, @name, adm1, adm1_code, adm2, adm2_code, adm3, adm3_code, lat, lon, acc  = row.split(/\t/)
+      country, zip, @name, a1, @code, a2, a2c, a3, a3c, lat, lon, acc = row.split(/\t/)
       parse_geom(lat, lon)
       # @code = adm1
-      # @kind = :city
-      @code = adm1_code
-      @kind = :cities
+      @kind = :city
       @zip = zip.split("-")[0]
     end
 
@@ -82,38 +79,16 @@ module Geonames
       Time.utc(*@up.split("-"))
     end
 
-    # For tokyo
-    def to_hash
-      { "id" => @geoname_id, "gid" => @geoname_id.to_s, "kind" => @kind.to_s,
-        "name" => @name, "ascii" => @ascii, "country" => @country,
-        "geom" => [@geom.x, @geom.y], "tz" => @tz }
-    end
-
+    # Translate geonames ADMx to models
     def human_code(code)
       case code
-        when 'ADM1' then :provinces
-        when 'ADM2', 'ADM3', 'ADM4' then :cities
+        when 'ADM1' then :province
+        when 'ADM2', 'ADM3', 'ADM4' then :city
         else :other
       end
     end
 
     class << self
-
-    def all
-      Adapter.all(@coll)
-    end
-
-    def first
-      from_hash(Adapter.first(@coll))
-    end
-
-    def find(id)
-      Adapter.find(@coll, id)
-    end
-
-    def find_by_name(name)
-      Adapter.find_by_name(@coll, name).map { |hsh| from_hash(hsh) }
-    end
 
     def nearest(x,y)
       from_hash(Adapter.find_near(@coll, x, y, 1)[0])

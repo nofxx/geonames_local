@@ -122,21 +122,24 @@ BANNER
       # Do the magic! Import Geonames Data
       #
       else
-        db = load_adapter(Opt[:store])
+        load_adapter(Opt[:store])
         info "Using adapter #{Opt[:store]}.."
 
-        if Opt[:codes][0] == "country"
+        if argv[0] =~ /coun|nati/
           Geonames::Dump.work(Opt[:codes], :dump)
+          data = :countries
         else
           Geonames::Dump.work(Opt[:codes], :zip)
           Geonames::Dump.work(Opt[:codes], :dump)
+          data = :cities
         end
 
         info "\n---\nTotal #{Cache[:dump].length} parsed. #{Cache[:zip].length} zips."
         # Sync.work!
         info "Join dump << zip"
         unify!
-        write_to_store!(db)
+        info "Writing to DB"
+        write_to_store! data
       end
     end
 
@@ -144,25 +147,21 @@ BANNER
       begin
         require "geonames_local/adapters/#{name}"
         require "geonames_local/models/#{name}"
-        Geonames.class_eval(name.capitalize).new(Opt[:db])
       rescue LoadError
         puts "Can't find adapter #{name}"
         stop!
       end
     end
 
-    def write_to_store!(db)
-      if Opt[:codes][0] == "country"
+    def write_to_store! data
+      if data == :countries
         Cache[:countries] = Cache[:dump]
-        do_write(db, Cache[:countries])
+        Country.from_batch(Cache[:dump])
       else
         groups = Cache[:dump].group_by(&:kind)
 
-        Cache[:provinces] = groups[:provinces]
-        Cache[:cities] = groups[:cities]
-
-        do_write(db, Cache[:provinces])
-        do_write(db, Cache[:cities])
+        Province.from_batch groups[:provinces]
+        City.from_batch groups[:city]
       end
     end
 
