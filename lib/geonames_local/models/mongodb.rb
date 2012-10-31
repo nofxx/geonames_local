@@ -8,26 +8,29 @@ end
 
 module Geonames
   module Models
+
+
     class City < Geonames::Spot
       include Mongoid::Document
       include Mongoid::Geospatial
+      store_in :collection => "cities"
 
-      field :slug
-      field :name
+      field :ascii, type: String
+      field :slug,  type: String
+      field :name,  type: String
       field :area
       field :gid,   type: Integer
       field :zip,   type: Integer
       field :geom,  type: Point, spatial: true
 
-
       belongs_to :province
       belongs_to :country, index: true
-      has_many :hoods
+      # has_many :hoods
 
       before_validation :set_defaults
 
       validates :name, :country, presence: true
-      validates_uniqueness_of :name, :scope => :province_id
+      validates :name, :uniqueness => { :scope => :province_id }
 
       index name: 1
       index slug: 1
@@ -38,7 +41,7 @@ module Geonames
       scope :ordered, order_by(name: 1)
 
       def abbr
-        province ? province.abbr : country.abbr
+        abbr || province ? province.abbr : country.abbr
       end
 
       def set_defaults
@@ -58,7 +61,64 @@ module Geonames
       def to_s
         "#{name}/#{province.abbr}"
       end
+
+      def self.from_batch data
+        data.each do |city|
+          next unless city.country
+          city = new.parse(city)
+          city.country = city.province.country
+          city.save!
+        end
+      end
+
+      def parse(spot)
+        self.name, self.ascii = spot.code, spot.name, spot.ascii
+        self.code, self.gid = spot.code, spot.gid
+        self.province = Province.find_by(code: spot.province)
+        self
+      end
+
     end
+
+
+    class Province < Geonames::Spot
+      include Mongoid::Document
+      store_in :collection => "provinces"
+
+      field :gid,    type: Integer  # geonames id
+      field :code,   type: String
+      field :name,   type: String
+      field :abbr,   type: String
+      field :codes,  type: Array # phone code
+
+      belongs_to :country
+      has_many :cities
+
+      validates :name, presence: true
+      validates :country, presence: true
+
+      index name: 1
+      index codes: 1
+
+      scope :ordered, order_by(name: 1)
+
+      def self.from_batch data
+        data.each do |province|
+          next unless province.country
+          province = new.parse(province)
+          province.country = Country.find_by(abbr: /#{province.country}/i)
+          province.save!
+        end
+      end
+
+      def parse(spot)
+        self.code, self.name = spot.province, spot.name
+        self.gid = spot.gid
+        self
+      end
+
+    end
+
 
     class Country < Geonames::Spot
       include Mongoid::Document
@@ -87,10 +147,8 @@ module Geonames
       end
 
       def self.from_batch data
-        data.each do |params|
-          c = new.parse(params)
-          p c.name
-          c.save
+        data.each do |spot|
+          new.parse(spot).save
         end
       end
 
@@ -107,38 +165,7 @@ module Geonames
       end
     end
 
-    class Province < Geonames::Spot
-      include Mongoid::Document
 
-      field :gid,    type: Integer  # geonames id
-      field :name,   type: String
-      field :abbr,   type: String
-      field :codes,  type: Array # phone code
-
-      belongs_to :country
-      has_many :cities
-
-      validates :name, presence: true
-
-      index name: 1
-      index codes: 1
-
-      scope :ordered, order_by(name: 1)
-      attr_accessor :code, :name, :gid
-
-      def self.from_batch data
-        data.each do |province|
-          new.parse(province).save
-        end
-      end
-
-      def parse(params)
-        self.code = params["code"]
-        self.name = params["name"]
-        self.gid = params["gid"]
-      end
-
-    end
 
     class Zip
       include Mongoid::Document

@@ -29,7 +29,6 @@ module Geonames
       download file
       uncompress file
       parse file
-      new(codes, kind)
     end
 
     def data

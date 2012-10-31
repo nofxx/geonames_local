@@ -6,7 +6,6 @@ require 'optparse'
 require 'geonames_local/geonames'
 require 'geonames_local/data/shp'
 require 'geonames_local/data/dump'
-require 'geonames_local/data/sync'
 require 'geonames_local/data/export'
 require 'geonames_local/cli'
 
@@ -128,20 +127,21 @@ BANNER
         if argv[0] =~ /coun|nati/
           dump = Geonames::Dump.new(:country, :dump)
           info "\n---\nTotal #{dump.data.length} parsed."
+
           info "Writing to DB"
-          # Cache[:countries] = Cache[:dump]
           Geonames::Models::Country.from_batch(dump.data)
         else
           zip = Geonames::Dump.new(Opt[:codes], :zip).data
           dump = Geonames::Dump.new(Opt[:codes], :dump).data
+          info "\n---\nTotal #{dump.size} parsed. #{zip.size} zips."
+
           info "Join dump << zip"
-          unify! dump, zip
-          info "\n---\nTotal #{dump.data.length} parsed. #{dump.data[:zip].length} zips."
-          groups = Cache[:dump].group_by(&:kind)
+          dump = unify!(dump, zip).group_by(&:kind)
 
-          Geonames::Models::Province.from_batch groups[:provinces]
-          City.from_batch groups[:city]
-
+          info "Writing provinces..."
+          Geonames::Models::Province.from_batch dump[:province]
+          info "Writing cities..."
+          Geonames::Models::City.from_batch dump[:city]
         end
       end
     end
@@ -166,6 +166,7 @@ BANNER
         end
       end
       info "Done. #{(Time.now-start).to_i}s"
+      dump
     end
 
     def stop!
