@@ -10,24 +10,13 @@ No hit limit, fast as possible.
 To use one adapter, install the corresponding gem:
 
   PostgreSQL   =>   pg
-  MongoDB      =>   mongo (optional: mongo_ext)
+  MongoDB      =>   mongoid (optional: mongo_ext)
   Tokyo        =>   tokyocabinet
 
 You will also need in your system:
 
 * unzip
 * curl
-
-
-=== PostgreSQL
-
-Be sure to use a database based on the PostGIS template.
-
-
-=== MongoDB
-
-MongoDB 2D support is new, only mongo >= 1.3.3 mongodb gem >= 0.19.2
-http://github.com/mongodb/mongo-ruby-driver
 
 
 === Config YML
@@ -45,26 +34,23 @@ If you are not sure your country code, use:
 
   geonames list <search>
 
+To populate the countries database for the first time use:
 
-== Relational Mapping
-
-When using PG, this gem will (try) to relational map Geonames
-data on your scheme.
-
-== ActiveRecord
-
-Check out lib/geonames/models/ar.rb
-
-I`m wondering the best way (and if it`s a good idea) to auto include'em on rails.
-For now, just copy as you see fit.
+  geonames -c geoconfig.yml countries
 
 
-== PostgreSQL
+== Mongoid
 
-So, supposing ActiveRecord, something like this is possible:
+So, supposing Mongoid, something like this is possible:
 
   City.first.province.country.abbr
   => "BR"
+
+
+== Postgis
+
+TBD (by someone else)
+Be sure to use a database based on the PostGIS template.
 
 
 === Migration
