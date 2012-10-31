@@ -24,7 +24,6 @@ Gem::Specification.new do |gem|
     "README.rdoc"
   ]
 
-  gem.add_dependency('georuby', ['>= 3.0.0'])
 
   gem.post_install_message = %q{
 Geonames Local
@@ -33,19 +32,8 @@ Geonames Local
 To use the adapter, install the corresponding gem:
 
   PostgreSQL   =>   pg
-  MongoDB      =>   mongodb (optional: mongo_ext)
+  MongoDB      =>   mongoid (optional: mongo_ext)
   Tokyo        =>   tokyocabinet
-
-PostgreSQL
-----------
-
-Be sure to use a database based on the PostGIS template.
-
-MongoDB
--------
-
-MongoDB 2D support is new, only mongo >= 1.3.3 mongodb gem >= 0.19.2
-http://github.com/mongodb/mongo-ruby-driver
 
 Have fun because:
 }
