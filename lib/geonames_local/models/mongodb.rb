@@ -18,6 +18,7 @@ module Geonames
       field :ascii, type: String
       field :slug,  type: String
       field :name,  type: String
+      field :abbr,  type: String
       field :area
       field :gid,   type: Integer
       field :zip,   type: Integer
@@ -40,10 +41,6 @@ module Geonames
 
       scope :ordered, order_by(name: 1)
 
-      def abbr
-        abbr || province ? province.abbr : country.abbr
-      end
-
       def set_defaults
         self.country ||= province.try(:country)
         self.slug    ||= name.try(:downcase) # don't use slugize
@@ -59,22 +56,25 @@ module Geonames
       end
 
       def to_s
-        "#{name}/#{province.abbr}"
+        "#{name}/#{abbr}"
       end
 
       def self.from_batch data
         data.each do |city|
+          info "Writing city #{city.name}"
           next unless city.country
           city = new.parse(city)
           city.country = city.province.country
-          city.save!
+          city.save
         end
       end
 
       def parse(spot)
-        self.name, self.ascii = spot.code, spot.name, spot.ascii
+        self.name, self.ascii = spot.name, spot.ascii
         self.code, self.gid = spot.code, spot.gid
         self.province = Province.find_by(code: spot.province)
+        self.geom = [spot.lon, spot.lat]
+        self.abbr = province.abbr
         self
       end
 
@@ -104,6 +104,7 @@ module Geonames
 
       def self.from_batch data
         data.each do |province|
+          info "Writing province #{province.name}"
           next unless province.country
           province = new.parse(province)
           province.country = Country.find_by(abbr: /#{province.country}/i)
