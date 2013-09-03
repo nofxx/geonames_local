@@ -1,6 +1,8 @@
 require 'mongoid'
 require 'mongoid_geospatial'
 
+I18n.locale = :en
+
 Mongoid.configure do |config|
   #config.master = Mongo::Connection.new.db("symbolize_test")
   config.connect_to(Opt[:db][:name])
@@ -8,173 +10,146 @@ end
 
 module Geonames
   module Models
+    #module Mongodb
+    require 'geopolitical/../../app/models/hood'
+    require 'geopolitical/../../app/models/city'
+    require 'geopolitical/../../app/models/region'
+    require 'geopolitical/../../app/models/nation'
 
-
-    class City < Geonames::Spot
-      include Mongoid::Document
-      include Mongoid::Geospatial
-      store_in :collection => "cities"
-
-      field :ascii, type: String
-      field :slug,  type: String
-      field :name,  type: String
-      field :abbr,  type: String
-      field :area
-      field :gid,   type: Integer
-      field :zip,   type: Integer
-      field :geom,  type: Point, spatial: true
-
-      belongs_to :province
-      belongs_to :country, index: true
-      # has_many :hoods
-
-      before_validation :set_defaults
-
-      validates :name, :country, presence: true
-      validates :name, :uniqueness => { :scope => :province_id }
-
-      index name: 1
-      index slug: 1
-      index geom: '2d'
-
-      #spatial_index :geom
-
-      scope :ordered, order_by(name: 1)
-
-      def set_defaults
-        self.country ||= province.try(:country)
-        self.slug    ||= name.try(:downcase) # don't use slugize
-      end
-
-      def self.search(search, page)
-        cities = search ? where(:field => /#{search}/i) : all
-        cities.page(page)
-      end
-
-      def <=> other
-        self.name <=> other.name
-      end
-
-      def to_s
-        "#{name}/#{abbr}"
-      end
-
+    module Nations
       def self.from_batch data
-        data.each do |city|
-          info "Writing city #{city.name}"
-          next unless city.country
-          city = new.parse(city)
-          city.country = city.province.country
-          city.save
+        # Nation.delete_all # if clean
+        data.each do |row|
+          # info row
+         create! parse(row) rescue nil
         end
       end
 
-      def parse(spot)
-        self.name, self.ascii = spot.name, spot.ascii
-        self.code, self.gid = spot.code, spot.gid
-        self.province = Province.find_by(code: spot.province)
-        self.geom = [spot.lon, spot.lat]
-        self.abbr = province.abbr
-        self
+      def self.create! data
+        Nation.create! data
+      rescue => e
+        info "Prob com nation #{klass}, #{data} #{e}"
       end
 
-    end
-
-
-    class Province < Geonames::Spot
-      include Mongoid::Document
-      store_in :collection => "provinces"
-
-      field :gid,    type: Integer  # geonames id
-      field :code,   type: String
-      field :name,   type: String
-      field :abbr,   type: String
-      field :codes,  type: Array # phone code
-
-      belongs_to :country
-      has_many :cities
-
-      validates :name, presence: true
-      validates :country, presence: true
-
-      index name: 1
-      index codes: 1
-
-      scope :ordered, order_by(name: 1)
-
-      def self.from_batch data
-        data.each do |province|
-          info "Writing province #{province.name}"
-          next unless province.country
-          province = new.parse(province)
-          province.country = Country.find_by(abbr: /#{province.country}/i)
-          province.save!
-        end
-      end
-
-      def parse(spot)
-        self.code, self.name = spot.province, spot.name
-        self.gid = spot.gid
-        self
-      end
-
-    end
-
-
-    class Country < Geonames::Spot
-      include Mongoid::Document
-      store_in :collection => "countries"
-
-      field :gid,    type: Integer  # geonames id
-      field :name,   type: String
-      field :abbr,   type: String
-      field :code    # optional phone/whatever code
-
-      has_many :cities
-      has_many :provinces
-
-      validates :abbr, :name, presence: true, uniqueness: true
-
-      index name: 1
-      index code: 1
-
-      scope :ordered, order_by(name: 1)
-
-
-      def parse row
-        self.abbr, @iso3, @ison, @fips, self.name, @capital, @area, @pop, continent, tld,
+      def self.parse row
+        abbr, iso3, ison, fips, name, capital, area, pop, continent, tld,
         currency, phone, postal, langs, gid, neighbours = row.split(/\t/)
-        self
+        info "Nation: #{name}/#{abbr}"
+        {
+          abbr: abbr, slug: name.downcase, name: name
+        }
       end
+    end
 
-      def self.from_batch data
-        data.each do |spot|
-          new.parse(spot).save
+    module Spots
+      class << self
+        def from_batch data
+          [Region, City].each(&:delete_all) # if clean
+
+          @regions, @cities = data[:region], data[:city]
+          @regions.each { |r| create Region, parse_region(r) }
+          @cities.each  { |c| create City, parse_city(c) }
         end
-      end
 
-      def to_hash
-        { "gid" => @gid.to_s, "name" => @name, "kind" => "country", "code" => @code}
-      end
+        def create klass, data
+          klass.create! data
+        rescue => e
+          info "Prob com spot #{klass}, #{data} #{e}"
+        end
 
-      def export
-        [@gid, @code, @name]
-      end
+        def parse_region s
+          nation = Nation.find_by(abbr: /#{s.nation}/i)
+          info "Region: #{s.name} / #{s.abbr}"
+          {
+            gid: s.gid, name: s.name, abbr: s.abbr,
+            nation: nation, code: s.region
+          }
+i        end
 
-      def export_header
-        ["gid", "code", "name"]
+        def parse_city s
+          region = Region.find_by(code: s.region)
+          slug = "#{s.ascii}-#{region.abbr}"
+          slug =  slug.downcase.gsub(/\W/, '').gsub(/\s/, '-')
+          attempt = slug.dup
+          try = 1
+          until City.where(slug: attempt).first.nil?
+            attempt = "#{slug}-#{try}"
+            try += 1
+            break if try > 7
+          end
+          slug = attempt
+          # info s.inspect
+          info "City: #{slug} - #{s.name} / #{region.try(:abbr)}"
+          {
+            name: s.name, slug: slug,
+            code: s.code, gid: s.gid, ascii: s.ascii,
+            region: region, souls: s.pop,
+            geom: [s.lon, s.lat],
+            abbr: region.abbr # tz
+          }
+        end
+
       end
     end
 
+    # class City < Geonames::Spot
+    #   # include Mongoid::Document
+    #   # include Mongoid::Geospatial
+    #   # store_in :collection => "cities"
+
+    #   def self.from_batch data
+    #     data.each do |city|
+    #       info "Writing city #{city.name}"
+    #       next unless city.nation
+    #       city = ::Geopolitical::City.new(parse(city))
+    #       city.save
+    #     end
+    #   end
+
+    #   def parse s
+    #
+    #   end
+
+    # end
 
 
-    class Zip
-      include Mongoid::Document
+    # class Region < Geonames::Spot
 
-      field :code
-      belongs_to :city
+    #   def self.from_batch data
 
-    end
+    #   end
+
+    # end
+
+
+    # class Nation < Geonames::Spot
+
+
+    #   def parse row
+    #   end
+
+    #   def to_hash
+    #     { "gid" => @gid.to_s, "name" => @name, "kind" => "nation", "code" => @code}
+    #   end
+
+    #   def export
+    #     [@gid, @code, @name]
+    #   end
+
+    #   def export_header
+    #     ["gid", "code", "name"]
+    #   end
+    # end
+
+
+
+    # class Zip
+    #   include Mongoid::Document
+
+    #   field :code
+    #   belongs_to :city
+
+    # end
 
   end
 end

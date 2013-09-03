@@ -28,7 +28,7 @@ module Geonames
         info "Free sample\n" + utf.inspect
         @sample = true
       end
-      @type.new(Opt[:map], utf, Opt[:country].upcase, Opt[:city])
+      @type.new(Opt[:map], utf, Opt[:nation].upcase, Opt[:city])
     end
 
     def parse

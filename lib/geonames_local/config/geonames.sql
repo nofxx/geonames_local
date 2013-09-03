@@ -20,13 +20,13 @@ SET default_with_oids = false;
 --
 -- TOC entry 2245 (class 1259 OID 21665)
 -- Dependencies: 2544 2545 2546 3 992
--- Name: cities; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: cities; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE cities (
     id integer NOT NULL,
-    country_id integer NOT NULL,
-    province_id integer,
+    nation_id integer NOT NULL,
+    region_id integer,
     name character varying(255) NOT NULL,
     gid integer,
     zip integer,
@@ -72,7 +72,7 @@ ALTER TABLE cities ALTER COLUMN id SET DEFAULT nextval('cities_id_seq'::regclass
 --
 -- TOC entry 2548 (class 2606 OID 21670)
 -- Dependencies: 2245 2245
--- Name: cities_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: cities_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY cities
@@ -82,16 +82,16 @@ ALTER TABLE ONLY cities
 --
 -- TOC entry 2549 (class 1259 OID 21697)
 -- Dependencies: 2245
--- Name: index_cities_on_country_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_cities_on_nation_id; Type: INDEX; Schema: public; Owner: -; Tablespace:
 --
 
-CREATE INDEX index_cities_on_country_id ON cities USING btree (country_id);
+CREATE INDEX index_cities_on_nation_id ON cities USING btree (nation_id);
 
 
 --
 -- TOC entry 2550 (class 1259 OID 21699)
 -- Dependencies: 2245 1869
--- Name: index_cities_on_geom; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_cities_on_geom; Type: INDEX; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE INDEX index_cities_on_geom ON cities USING gist (geom);
@@ -100,7 +100,7 @@ CREATE INDEX index_cities_on_geom ON cities USING gist (geom);
 --
 -- TOC entry 2551 (class 1259 OID 21695)
 -- Dependencies: 2245
--- Name: index_cities_on_gid; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_cities_on_gid; Type: INDEX; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE INDEX index_cities_on_gid ON cities USING btree (gid);
@@ -109,7 +109,7 @@ CREATE INDEX index_cities_on_gid ON cities USING btree (gid);
 --
 -- TOC entry 2552 (class 1259 OID 21694)
 -- Dependencies: 2245
--- Name: index_cities_on_name; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_cities_on_name; Type: INDEX; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE INDEX index_cities_on_name ON cities USING btree (name);
@@ -118,16 +118,16 @@ CREATE INDEX index_cities_on_name ON cities USING btree (name);
 --
 -- TOC entry 2553 (class 1259 OID 21698)
 -- Dependencies: 2245
--- Name: index_cities_on_province_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_cities_on_region_id; Type: INDEX; Schema: public; Owner: -; Tablespace:
 --
 
-CREATE INDEX index_cities_on_province_id ON cities USING btree (province_id);
+CREATE INDEX index_cities_on_region_id ON cities USING btree (region_id);
 
 
 --
 -- TOC entry 2554 (class 1259 OID 21696)
 -- Dependencies: 2245
--- Name: index_cities_on_zip; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_cities_on_zip; Type: INDEX; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE INDEX index_cities_on_zip ON cities USING btree (zip);
@@ -155,10 +155,10 @@ SET default_with_oids = false;
 --
 -- TOC entry 2249 (class 1259 OID 21688)
 -- Dependencies: 3
--- Name: countries; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: nations; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
-CREATE TABLE countries (
+CREATE TABLE nations (
     id integer NOT NULL,
     name character varying(30) NOT NULL,
     abbr character varying(2) NOT NULL
@@ -168,10 +168,10 @@ CREATE TABLE countries (
 --
 -- TOC entry 2248 (class 1259 OID 21686)
 -- Dependencies: 3 2249
--- Name: countries_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: nations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE countries_id_seq
+CREATE SEQUENCE nations_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
@@ -182,10 +182,10 @@ CREATE SEQUENCE countries_id_seq
 --
 -- TOC entry 2548 (class 0 OID 0)
 -- Dependencies: 2248
--- Name: countries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: nations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE countries_id_seq OWNED BY countries.id;
+ALTER SEQUENCE nations_id_seq OWNED BY nations.id;
 
 
 --
@@ -194,17 +194,17 @@ ALTER SEQUENCE countries_id_seq OWNED BY countries.id;
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE countries ALTER COLUMN id SET DEFAULT nextval('countries_id_seq'::regclass);
+ALTER TABLE nations ALTER COLUMN id SET DEFAULT nextval('nations_id_seq'::regclass);
 
 
 --
 -- TOC entry 2545 (class 2606 OID 21693)
 -- Dependencies: 2249 2249
--- Name: countries_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: nations_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
-ALTER TABLE ONLY countries
-    ADD CONSTRAINT countries_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY nations
+    ADD CONSTRAINT nations_pkey PRIMARY KEY (id);
 
 
 --
@@ -229,12 +229,12 @@ SET default_with_oids = false;
 --
 -- TOC entry 2247 (class 1259 OID 21680)
 -- Dependencies: 3
--- Name: provinces; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: regions; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
-CREATE TABLE provinces (
+CREATE TABLE regions (
     id integer NOT NULL,
-    country_id integer NOT NULL,
+    nation_id integer NOT NULL,
     name character varying(255) NOT NULL,
     abbr character varying(2) NOT NULL,
     gid integer
@@ -244,10 +244,10 @@ CREATE TABLE provinces (
 --
 -- TOC entry 2246 (class 1259 OID 21678)
 -- Dependencies: 3 2247
--- Name: provinces_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: regions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE provinces_id_seq
+CREATE SEQUENCE regions_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
@@ -258,10 +258,10 @@ CREATE SEQUENCE provinces_id_seq
 --
 -- TOC entry 2552 (class 0 OID 0)
 -- Dependencies: 2246
--- Name: provinces_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: regions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE provinces_id_seq OWNED BY provinces.id;
+ALTER SEQUENCE regions_id_seq OWNED BY regions.id;
 
 
 --
@@ -270,53 +270,53 @@ ALTER SEQUENCE provinces_id_seq OWNED BY provinces.id;
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE provinces ALTER COLUMN id SET DEFAULT nextval('provinces_id_seq'::regclass);
+ALTER TABLE regions ALTER COLUMN id SET DEFAULT nextval('regions_id_seq'::regclass);
 
 
 --
 -- TOC entry 2549 (class 2606 OID 21685)
 -- Dependencies: 2247 2247
--- Name: provinces_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: regions_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
-ALTER TABLE ONLY provinces
-    ADD CONSTRAINT provinces_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY regions
+    ADD CONSTRAINT regions_pkey PRIMARY KEY (id);
 
 
 --
 -- TOC entry 2544 (class 1259 OID 21701)
 -- Dependencies: 2247
--- Name: index_provinces_on_abbr; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_regions_on_abbr; Type: INDEX; Schema: public; Owner: -; Tablespace:
 --
 
-CREATE INDEX index_provinces_on_abbr ON provinces USING btree (abbr);
+CREATE INDEX index_regions_on_abbr ON regions USING btree (abbr);
 
 
 --
 -- TOC entry 2545 (class 1259 OID 21703)
 -- Dependencies: 2247
--- Name: index_provinces_on_country_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_regions_on_nation_id; Type: INDEX; Schema: public; Owner: -; Tablespace:
 --
 
-CREATE INDEX index_provinces_on_country_id ON provinces USING btree (country_id);
+CREATE INDEX index_regions_on_nation_id ON regions USING btree (nation_id);
 
 
 --
 -- TOC entry 2546 (class 1259 OID 21702)
 -- Dependencies: 2247
--- Name: index_provinces_on_gid; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_regions_on_gid; Type: INDEX; Schema: public; Owner: -; Tablespace:
 --
 
-CREATE INDEX index_provinces_on_gid ON provinces USING btree (gid);
+CREATE INDEX index_regions_on_gid ON regions USING btree (gid);
 
 
 --
 -- TOC entry 2547 (class 1259 OID 21700)
 -- Dependencies: 2247
--- Name: index_provinces_on_name; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_regions_on_name; Type: INDEX; Schema: public; Owner: -; Tablespace:
 --
 
-CREATE INDEX index_provinces_on_name ON provinces USING btree (name);
+CREATE INDEX index_regions_on_name ON regions USING btree (name);
 
 
 -- Completed on 2010-03-19 05:45:19 BRT
@@ -324,8 +324,3 @@ CREATE INDEX index_provinces_on_name ON provinces USING btree (name);
 --
 -- PostgreSQL database dump complete
 --
-
-
-
-
-

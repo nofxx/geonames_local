@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
 
   gem.authors = ["Marcos Piccinini"]
   gem.default_executable = %q{geonames}
-  gem.description = %q{Dump and feed a tokyo cabinet for local geonames search}
+  gem.description = %q{Dumps geonames data to feed a local db}
   gem.email = %q{x@nofxx.com}
 
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
@@ -16,14 +16,12 @@ Gem::Specification.new do |gem|
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   gem.name          = "geonames_local"
   gem.require_paths = ["lib"]
-  gem.summary = %q{Dump and feed a tokyo local geonames db}
-
+  gem.summary = %q{Dumps geonames data for local usage}
 
   gem.extra_rdoc_files = [
     "LICENSE",
     "README.rdoc"
   ]
-
 
   gem.post_install_message = %q{
 Geonames Local

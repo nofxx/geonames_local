@@ -2,7 +2,7 @@
 # Geonames Local Config Example
 #
 :store: mongodb # postgis / tokyo
-:codes: [br] # to store all countries informations in the countries table, just write [country]
+:codes: [br] # [] to store all nations informations (not recursive)
 :level: city
 :min_pop: 100000
 :mapping:
@@ -10,7 +10,7 @@
   :geom: true
 :db:
   :host: localhost
-  :name: geonames_test
+  :name: baccafe_development
   :user:
   :pass:
   :purge: false

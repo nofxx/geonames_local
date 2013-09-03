@@ -16,13 +16,9 @@ module Geonames
       options = {}
 
       argv.options do |opts|
-        opts.banner = <<BANNER
-Geonames Command Line Usage:
+        opts.banner = "Geonames Command Line Usage\n\n    geonames <nation code(s)> <opts>\n\n\n"
 
-geonames <country code(s)> <opts>
 
-geonames
-BANNER
         opts.on("-l", "--level LEVEL", String, "The level of logging to report" ) { |level| options[:level] = level }
         opts.on("-d", "--dump", "Dump DB before all" ) { options[:dump] = true }
         opts.separator ""
@@ -34,7 +30,7 @@ BANNER
         opts.on("--map TYPE", Array, "Use zone/road to import" ) { |s| options[:map] = s.map(&:to_sym) }
         opts.on("--type TYPE", String, "Use zone/road to import" ) { |s| options[:type] = s }
         opts.on("--city CITY", String, "Use city gid to import" ) { |s| options[:city] = s }
-        opts.on("--country COUNTRY", String, "Use country gid to import" ) { |s| options[:country] = s }
+        opts.on("--nation NATION", String, "Use nation gid to import" ) { |s| options[:nation] = s }
         opts.separator ""
         opts.separator "Common Options:"
         opts.on("-h", "--help", "Show this message" ) { puts opts; exit }
@@ -58,13 +54,8 @@ BANNER
 
     class << self
 
-    # Ugly but works?
-    def work(argv)
-      trap(:INT) { stop! }
-      trap(:TERM) { stop! }
-      Opt.merge! parse_options(argv)
-
-      if Opt[:config]
+      def load_config
+              if Opt[:config]
         Opt.merge! YAML.load(File.read(Opt[:config]))
       end
 
@@ -72,6 +63,18 @@ BANNER
       if File.exists?(cfg = File.join("config", "geonames.yml"))
         Opt.merge! YAML.load(File.read(cfg))
       end
+      rescue
+        info "Cant't find config file"
+        exit
+      end
+
+    # Ugly but works?
+    def work(argv)
+      trap(:INT) { stop! }
+      trap(:TERM) { stop! }
+      Opt.merge! parse_options(argv)
+
+      load_config
 
       if shp = Opt[:shp]
         SHP.import(shp)
@@ -115,7 +118,7 @@ BANNER
       # Export Data as CSV or JSON
       #
       if argv[0] =~ /csv|json/
-        Geonames::Export.new(Country.all).to_csv
+        Geonames::Export.new(Nation.all).to_csv
 
       #
       # Do the magic! Import Geonames Data
@@ -124,12 +127,15 @@ BANNER
         load_adapter(Opt[:store])
         info "Using adapter #{Opt[:store]}.."
 
-        if argv[0] =~ /coun|nati/
-          dump = Geonames::Dump.new(:country, :dump)
+        # Nations
+        if Opt[:codes].empty? || argv[0] =~ /coun|nati/
+          dump = Geonames::Dump.new(:nation, :dump)
           info "\n---\nTotal #{dump.data.length} parsed."
 
-          info "Writing to DB"
-          Geonames::Models::Country.from_batch(dump.data)
+          info "Writing to nations DB"
+          Geonames::Models::Nations.from_batch(dump.data)
+
+        # Regions, Cities....
         else
           zip = Geonames::Dump.new(Opt[:codes], :zip).data
           dump = Geonames::Dump.new(Opt[:codes], :dump).data
@@ -138,10 +144,10 @@ BANNER
           info "Join dump << zip"
           dump = unify!(dump, zip).group_by(&:kind)
 
-          info "Writing provinces..."
-          Geonames::Models::Province.from_batch dump[:province]
-          info "Writing cities..."
-          Geonames::Models::City.from_batch dump[:city]
+          info "Writing to DB..."
+          Geonames::Models::Spots.from_batch dump
+          # info "Writing cities..."
+          # Geonames::Models::City.from_batch dump[:city]
         end
       end
     end
@@ -149,9 +155,9 @@ BANNER
     def load_adapter(name)
       begin
         require "geonames_local/models/#{name}"
-      rescue LoadError
-        puts "Can't find adapter for #{name}"
-        stop!
+    #  rescue LoadError
+     #   puts "Can't find adapter for #{name}"
+      #  stop!
       end
     end
 

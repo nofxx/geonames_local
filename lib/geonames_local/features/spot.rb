@@ -1,7 +1,7 @@
 module Geonames
   class Spot
-    attr_accessor :gid, :name, :ascii, :lat, :lon, :country, :kind,
-                  :code,  :pop, :tz, :geom, :province, :zip, :abbr, :id
+    attr_accessor :gid, :name, :ascii, :lat, :lon, :nation, :kind,
+                  :code,  :pop, :tz, :geom, :region, :zip, :abbr, :id
     alias :x :lon
     alias :y :lat
     alias :geoname_id :gid
@@ -14,13 +14,13 @@ module Geonames
     def initialize(params = nil, kind = nil)
       return unless params.instance_of? String
       kind == :zip ? parse_zip(params) : parse(params)
-      if @kind == :province
+      if @kind == :region
         @name.gsub!(/Estado d\w\s/, "")
         @abbr = get_abbr
       end
     end
 
-    # Geonames does not have province/state abbr..#fail!
+    # Geonames does not have region/state abbr..#fail!
     # This works 75% of the time in brazil heh
     def get_abbr
       s = @name.split(" ")
@@ -35,22 +35,22 @@ module Geonames
     # Parse Geonames Dump Export
     def parse(row)
       gid, @name, @ascii, @alternates, lat, lon, feat, kind,
-        @country, cc2, adm1, adm2, adm3, adm4, @pop, @ele,
+        @nation, cc2, adm1, adm2, adm3, adm4, @pop, @ele,
         @gtop, @tz, @up = row.split(/\t/)
       parse_geom(lat, lon)
       @gid = @geoname_id = gid.to_i
       @kind = human_code(kind)
-      @province = adm1
+      @region = adm1
       @code = adm2
 
-    # puts "#{@kind} - #{@code} - #{@province}"
+    # puts "#{@kind} - #{@code} - #{@region}"
     end
 
     #
     # Parse Geonames Zip Export
     def parse_zip(row)
-      # country, zip, @name, state, state_code, procince, province_code, community, community_code, lat, lon, acc  = row.split(/\t/)
-      country, zip, @name, a1, @code, a2, a2c, a3, a3c, lat, lon, acc = row.split(/\t/)
+      # nation, zip, @name, state, state_code, procince, region_code, community, community_code, lat, lon, acc  = row.split(/\t/)
+      nation, zip, @name, a1, @code, a2, a2c, a3, a3c, lat, lon, acc = row.split(/\t/)
       parse_geom(lat, lon)
       # @code = adm1
       @kind = :city
@@ -82,7 +82,7 @@ module Geonames
     # Translate geonames ADMx to models
     def human_code(code)
       case code
-        when 'ADM1' then :province
+        when 'ADM1' then :region
         when 'ADM2', 'ADM3', 'ADM4' then :city
         else :other
       end

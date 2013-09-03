@@ -1,19 +1,19 @@
 module Geonames
   module Models
-    module AR
+    #module Postgis
 
       class City < ActiveRecord::Base
         attr_accessor :x, :y, :z
 
-        belongs_to :province
-        belongs_to :country
+        belongs_to :region
+        belongs_to :nation
 
-        validates_presence_of :country
+        validates_presence_of :nation
         validates_presence_of :name
-        # validates_uniqueness_of :name, :scope => :province_id
+        # validates_uniqueness_of :name, :scope => :region_id
 
         def abbr
-          province.try(:abbr) || country.abbr
+          region.try(:abbr) || nation.abbr
         end
 
         def geom=(val)
@@ -25,22 +25,22 @@ module Geonames
 
         # Instantiate self.geom as a Point
         def validation
-          self.country ||= province.country
+          self.nation ||= region.nation
           unless !@x || !@y || @x == "" || @y == ""
             self.geom = Point.from_x_y(@x.to_f, @y.to_f)
           end
         end
       end
 
-      class Province < ActiveRecord::Base
+      class Region < ActiveRecord::Base
         has_many :cities
-        belongs_to :country
+        belongs_to :nation
 
-        validates_uniqueness_of :name, :abbr,  :scope => :country_id
+        validates_uniqueness_of :name, :abbr,  :scope => :nation_id
       end
 
-      class Country < ActiveRecord::Base
-        has_many :provinces
+      class Nation < ActiveRecord::Base
+        has_many :regions
         has_many :cities
         validates_presence_of :name, :abbr
         validates_uniqueness_of :name, :abbr
@@ -51,8 +51,6 @@ module Geonames
       end
 
 
-    end
+    #end
   end
 end
-
-

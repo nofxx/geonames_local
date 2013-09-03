@@ -11,14 +11,14 @@ module Geonames
         for code in codes
           work code
         end
-      elsif codes == :country
-        countries
+      elsif codes == :nation
+        nations
       end
     end
 
-    def countries
-      info "\nDumping country database"
-      file = get_file('country')
+    def nations
+      info "\nDumping nation database"
+      file = get_file('nation')
       download file
       parse file
     end
@@ -36,7 +36,7 @@ module Geonames
     end
 
     def get_file(code)
-      code == "country" ? "countryInfo.txt" : "#{code.upcase}.zip"
+      code == "nation" ? "countryInfo.txt" : "#{code.upcase}.zip"
     end
 
     def download(file)

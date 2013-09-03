@@ -2,9 +2,9 @@ require "rubygems"
 require "geo_ruby"
 
 class Road
-  attr_reader :city, :province, :country, :zone, :name, :geom, :kind, :table
+  attr_reader :city, :region, :nation, :zone, :name, :geom, :kind, :table
 
-  def initialize(keys, vals, country=nil, city=nil)
+  def initialize(keys, vals, nation=nil, city=nil)
     s = vals.split("\t")
     r = {}
     keys.each_with_index do |k, i|
@@ -16,7 +16,7 @@ class Road
     @geom = parse_geom(r[:geom])
     @kind = parse_kind(kind)
     @city = city
-    @country = country
+    @nation = nation
     @table = :roads
   end
 

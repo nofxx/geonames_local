@@ -2,11 +2,11 @@ module Geonames
   module Models
     module Tokyo
 
-  class Country
+  class Nation
     attr_accessor :code, :name, :gid, :iso, :capital, :pop, :currency
 
     def self.all
-      Tokyo.new.all({ :kind => "country" }).map do |c|
+      Tokyo.new.all({ :kind => "nation" }).map do |c|
         new(c)
       end
     end
@@ -46,11 +46,11 @@ module Geonames
     end
 
     def cities
-      # qry.addcond("country", TBDQRY::QSTREQ, @code)
+      # qry.addcond("nation", TBDQRY::QSTREQ, @code)
     end
 
     def to_hash
-      # { "gid" => @gid.to_s, "name" => @name, "kind" => "country", "code" => @code, "currency" => @currency}
+      # { "gid" => @gid.to_s, "name" => @name, "kind" => "nation", "code" => @code, "currency" => @currency}
     { "gid" => @gid.to_s, "iso" => @iso, "iso3" => @iso3, "iso_num" => @ison, "fips" => @fips,
     "name" => @name, "capital" => @capital, "area" => @area, "population" => @pop,
     "continent" => @continent, "tld" => @tld, "currency_code" => @currency, "currency_name" => @currency_name,
@@ -68,11 +68,11 @@ module Geonames
 
     end
   end
-      class Province
+      class Region
     attr_accessor :code, :name, :gid
 
     def self.all
-      Tokyo.new.all({ :kind => "province" }).map do |c|
+      Tokyo.new.all({ :kind => "region" }).map do |c|
         new(c)
       end
     end
