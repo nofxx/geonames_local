@@ -140,7 +140,7 @@ module Geonames
           info "\n---\nTotal #{dump.data.length} parsed."
 
           info "Writing to nations DB"
-          Geonames::Models::MongoWrapper.nations(dump.data)
+          Geonames::Models::MongoWrapper.nations dump.data, Opt[:clean]
 
         # Regions, Cities....
         else
@@ -152,7 +152,7 @@ module Geonames
           dump = unify!(dump, zip).group_by(&:kind)
 
           info "Writing to DB..."
-          Geonames::Models::MongoWrapper.batch dump
+          Geonames::Models::MongoWrapper.batch dump, Opt[:clean]
           # info "Writing cities..."
           # Geonames::Models::City.from_batch dump[:city]
         end

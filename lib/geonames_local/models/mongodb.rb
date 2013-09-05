@@ -1,6 +1,6 @@
 require 'mongoid'
 require 'mongoid_geospatial'
-
+require 'geopolitical/helpers'
 
 Mongoid.configure do |config|
   #config.master = Mongo::Connection.new.db("symbolize_test")
@@ -9,7 +9,6 @@ end
 
 module Geonames
   module Models
-    require 'geopolitical/../../app/models/concerns/geo_slug'
     require 'geopolitical/../../app/models/hood'
     require 'geopolitical/../../app/models/city'
     require 'geopolitical/../../app/models/region'
@@ -18,17 +17,16 @@ module Geonames
 
       class << self
 
-        def nations data
+        def nations data, clean
           Nation.delete_all # if clean
           data.each do |row|
-            # info row
             create Nation, parse_nation(row) rescue nil
           end
         end
 
 
-        def batch data
-          [Region, City].each(&:delete_all) # if clean
+        def batch data, clean = false
+          [Region, City].each(&:delete_all) #if clean
 
           @regions, @cities = data[:region], data[:city]
           @regions.each { |r| create Region, parse_region(r) }
@@ -57,7 +55,7 @@ module Geonames
           # info "------------------------"
           {
             name_translations: translate(name),
-            zip: pos_code, cash: cur_code,
+            zip: pos_code, cash: cur_code, gid: gid,
             abbr: abbr, slug: name.downcase, code: iso3, lang: langs
           }
         end
@@ -69,30 +67,28 @@ module Geonames
           {
             name_translations: translate(s.name),
             gid: s.gid, abbr: s.abbr,
-            nation: nation, code: s.region ,
+            nation: nation, code: s.region
           }
         end
 
         def parse_city s
           region = Region.find_by(code: s.region)
-          slug = "#{s.ascii}"
-          slug =  slug.encode(Encoding::ISO_8859_1).gsub(/\s/, '-')
+          slug = City.new(slug: s.ascii).slug
           attempt = slug.dup
           try = 1
-          until City.where(slug: attempt).first.nil?
+          until City.where(slug: attempt.downcase).first.nil?
             attempt = "#{slug}-#{region.abbr}-#{try}"
             try += 1
             break if try > 7
           end
-          slug = attempt
-          # info s.inspect
-          info "City: #{slug} - #{s.name} / #{region.try(:abbr)}"
+
+          info s.inspect
+          info "City: #{s.zip} | #{slug} - #{s.name} / #{region.try(:abbr)}"
           {
             name_translations: translate(s.name),
-            slug: slug,  code: s.code, gid: s.gid,
+            slug: attempt, gid: s.gid, code: s.code,
             souls: s.pop, geom: [s.lon, s.lat],
-            ascii: s.ascii, region: region,
-            abbr: region.abbr # tz
+            region: region, abbr: region.abbr, zip: s.zip # tz
           }
         end
 
