@@ -10,6 +10,7 @@ Gem::Specification.new do |gem|
   gem.default_executable = %q{geonames}
   gem.description = %q{Dumps geonames data to feed a local db}
   gem.email = %q{x@nofxx.com}
+  gem.license = "MIT"
 
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   gem.files         = `git ls-files`.split("\n")
@@ -19,7 +20,7 @@ Gem::Specification.new do |gem|
   gem.summary = %q{Dumps geonames data for local usage}
 
   gem.extra_rdoc_files = [
-    "LICENSE",
+    "MIT-LICENSE",
     "README.rdoc"
   ]
 
