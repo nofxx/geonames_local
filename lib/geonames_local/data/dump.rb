@@ -1,17 +1,16 @@
 module Geonames
   class Dump
+    # Geonames base URL
     URL = "http://download.geonames.org/export/"
+    # Work temporary files
     TMP = "/tmp/geonames/"
 
-    def initialize(codes, kind)
-      @codes = codes
+    def initialize(target, kind)
       @kind = kind
       @data = []
-      if codes.respond_to? :each
-        for code in codes
-          work code
-        end
-      elsif codes == :nation
+      if target.respond_to? :each
+        target.each { |n| work(n) }
+      elsif target == :all
         nations
       end
     end
@@ -23,9 +22,9 @@ module Geonames
       parse file
     end
 
-    def work code
-      info "\nWorking on #{@kind} for #{code}"
-      file = get_file(code)
+    def work nation
+      info "\nWorking on #{@kind} for #{nation}"
+      file = get_file(nation)
       download file
       uncompress file
       parse file
@@ -35,8 +34,8 @@ module Geonames
       @data
     end
 
-    def get_file(code)
-      code == "nation" ? "countryInfo.txt" : "#{code.upcase}.zip"
+    def get_file(nation)
+      nation == "nation" ? "countryInfo.txt" : "#{nation.upcase}.zip"
     end
 
     def download(file)

@@ -50,19 +50,22 @@ module Geonames
       end
       options
     end
+
     private_class_method :parse_options
 
     class << self
 
       def load_config
-              if Opt[:config]
-        Opt.merge! YAML.load(File.read(Opt[:config]))
-      end
-
-      # Load config/geonames.yml if there's one
-      if File.exists?(cfg = File.join("config", "geonames.yml"))
-        Opt.merge! YAML.load(File.read(cfg))
-      end
+        if Opt[:config]
+          Opt.merge! YAML.load(File.read(Opt[:config]))
+        else
+          # Load config/geonames.yml if there's one
+          if File.exists?(cfg = File.join("config", "geonames.yml"))
+            Opt.merge! YAML.load(File.read(cfg))
+          else
+            raise
+          end
+        end
       rescue
         info "Cant't find config file"
         exit
@@ -73,6 +76,9 @@ module Geonames
       trap(:INT) { stop! }
       trap(:TERM) { stop! }
       Opt.merge! parse_options(argv)
+      if Opt[:locales].nil? || Opt[:locales].empty?
+        Opt[:locales] = ['en']
+      end
 
       load_config
 
@@ -128,8 +134,9 @@ module Geonames
         info "Using adapter #{Opt[:store]}.."
 
         # Nations
-        if Opt[:codes].empty? || argv[0] =~ /coun|nati/
-          dump = Geonames::Dump.new(:nation, :dump)
+        if Opt[:nations].empty? || argv[0] =~ /coun|nati/
+          info "\nPopulating 'nations' database..."
+          dump = Geonames::Dump.new(:all, :dump)
           info "\n---\nTotal #{dump.data.length} parsed."
 
           info "Writing to nations DB"
@@ -137,8 +144,8 @@ module Geonames
 
         # Regions, Cities....
         else
-          zip = Geonames::Dump.new(Opt[:codes], :zip).data
-          dump = Geonames::Dump.new(Opt[:codes], :dump).data
+          zip = Geonames::Dump.new(Opt[:nations], :zip).data
+          dump = Geonames::Dump.new(Opt[:nations], :dump).data
           info "\n---\nTotal #{dump.size} parsed. #{zip.size} zips."
 
           info "Join dump << zip"

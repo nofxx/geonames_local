@@ -1,7 +1,6 @@
 require 'mongoid'
 require 'mongoid_geospatial'
 
-I18n.locale = :en
 
 Mongoid.configure do |config|
   #config.master = Mongo::Connection.new.db("symbolize_test")
@@ -10,7 +9,6 @@ end
 
 module Geonames
   module Models
-    #module Mongodb
     require 'geopolitical/../../app/models/hood'
     require 'geopolitical/../../app/models/city'
     require 'geopolitical/../../app/models/region'
@@ -18,25 +16,36 @@ module Geonames
 
     module Nations
       def self.from_batch data
-        # Nation.delete_all # if clean
+        Nation.delete_all # if clean
         data.each do |row|
           # info row
-         create! parse(row) rescue nil
+          create! parse(row) rescue nil
         end
       end
 
       def self.create! data
-        Nation.create! data
+        n = Nation.create! data
+        info n.inspect
       rescue => e
         info "Prob com nation #{klass}, #{data} #{e}"
       end
 
       def self.parse row
-        abbr, iso3, ison, fips, name, capital, area, pop, continent, tld,
-        currency, phone, postal, langs, gid, neighbours = row.split(/\t/)
+        abbr, iso3, ison, fips, name, capital, area, pop, continent,
+        tld, cur_code, cur_name, phone, pos_code, pos_regex,
+        langs, gid, neighbours = row.split(/\t/)
         info "Nation: #{name}/#{abbr}"
+        info "#{row}"
+        info "------------------------"
+
+
+        name_i18n = Opt[:locales].reduce({}) do |h, l|
+          h.merge({ l => name })
+        end
+
         {
-          abbr: abbr, slug: name.downcase, name: name
+          name_translations: name_i18n, zip: pos_code, cash: cur_code,
+          abbr: abbr, slug: name.downcase, code: iso3, lang: langs
         }
       end
     end
@@ -64,7 +73,7 @@ module Geonames
             gid: s.gid, name: s.name, abbr: s.abbr,
             nation: nation, code: s.region
           }
-i        end
+        end
 
         def parse_city s
           region = Region.find_by(code: s.region)
@@ -91,35 +100,6 @@ i        end
 
       end
     end
-
-    # class City < Geonames::Spot
-    #   # include Mongoid::Document
-    #   # include Mongoid::Geospatial
-    #   # store_in :collection => "cities"
-
-    #   def self.from_batch data
-    #     data.each do |city|
-    #       info "Writing city #{city.name}"
-    #       next unless city.nation
-    #       city = ::Geopolitical::City.new(parse(city))
-    #       city.save
-    #     end
-    #   end
-
-    #   def parse s
-    #
-    #   end
-
-    # end
-
-
-    # class Region < Geonames::Spot
-
-    #   def self.from_batch data
-
-    #   end
-
-    # end
 
 
     # class Nation < Geonames::Spot

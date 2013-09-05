@@ -2,8 +2,9 @@
 # Geonames Local Config Example
 #
 :store: mongodb
-:codes: [br] # [] to populate nations
 :level: city
+:nations: [br, us] # [] to populate nations database
+:locales: [pt, en]
 :mapping:
   :name: name
   :geom: true

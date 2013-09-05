@@ -9,8 +9,8 @@ No hit limit, fast as possible.
 
 To use one adapter, install the corresponding gem:
 
+  MongoDB      =>   mongoid, geopolitical (optional: mongo_ext)
   PostgreSQL   =>   pg
-  MongoDB      =>   mongoid (optional: mongo_ext)
   Tokyo        =>   tokyocabinet
 
 You will also need in your system:

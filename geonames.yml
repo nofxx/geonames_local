@@ -1,9 +1,10 @@
 #
 # Geonames Local Config Example
 #
-:store: mongodb # postgis / tokyo
-:codes: [br] # [] to store all nations informations (not recursive)
+:store: mongodb
 :level: city
+:nations: [br]
+:locales: [pt, en]
 :min_pop: 100000
 :mapping:
   :name: name
