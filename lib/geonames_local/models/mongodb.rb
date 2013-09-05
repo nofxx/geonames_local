@@ -18,7 +18,7 @@ module Geonames
       class << self
 
         def nations data, clean
-          Nation.delete_all # if clean
+          Nation.delete_all if clean
           data.each do |row|
             create Nation, parse_nation(row) rescue nil
           end
@@ -26,7 +26,7 @@ module Geonames
 
 
         def batch data, clean = false
-          [Region, City].each(&:delete_all) #if clean
+          [Region, City].each(&:delete_all) if clean
 
           @regions, @cities = data[:region], data[:city]
           @regions.each { |r| create Region, parse_region(r) }
@@ -81,8 +81,8 @@ module Geonames
             try += 1
             break if try > 7
           end
-
-          info s.inspect
+          # ---
+          # info s.inspect
           info "City: #{s.zip} | #{slug} - #{s.name} / #{region.try(:abbr)}"
           {
             name_translations: translate(s.name),
