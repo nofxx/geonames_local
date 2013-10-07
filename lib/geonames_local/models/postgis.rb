@@ -54,3 +54,41 @@ module Geonames
     #end
   end
 end
+
+
+#   === Migration
+
+# Default PG migration:
+
+#     create_table :cities do |t|
+#       t.references :country, :null => false
+#       t.references :province
+#       t.string  :name,   :null => false
+#       t.point   :geom,   :srid => 4326
+#       t.integer :gid, :zip
+#     end
+
+#     create_table :provinces do |t|
+#       t.references :country, :null => false
+#       t.string :name, :null => false
+#       t.string :abbr, :limit => 2, :null => false
+#       t.integer :gid
+#     end
+
+#     create_table :countries do |t|
+#       t.string :name, :limit => 30, :null => false
+#       t.string :abbr, :limit => 2,  :null => false
+#     end
+
+#     add_index :cities, :name
+#     add_index :cities, :zip
+#     add_index :cities, :country_id
+#     add_index :cities, :province_id
+#     add_index :cities, :gid,  :unique  => true
+#     add_index :cities, :geom, :spatial => true
+#     add_index :provinces, :name
+#     add_index :provinces, :abbr
+#     add_index :provinces, :country_id
+#     add_index :provinces, :gid,  :unique => true
+#     add_index :countries, :abbr, :unique => true
+#     add_index :countries, :name, :unique => true
