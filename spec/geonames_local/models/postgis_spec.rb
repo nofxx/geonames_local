@@ -11,31 +11,31 @@
 # end
 
 # def brasil
-#   Models::AR::Country.find_or_create_by_name(:name => "Brazil", :abbr => "BR")
+#   Models::AR::Nation.find_or_create_by_name(:name => "Brazil", :abbr => "BR")
 # end
 
-# describe "Country" do
+# describe "Nation" do
 
 #   it "should create countries" do
-#     Models::AR::Country.create(:name => "Chad", :abbr => "TD").should be_valid
+#     Models::AR::Nation.create(:name => "Chad", :abbr => "TD").should be_valid
 #   end
 
 #   it "should write to db" do
 #     lambda do
-#       Models::AR::Country.create(:name => "Itália", :abbr => "IT")
-#     end.should change(Models::AR::Country, :count).by(1)
+#       Models::AR::Nation.create(:name => "Itália", :abbr => "IT")
+#     end.should change(Models::AR::Nation, :count).by(1)
 #   end
 
 # end
 
-# describe "Province" do
+# describe "Region" do
 
 #   it "should be a class instance of ar" do
-#     Models::AR::Province.new.should be_instance_of Models::AR::Province
+#     Models::AR::Region.new.should be_instance_of Models::AR::Region
 #   end
 
 #   it "should create" do
-#     Models::AR::Province.create(:name => "Chadland", :country => brasil).should be_valid
+#     Models::AR::Region.create(:name => "Chadland", :nation => brasil).should be_valid
 #   end
 # end
 
@@ -46,7 +46,7 @@
 #   end
 
 #   it "should create" do
-#     Models::AR::City.create(:name => "Chadland", :country => brasil).should be_valid
+#     Models::AR::City.create(:name => "Chadland", :nation => brasil).should be_valid
 #   end
 # end
 # #  DatabaseCleaner.clean
@@ -56,8 +56,8 @@
 #   before do
 #  #   DatabaseCleaner.clean
 #     @br ||= brasil
-#     Models::AR::City.create!("name" => "São Tomé", "geom" => [15,15], :country => @br)
-#     Models::AR::City.create!("name" => "Rock CIty", "geom" => [18,16], :country => @br)
+#     Models::AR::City.create!("name" => "São Tomé", "geom" => [15,15], :nation => @br)
+#     Models::AR::City.create!("name" => "Rock CIty", "geom" => [18,16], :nation => @br)
 #   end
 
 #   it "should record" do

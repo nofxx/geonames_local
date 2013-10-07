@@ -20,9 +20,9 @@ describe "Tokyo" do
 #   end
 
 #   it "should return all countries" do
-#     all = Geonames::Country.all
+#     all = Geonames::Nation.all
 #     all.should be_instance_of Array
-#     all[0].should be_instance_of Geonames::Country
+#     all[0].should be_instance_of Geonames::Nation
 #     all[0].gid.should eql(1)
 #   end
 

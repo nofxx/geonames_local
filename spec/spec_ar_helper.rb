@@ -43,13 +43,13 @@
 
 #   create_table :cities, :force => true  do |t|
 #     t.references :country, :null => false
-#     t.references :province
+#     t.references :region
 #     t.string  :name, :null => false
 #     t.point   :geom,   :srid => 4326
 #     t.integer :gid, :zip
 #   end
 
-#   create_table :provinces, :force => true do |t|
+#   create_table :regions, :force => true do |t|
 #     t.references :country, :null => false
 #     t.string :name, :null => false
 #     t.string :abbr, :limit => 3
@@ -65,12 +65,12 @@
 #   add_index :cities, :gid
 #   add_index :cities, :zip
 #   add_index :cities, :country_id
-#   add_index :cities, :province_id
+#   add_index :cities, :region_id
 #   add_index :cities, :geom, :spatial => true
-#   add_index :provinces, :name
-#   add_index :provinces, :abbr
-#   add_index :provinces, :gid
-#   add_index :provinces, :country_id
+#   add_index :regions, :name
+#   add_index :regions, :abbr
+#   add_index :regions, :gid
+#   add_index :regions, :country_id
 #   add_index :countries, :abbr, :unique => true
 #   add_index :countries, :name, :unique => true
 

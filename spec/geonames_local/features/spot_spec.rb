@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
+require "spec_helper"
 require "geo_ruby"
 
 describe Spot do
@@ -17,8 +17,8 @@ describe Spot do
       spot.code.should eql("6593")
     end
 
-    it "should parse province code" do
-      spot.province.should eql("2407500")
+    it "should parse region code" do
+      spot.region.should eql("2407500")
     end
 
     it "should parse name" do
@@ -36,8 +36,8 @@ describe Spot do
       spot.kind.should eql(:city)
     end
 
-    it "should parse spot country" do
-      spot.country.should eql("BR")
+    it "should parse spot nation" do
+      spot.nation.should eql("BR")
     end
 
     it "shuold parse timezone" do
@@ -72,8 +72,8 @@ describe Spot do
       spot.kind.should eql(:other)
     end
 
-    it "should parse spot country" do
-      spot.country.should eql("BR")
+    it "should parse spot nation" do
+      spot.nation.should eql("BR")
     end
 
     it "shuold parse timezone" do
@@ -86,12 +86,12 @@ describe Spot do
     end
   end
 
-  describe "Parsing Province" do
+  describe "Parsing Region" do
 
     let(:spot) { Geonames::Spot.new("3457153\tEstado de Minas Gerais\tEstado de Minas Gerais\tMinas,Minas Geraes,Minas Gerais\t-18.0\t-44.0\tA\tADM1\tBR\tBR\t15\t\t\t\t16672613\t\t1219\tAmerica/Sao_Paulo\t2007-05-15\n", :dump) }
 
-    it "should be kind of province" do
-      spot.kind.should eql(:province)
+    it "should be kind of region" do
+      spot.kind.should eql(:region)
     end
 
     it "should parse geoid" do
@@ -103,8 +103,8 @@ describe Spot do
       spot.code.should be_empty
     end
 
-    it "should parse province code" do
-      spot.province.should eql("15")
+    it "should parse region code" do
+      spot.region.should eql("15")
     end
 
     it "should create abbr" do
@@ -151,12 +151,12 @@ describe Spot do
       spot.kind.should eql(:city)
     end
 
-    it "should parse country" do
-      spot.country.should eql("BR")
+    it "should parse nation" do
+      spot.nation.should eql("BR")
     end
 
-    it "should parse province" do
-      spot.province.should eql("06")
+    it "should parse region" do
+      spot.region.should eql("06")
     end
 
     it "should parse pop" do
@@ -193,13 +193,12 @@ describe Spot do
       spot.kind.should eql(:city)
     end
 
-    it "should parse country" do
-      spot.country.should eql("BR")
+    it "should parse nation" do
+      spot.nation.should eql("BR")
     end
 
-    it "should parse province" do
-      pending
-      spot.province.should eql("18")
+    it "should parse region" do
+      spot.region.should eql("18")
     end
 
     it "should parse pop" do
@@ -211,10 +210,10 @@ describe Spot do
 
   describe "Parsing Zip" do
 
-    let(:spot) { Geonames::Spot.new("BR\t76375-000\tHidrolina\tGoias\t29\t\t5209804\t\t\t-14.7574\t-49.3596\t\n", :zip) }
+    let(:spot) { Geonames::Spot.new("BR\t76375-000\tHidrolina\tGoias\t\t5209804\t29\t\t\t-14.7574\t-49.3596\t\n", :zip) }
 
     it "should parse zip oO" do
-      spot.zip.should eql("76375")
+      spot.zip.should eql("76375-000")
     end
 
     it "should be a city" do
@@ -246,7 +245,7 @@ describe Spot do
 
   describe "From Hash" do
 
-    let(:spot) { Spot.from_hash({"id" => 9, "name" => "Sao Rock", "geom" => [15,15], "kind" => "city", "country" => "BR", "gid" => 13232, "tz" => "America/Foo", "ascii" => "Rock"}) }
+    let(:spot) { Spot.from_hash({"id" => 9, "name" => "Sao Rock", "geom" => [15,15], "kind" => "city", "nation" => "BR", "gid" => 13232, "tz" => "America/Foo", "ascii" => "Rock"}) }
 
     it "should be an spot" do
       spot.should be_instance_of Spot
@@ -269,8 +268,8 @@ describe Spot do
       spot.ascii.should eql("Rock")
     end
 
-    it "should set the country abbr" do
-      spot.country.should eql("BR")
+    it "should set the nation abbr" do
+      spot.nation.should eql("BR")
     end
 
   end
