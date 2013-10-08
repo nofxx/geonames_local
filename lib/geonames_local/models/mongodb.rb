@@ -4,6 +4,7 @@ require 'geopolitical/helpers'
 
 Mongoid.configure do |config|
   #config.master = Mongo::Connection.new.db("symbolize_test")
+  info "Mongoid connecting to #{Opt[:db]}"
   config.connect_to(Opt[:db][:name])
 end
 
@@ -34,9 +35,10 @@ module Geonames
         end
 
         def create klass, data
+          info "#{klass}.new #{data}"
           klass.create! data
         rescue => e
-          info "Prob com spot #{klass}, #{data} #{e}"
+          warn "Prob com spot #{e} #{e.backtrace.join("\n")}"
         end
 
         def translate txt

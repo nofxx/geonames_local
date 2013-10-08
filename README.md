@@ -1,11 +1,13 @@
-= Geonames Local
+Geonames Local
+==============
 
 Downloads and store Geonames.org data locally (MongoDB, Mongoid).
 Making every Geoname API operation possible on your servers.
 No hit limit, fast as possible.
 
 
-== Usage
+Use
+---
 
 Install where you want to populate the DB:
 
@@ -18,13 +20,13 @@ You will also need in your system:
 * curl
 
 
-=== Config YML
-
+Config
+------
 
 Create a config yml file:
 
 
-  geonames conf
+  geonames init
 
 
 Will generate a "geonames.yml" file on your folder.
@@ -43,7 +45,8 @@ To populate the nations database for the first time use:
   geonames -c geoconfig.yml nations
 
 
-== Mongoid
+Adapters
+--------
 
 So, supposing Mongoid, something like this is possible:
 
@@ -59,24 +62,7 @@ Be sure to use a database based on the PostGIS template.
 
 
 
-== TODO/Problems
+Next
+----
 
-- Local relational mapping of geonames data
-- Map geonames fields to your db scheme
-- Countries are a static yml file :/
 - IP Geonames? http://ipinfodb.com
-
-
-== Note on Patches/Pull Requests
-
-* Fork the project.
-* Make your feature addition or bug fix.
-* Add tests for it. This is important so I don't break it in a
-  future version unintentionally.
-* Commit, do not mess with rakefile, version, or history.
-  (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
-* Send me a pull request. Bonus points for topic branches.
-
-== Copyright
-
-Copyright (c) 2009 Marcos Piccinini. See LICENSE for details.

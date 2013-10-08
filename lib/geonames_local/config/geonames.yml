@@ -10,7 +10,7 @@
   :geom: true
 :db:
   :host: localhost
-  :dbname: geonames_local
+  :name: geonames_local
   # :user:
   # :password:
   # :purge: false

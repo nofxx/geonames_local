@@ -19,21 +19,22 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.summary = %q{Dumps geonames data for local usage}
 
+
   gem.extra_rdoc_files = [
     "MIT-LICENSE",
     "README.rdoc"
   ]
 
+  gem.add_dependency('mongoid', ['>= 3.0.0'])
+  gem.add_dependency('geopolitical', ['>= 0.8.0'])
+
   gem.post_install_message = %q{
 Geonames Local
 --------------
 
-To use the adapter, install the corresponding gem:
+Use `geonames init` to create a config.yml file.
+Or `geonames -c config.yml` to run using a config file.
 
-  PostgreSQL   =>   pg
-  MongoDB      =>   mongoid (optional: mongo_ext)
-  Tokyo        =>   tokyocabinet
-
-Have fun because:
+Have fun!
 }
 end
