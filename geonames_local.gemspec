@@ -22,7 +22,7 @@ Gem::Specification.new do |gem|
 
   gem.extra_rdoc_files = [
     "MIT-LICENSE",
-    "README.rdoc"
+    "README.md"
   ]
 
   gem.add_dependency('mongoid', ['>= 3.0.0'])
