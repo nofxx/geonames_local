@@ -11,7 +11,7 @@ Use
 
 Install where you want to populate the DB:
 
-  gem install geonames_local
+    gem install geonames_local
 
 
 You will also need in your system:
@@ -25,24 +25,30 @@ Config
 
 Create a config yml file:
 
-
-  geonames init
-
+    geonames init
 
 Will generate a "geonames.yml" file on your folder.
 The file is self explanatory.
 
-  geonames -c geonames.yml
+Geonames splits the nations/countries database from the rest, so:
 
-To run it. Use -v for verbose.
-
-If you are not sure your country/nation code, use:
-
-  geonames list <search>
 
 To populate the nations database for the first time use:
 
-  geonames -c geoconfig.yml nations
+    geonames -c geoconfig.yml nations
+
+
+Then you can run geonames to populate regions/cities...
+
+    geonames -c geonames.yml
+
+To run it. Use -v for verbose.
+
+
+If you are not sure your country/nation code, use:
+
+    geonames list <search>
+
 
 
 Adapters
