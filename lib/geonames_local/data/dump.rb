@@ -76,12 +76,11 @@ module Geonames
           end
         end
         total = Time.now - start
-        info "#{red} #{@kind} entries parsed in #{total} sec (#{(red/total).to_i}/s)"
+        info "#{red} #{@kind} spots parsed #{total}s (#{(red / total).to_i}/s)"
       end
       rescue Errno::ENOENT => e
-      info "Failed to download #{file}, skipping."
+      info "Failed to download #{file}, skipping. #{e}"
     end
-
 
   end
 

@@ -25,7 +25,7 @@ Gem::Specification.new do |gem|
     "README.md"
   ]
 
-  gem.add_dependency('mongoid', ['>= 3.0.0'])
+  gem.add_dependency('mongoid', ['~> 3.1.0'])
   gem.add_dependency('geopolitical', ['>= 0.8.0'])
 
   gem.post_install_message = %q{

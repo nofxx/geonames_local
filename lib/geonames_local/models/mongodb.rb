@@ -4,6 +4,7 @@ require 'geopolitical/helpers'
 
 Mongoid.configure do |config|
   #config.master = Mongo::Connection.new.db("symbolize_test")
+  info "Using Mongoid v#{Mongoid::VERSION}"
   info "Mongoid connecting to #{Opt[:db]}"
   config.connect_to(Opt[:db][:name])
 end
@@ -17,14 +18,6 @@ module Geonames
     module MongoWrapper
 
       class << self
-
-        def nations data, clean
-          Nation.delete_all if clean
-          data.each do |row|
-            create Nation, parse_nation(row) rescue nil
-          end
-        end
-
 
         def batch data, clean = false
           [Region, City].each(&:delete_all) if clean
@@ -47,6 +40,16 @@ module Geonames
           end
         end
 
+        #
+        # Parse Nations
+        #
+        def nations data, clean
+          fail "JJDJDJ"
+          Nation.delete_all if clean
+          data.each do |row|
+            create Nation, parse_nation(row) rescue nil
+          end
+        end
 
         def parse_nation row
           abbr, iso3, ison, fips, name, capital, area, pop, continent,
@@ -62,7 +65,9 @@ module Geonames
           }
         end
 
-
+        #
+        # Parse Regions
+        #
         def parse_region s
           nation = Nation.find_by(abbr: /#{s.nation}/i)
           info "Region: #{s.name} / #{s.abbr}"
@@ -73,7 +78,10 @@ module Geonames
           }
         end
 
-        def parse_city s
+        #
+        # Parse Cities
+        #
+        def parse_city(s)
           region = Region.find_by(code: s.region)
           slug = City.new(slug: s.ascii).slug
           attempt = slug.dup
@@ -95,8 +103,8 @@ module Geonames
         end
 
       end
-    end
 
+    end
 
     # class Nation < Geonames::Spot
 
@@ -105,7 +113,8 @@ module Geonames
     #   end
 
     #   def to_hash
-    #     { "gid" => @gid.to_s, "name" => @name, "kind" => "nation", "code" => @code}
+    #     { "gid" => @gid.to_s, "name" => @name,
+    #     "kind" => "nation", "code" => @code}
     #   end
 
     #   def export
@@ -116,8 +125,6 @@ module Geonames
     #     ["gid", "code", "name"]
     #   end
     # end
-
-
 
     # class Zip
     #   include Mongoid::Document
