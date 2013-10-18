@@ -26,7 +26,7 @@ Gem::Specification.new do |gem|
   ]
 
   gem.add_dependency('mongoid', ['~> 3.1.0'])
-  gem.add_dependency('geopolitical', ['>= 0.8.0'])
+  gem.add_dependency('geopolitical', ['> 0.8.1'])
 
   gem.post_install_message = %q{
 Geonames Local

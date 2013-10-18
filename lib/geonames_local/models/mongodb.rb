@@ -28,7 +28,7 @@ module Geonames
         end
 
         def create klass, data
-          info "#{klass}.new #{data}"
+          # info "#{klass}.new #{data}"
           klass.create! data
         rescue => e
           warn "Prob com spot #{e} #{e.backtrace.join("\n")}"
@@ -44,7 +44,6 @@ module Geonames
         # Parse Nations
         #
         def nations data, clean
-          fail "JJDJDJ"
           Nation.delete_all if clean
           data.each do |row|
             create Nation, parse_nation(row) rescue nil
