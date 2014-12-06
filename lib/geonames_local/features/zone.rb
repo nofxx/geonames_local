@@ -1,6 +1,6 @@
-require 'rubygems'
-require 'geo_ruby'
-
+#
+# A polygon basically.
+#
 class Zone
   attr_reader :city, :name, :geom, :kind
 

@@ -1,6 +1,3 @@
-require 'logger'
-require 'yaml'
-
 module Geonames
   Opt = {}
   Cache = { dump: [], zip: [], roads: [], zones: [] }

@@ -3,11 +3,9 @@
 #
 require 'optparse'
 # Require CLI Stuff
-require 'geonames_local/geonames'
 require 'geonames_local/data/shp'
 require 'geonames_local/data/dump'
 require 'geonames_local/data/export'
-require 'geonames_local/cli'
 
 module Geonames
   #

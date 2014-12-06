@@ -1,6 +1,6 @@
-require 'rubygems'
-require 'geo_ruby'
-
+#
+# Road/Street/Via/Autoban
+#
 class Road
   attr_reader :city, :region, :nation, :zone, :name, :geom, :kind, :table
 
