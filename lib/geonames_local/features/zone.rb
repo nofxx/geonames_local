@@ -1,10 +1,10 @@
-require "rubygems"
-require "geo_ruby"
+require 'rubygems'
+require 'geo_ruby'
 
 class Zone
   attr_reader :city, :name, :geom, :kind
 
-  def initialize(keys, vals, city=nil)
+  def initialize(keys, vals, city = nil)
     s = vals.split("\t")
     r = {}
     keys.each_with_index do |k, i|
@@ -20,5 +20,4 @@ class Zone
   def parse_geom(hex)
     @geom = GeoRuby::SimpleFeatures::Geometry.from_hex_ewkb(hex)
   end
-
 end

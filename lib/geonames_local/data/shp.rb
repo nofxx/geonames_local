@@ -4,10 +4,9 @@
 
 module Geonames
   class SHP
-
     def initialize(file)
       @file = file
-      @fname = file.split("/")[-1] rescue nil
+      @fname = file.split('/')[-1] rescue nil
       @type = Object.module_eval("::#{Opt[:type].capitalize}", __FILE__, __LINE__)
       # @ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
       @sample = nil
@@ -17,7 +16,7 @@ module Geonames
     end
 
     def shp2pg
-      info "Converting SRID"
+      info 'Converting SRID'
       `shp2pgsql -D -as 4326 #{@file} nil > /tmp/#{@fname}.dump`
     end
 
@@ -32,7 +31,7 @@ module Geonames
     end
 
     def parse
-      info "Parsing dump"
+      info 'Parsing dump'
       start = Time.now
       red = 0
       File.open("/tmp/#{@fname}.dump") do |f|
@@ -44,15 +43,15 @@ module Geonames
           end
         end
       end
-      info "#{red} parsed. #{Time.now-start}s"
+      info "#{red} parsed. #{Time.now - start}s"
     end
 
     def reduce!
-      hsh = Cache[:roads].group_by { |r| r.name }
+      hsh = Cache[:roads].group_by(&:name)
       arr = []
-      hsh.map do |key, vals|
+      hsh.map do |_key, vals|
         first = vals.delete_at(0)
-#        p vals[0].geom.geometries.concat(vals[1].geom.geometries)
+        #        p vals[0].geom.geometries.concat(vals[1].geom.geometries)
         vals.map(&:geom).each do |g|
           first.geom.geometries.concat g.geometries
         end

@@ -5,10 +5,10 @@ module Geonames
   class Spot
     attr_accessor :gid, :name, :ascii, :lat, :lon, :nation, :kind,
                   :code,  :pop, :tz, :geom, :region, :zip, :abbr, :id
-    alias :x :lon
-    alias :y :lat
-    alias :geoname_id :gid
-    alias :table :kind
+    alias_method :x, :lon
+    alias_method :y, :lat
+    alias_method :geoname_id, :gid
+    alias_method :table, :kind
 
     #
     # = Geonames Spot
@@ -97,7 +97,6 @@ module Geonames
     end
 
     class << self
-
       attr_accessor :collection
 
       def nearest(x, y)
@@ -110,9 +109,6 @@ module Geonames
         spot.geom = GeoRuby::SimpleFeatures::Point.from_x_y(*spot.geom)
         spot
       end
-
     end
-
   end
-
 end

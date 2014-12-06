@@ -30,8 +30,6 @@
 #   exit
 # end
 
-
-
 # ActiveRecord::Schema.define() do
 
 #   create_table :users, :force => true do |t|
@@ -91,6 +89,5 @@
 #   c.after(:each) do
 #     DatabaseCleaner.clean
 #   end
-
 
 # end

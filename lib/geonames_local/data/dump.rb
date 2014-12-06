@@ -1,9 +1,9 @@
 module Geonames
   class Dump
     # Geonames base URL
-    URL = "http://download.geonames.org/export/"
+    URL = 'http://download.geonames.org/export/'
     # Work temporary files
-    TMP = "/tmp/geonames/"
+    TMP = '/tmp/geonames/'
 
     def initialize(target, kind)
       @kind = kind
@@ -22,7 +22,7 @@ module Geonames
       parse file
     end
 
-    def work nation
+    def work(nation)
       info "\nWorking on #{@kind} for #{nation}"
       file = get_file(nation)
       download file
@@ -30,19 +30,17 @@ module Geonames
       parse file
     end
 
-    def data
-      @data
-    end
+    attr_reader :data
 
     def get_file(nation)
-      nation == "nation" ? "countryInfo.txt" : "#{nation.upcase}.zip"
+      nation == 'nation' ? 'countryInfo.txt' : "#{nation.upcase}.zip"
     end
 
     def download(file)
-      Dir.mkdir(TMP) unless File.exists?(TMP)
-      Dir.mkdir(TMP + @kind.to_s) unless File.exists?(TMP + @kind.to_s)
+      Dir.mkdir(TMP) unless File.exist?(TMP)
+      Dir.mkdir(TMP + @kind.to_s) unless File.exist?(TMP + @kind.to_s)
       fname = TMP + "#{@kind}/#{file}"
-      return if File.exists?(fname)
+      return if File.exist?(fname)
       `curl #{URL}/#{@kind}/#{file} -o #{fname}`
     end
 
@@ -57,7 +55,7 @@ module Geonames
         if l =~ /^\D/
           return l
         else
-          if Opt[:level] != "all"
+          if Opt[:level] != 'all'
             return unless l =~ /ADM\d/ # ADM2 => cities
           end
         end
@@ -68,7 +66,7 @@ module Geonames
     def parse(file)
       red = 0
       start = Time.now
-      File.open("/tmp/geonames/#{@kind}/#{file.gsub("zip", "txt")}") do |f|
+      File.open("/tmp/geonames/#{@kind}/#{file.gsub('zip', 'txt')}") do |f|
         while line = f.gets
           if record = parse_line(line)
             @data << record
@@ -79,9 +77,7 @@ module Geonames
         info "#{red} #{@kind} spots parsed #{total}s (#{(red / total).to_i}/s)"
       end
       rescue Errno::ENOENT => e
-      info "Failed to download #{file}, skipping. #{e}"
+        info "Failed to download #{file}, skipping. #{e}"
     end
-
   end
-
 end

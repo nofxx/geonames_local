@@ -3,7 +3,7 @@ require 'yaml'
 
 module Geonames
   Opt = {}
-  Cache = {:dump => [], :zip => [], :roads => [], :zones => []}
+  Cache = { dump: [], zip: [], roads: [], zones: [] }
   Codes = YAML.load(File.read(File.join(File.dirname(__FILE__), 'config', 'codes.yml')))
 
   def info(txt)

@@ -9,7 +9,6 @@ require 'geonames_local/data/dump'
 require 'geonames_local/data/export'
 require 'geonames_local/cli'
 
-
 module Geonames
   #
   # Command Line Interface for Geonames Local
@@ -57,14 +56,13 @@ module Geonames
     private_class_method :parse_options
 
     class << self
-
       def load_config
-        info "Loading config file..."
+        info 'Loading config file...'
         if Opt[:config]
           Opt.merge! YAML.load(File.read(Opt[:config]))
         else
           # Load config/geonames.yml if there's one
-          if File.exists?(cfg = File.join('config', 'geonames.yml'))
+          if File.exist?(cfg = File.join('config', 'geonames.yml'))
             Opt.merge! YAML.load(File.read(cfg))
           else
             fail
@@ -77,7 +75,7 @@ module Geonames
 
       # Ugly but works?
       def work(argv)
-        info "Geopolitical Local Start!"
+        info 'Geopolitical Local Start!'
 
         trap(:INT) { stop! }
         trap(:TERM) { stop! }
@@ -95,7 +93,7 @@ module Geonames
         # Return Codes and Exit
         #
         if argv[0] =~ /list|codes/
-          Codes.each do |key,val|
+          Codes.each do |key, val|
             str = [val.values, key.to_s].join(' ').downcase
             if s = argv[1]
               next unless str =~ /#{s.downcase}/
@@ -169,12 +167,10 @@ module Geonames
       end
 
       def load_adapter(name)
-        begin
-          require "geonames_local/models/#{name}"
-        rescue LoadError
-          info "Can't find adapter for #{name}"
-          stop!
-        end
+        require "geonames_local/models/#{name}"
+      rescue LoadError
+        info "Can't find adapter for #{name}"
+        stop!
       end
 
       def unify!(dump, zip)
@@ -195,9 +191,6 @@ module Geonames
         puts 'Closing Geonames...'
         exit
       end
-
     end # class < self
-
   end # CLI
-
 end # Geonames

@@ -3,9 +3,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'geonames_local'
 require 'geonames_local/cli'
 require 'rspec'
-require 'rspec/autorun'
 include Geonames
 
-RSpec.configure do |config|
-
-end
+# RSpec.configure do |config|
+# end

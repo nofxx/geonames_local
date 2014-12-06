@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-require "spec_helper"
+require 'spec_helper'
 
 # require 'geonames_local/models/mongodb'
 # include Models::Mongo

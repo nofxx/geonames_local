@@ -3,7 +3,7 @@ require 'mongoid_geospatial'
 require 'geopolitical/helpers'
 
 Mongoid.configure do |config|
-  #config.master = Mongo::Connection.new.db("symbolize_test")
+  # config.master = Mongo::Connection.new.db("symbolize_test")
   info "Using Mongoid v#{Mongoid::VERSION}"
   info "Mongoid connecting to #{Opt[:db]}"
   config.connect_to(Opt[:db][:name])
@@ -16,10 +16,8 @@ module Geonames
     require 'geopolitical/../../app/models/region'
     require 'geopolitical/../../app/models/nation'
     module MongoWrapper
-
       class << self
-
-        def batch data, clean = false
+        def batch(data, clean = false)
           [Region, City].each(&:delete_all) if clean
 
           @regions, @cities = data[:region], data[:city]
@@ -27,30 +25,30 @@ module Geonames
           @cities.each  { |c| create City, parse_city(c) }
         end
 
-        def create klass, data
+        def create(klass, data)
           # info "#{klass}.new #{data}"
           klass.create! data
         rescue => e
           warn "Prob com spot #{e} #{e.backtrace.join("\n")}"
         end
 
-        def translate txt
+        def translate(txt)
           name_i18n = Opt[:locales].reduce({}) do |h, l|
-            h.merge({ l => txt })
+            h.merge(l => txt)
           end
         end
 
         #
         # Parse Nations
         #
-        def nations data, clean
+        def nations(data, clean)
           Nation.delete_all if clean
           data.each do |row|
             create Nation, parse_nation(row) rescue nil
           end
         end
 
-        def parse_nation row
+        def parse_nation(row)
           abbr, iso3, ison, fips, name, capital, area, pop, continent,
           tld, cur_code, cur_name, phone, pos_code, pos_regex,
           langs, gid, neighbours = row.split(/\t/)
@@ -67,7 +65,7 @@ module Geonames
         #
         # Parse Regions
         #
-        def parse_region s
+        def parse_region(s)
           nation = Nation.find_by(abbr: /#{s.nation}/i)
           info "Region: #{s.name} / #{s.abbr}"
           {
@@ -100,13 +98,10 @@ module Geonames
             region: region, abbr: region.abbr, zip: s.zip # tz
           }
         end
-
       end
-
     end
 
     # class Nation < Geonames::Spot
-
 
     #   def parse row
     #   end
@@ -132,6 +127,5 @@ module Geonames
     #   belongs_to :city
 
     # end
-
   end
 end
