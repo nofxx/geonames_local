@@ -1,5 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
-require 'geo_ruby'
+require 'spec_helper'
 
 describe Zone do
 
@@ -10,28 +9,28 @@ describe Zone do
     end
 
     it 'should parse code' do
-      @zone.name.should eql('Copacabana')
+      expect(@zone.name).to eql('Copacabana')
     end
 
     it 'should parse kind' do
-      @zone.kind.should eql(:zone)
+      expect(@zone.kind).to eql(:zone)
     end
 
     it 'should parse geom' do
-      @zone.geom.should be_kind_of(GeoRuby::SimpleFeatures::MultiPolygon)
+      expect(@zone.geom).to be_kind_of(GeoRuby::SimpleFeatures::MultiPolygon)
     end
 
     it 'should have 1 geometry' do
-      @zone.geom.should have(1).geometries
+      expect(@zone.geom.size).to eq(1)
     end
 
     it 'should have 1 geometry polygon' do
       geom = @zone.geom.geometries[0]
-      geom.should be_kind_of(GeoRuby::SimpleFeatures::Polygon)
+      expect(geom).to be_kind_of(GeoRuby::SimpleFeatures::Polygon)
     end
 
     it 'should have 1 geometry polygon with n points' do
-      @zone.geom.geometries[0][0].should have(27).points
+      expect(@zone.geom.geometries[0][0].size).to eq(27)
     end
 
   end
@@ -42,15 +41,15 @@ describe Zone do
     end
 
     it 'should parse code' do
-      @zone.name.should eql('Botafogo')
+      expect(@zone.name).to eql('Botafogo')
     end
 
     it 'should parse geom' do
-      @zone.geom.should be_kind_of(GeoRuby::SimpleFeatures::MultiPolygon)
+      expect(@zone.geom).to be_kind_of(GeoRuby::SimpleFeatures::MultiPolygon)
     end
 
     it 'should have 1 geometry polygon with n points' do
-      @zone.geom.geometries[0][0].should have(38).points
+      expect(@zone.geom.geometries[0][0].size).to eq(38)
     end
 
   end

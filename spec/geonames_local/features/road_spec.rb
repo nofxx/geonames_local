@@ -1,5 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
-require 'geo_ruby'
+require 'spec_helper'
 
 describe Road do
 
@@ -10,32 +9,32 @@ describe Road do
     end
 
     it 'should parse zone' do
-      @road.zone.should eql('RIO COMPRIDO')
+      expect(@road.zone).to eql('RIO COMPRIDO')
     end
 
     it 'should parse code' do
-      @road.name.should eql('AV PAULO DE FRONTIN')
+      expect(@road.name).to eql('AV PAULO DE FRONTIN')
     end
 
     it 'should parse kind' do
-      @road.kind.should eql(:avenue)
+      expect(@road.kind).to eql(:avenue)
     end
 
     it 'should parse geom' do
-      @road.geom.should be_kind_of(GeoRuby::SimpleFeatures::MultiLineString)
+      expect(@road.geom).to be_kind_of(GeoRuby::SimpleFeatures::MultiLineString)
     end
 
     it 'should have 1 geometry' do
-      @road.geom.should have(1).geometries
+      expect(@road.geom.size).to eq(1)
     end
 
     it 'should have 1 geometry linestring' do
       geom = @road.geom.geometries[0]
-      geom.should be_kind_of(GeoRuby::SimpleFeatures::LineString)
+      expect(geom).to be_kind_of(GeoRuby::SimpleFeatures::LineString)
     end
 
     it 'should have 1 geometry linestring with n points' do
-      @road.geom.geometries[0].should have(7).points
+      expect(@road.geom.geometries[0].size).to eq(7)
     end
 
   end
@@ -46,15 +45,15 @@ describe Road do
     end
 
     it 'should parse code' do
-      @road.name.should eql('MS-380')
+      expect(@road.name).to eql('MS-380')
     end
 
     it 'should parse kind' do
-      @road.kind.should eql(:road)
+      expect(@road.kind).to eql(:road)
     end
 
     it 'should parse geom' do
-      @road.geom.should be_kind_of(GeoRuby::SimpleFeatures::MultiLineString)
+      expect(@road.geom).to be_kind_of(GeoRuby::SimpleFeatures::MultiLineString)
     end
 
   end

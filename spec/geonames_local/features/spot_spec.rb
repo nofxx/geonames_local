@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 require 'spec_helper'
-require 'geo_ruby'
 
 describe Spot do
 
@@ -9,44 +7,44 @@ describe Spot do
     let(:spot) { Spot.new("6319037\tMaxaranguape\tMaxaranguape\t\t-5.46874226086957\t-35.3565714695652\tA\tADM2\tBR\t22\t2407500\t6593\t\t12\t\t\t\tAmerica/Recife\t2006-12-17", :dump) }
 
     it 'should parse geoid integer' do
-      spot.geoname_id.should eql(6_319_037)
-      spot.gid.should eql(6_319_037)
+      expect(spot.geoname_id).to eql(6_319_037)
+      expect(spot.gid).to eql(6_319_037)
     end
 
     it 'should parse code' do
-      spot.code.should eql('6593')
+      expect(spot.code).to eql('6593')
     end
 
     it 'should parse region code' do
-      spot.region.should eql('2407500')
+      expect(spot.region).to eql('2407500')
     end
 
     it 'should parse name' do
-      spot.name.should eql('Maxaranguape')
-      spot.ascii.should eql('Maxaranguape')
+      expect(spot.name).to eql('Maxaranguape')
+      expect(spot.ascii).to eql('Maxaranguape')
     end
 
     it 'should parse geostuff' do
-      spot.lat.should be_within(0.001).of(-5.4687)
-      spot.y.should be_within(0.001).of(-5.4687)
-      spot.lon.should be_within(0.001).of(-35.3565)
+      expect(spot.lat).to be_within(0.001).of(-5.4687)
+      expect(spot.y).to be_within(0.001).of(-5.4687)
+      expect(spot.lon).to be_within(0.001).of(-35.3565)
     end
 
     it 'should parse spot kind' do
-      spot.kind.should eql(:city)
+      expect(spot.kind).to eql(:city)
     end
 
     it 'should parse spot nation' do
-      spot.nation.should eql('BR')
+      expect(spot.nation).to eql('BR')
     end
 
     it 'shuold parse timezone' do
-      spot.tz.should eql('America/Recife')
+      expect(spot.tz).to eql('America/Recife')
     end
 
     it 'should parse updated_at' do
-      spot.updated_at.should be_instance_of(Time)
-      spot.updated_at.day.should eql(17)
+      expect(spot.updated_at).to be_instance_of(Time)
+      expect(spot.updated_at.day).to eql(17)
     end
   end
 
@@ -55,34 +53,34 @@ describe Spot do
     let(:spot) { Geonames::Spot.new("3384862\tRiacho Zuza\tRiacho Zuza\t\t-9.4333333\t-37.6666667\tH\tSTMI\tBR\t\t02\t\t\t\t0\t\t241\tAmerica/Maceio\t1993-12-17\n", :dump) }
 
     it 'should parse geoid integer' do
-      spot.geoname_id.should eql(3_384_862)
+      expect(spot.geoname_id).to eql(3_384_862)
     end
 
     it 'should parse name' do
-      spot.name.should eql('Riacho Zuza')
-      spot.ascii.should eql('Riacho Zuza')
+      expect(spot.name).to eql('Riacho Zuza')
+      expect(spot.ascii).to eql('Riacho Zuza')
     end
 
     it 'should parse geostuff' do
-      spot.lat.should be_within(0.001).of(-9.4333333)
-      spot.lon.should be_within(0.001).of(-37.6666667)
+      expect(spot.lat).to be_within(0.001).of(-9.4333333)
+      expect(spot.lon).to be_within(0.001).of(-37.6666667)
     end
 
     it 'should parse spot kind' do
-      spot.kind.should eql(:other)
+      expect(spot.kind).to eql(:other)
     end
 
     it 'should parse spot nation' do
-      spot.nation.should eql('BR')
+      expect(spot.nation).to eql('BR')
     end
 
     it 'shuold parse timezone' do
-      spot.tz.should eql('America/Maceio')
+      expect(spot.tz).to eql('America/Maceio')
     end
 
     it 'should parse updated_at' do
-      spot.updated_at.should be_instance_of(Time)
-      spot.updated_at.day.should eql(17)
+      expect(spot.updated_at).to be_instance_of(Time)
+      expect(spot.updated_at.day).to eql(17)
     end
   end
 
@@ -91,34 +89,34 @@ describe Spot do
     let(:spot) { Geonames::Spot.new("3457153\tEstado de Minas Gerais\tEstado de Minas Gerais\tMinas,Minas Geraes,Minas Gerais\t-18.0\t-44.0\tA\tADM1\tBR\tBR\t15\t\t\t\t16672613\t\t1219\tAmerica/Sao_Paulo\t2007-05-15\n", :dump) }
 
     it 'should be kind of region' do
-      spot.kind.should eql(:region)
+      expect(spot.kind).to eql(:region)
     end
 
     it 'should parse geoid' do
-      spot.geoname_id.should eql(3_457_153)
-      spot.gid.should eql(3_457_153)
+      expect(spot.geoname_id).to eql(3_457_153)
+      expect(spot.gid).to eql(3_457_153)
     end
 
     it 'should parse code' do
-      spot.code.should be_empty
+      expect(spot.code).to be_empty
     end
 
     it 'should parse region code' do
-      spot.region.should eql('15')
+      expect(spot.region).to eql('15')
     end
 
     it 'should create abbr' do
-      spot.abbr.should eql('MG')
+      expect(spot.abbr).to eql('MG')
     end
 
     it 'should parse name' do
-      spot.name.should eql('Minas Gerais')
-      spot.ascii.should eql('Estado de Minas Gerais')
+      expect(spot.name).to eql('Minas Gerais')
+      expect(spot.ascii).to eql('Estado de Minas Gerais')
     end
 
     it 'should parse geostuff' do
-      spot.lat.should be_within(0.001).of(-18.0)
-      spot.lon.should be_within(0.001).of(-44.0)
+      expect(spot.lat).to be_within(0.001).of(-18.0)
+      expect(spot.lon).to be_within(0.001).of(-44.0)
     end
 
   end
@@ -128,39 +126,39 @@ describe Spot do
     let(:spot) {  Spot.new "3386859\tTamboril\tTamboril\t\t-4.9931\t-40.26738\tA\tADM2\tBR\t\t06\t2313203\t\t\t25455\t\t401\tAmerica/Fortaleza\t2011-04-21" }
 
     it 'should parse name' do
-      spot.name.should eql('Tamboril')
+      expect(spot.name).to eql('Tamboril')
     end
 
     it 'should parse ascii name' do
-      spot.name.should eql('Tamboril')
+      expect(spot.name).to eql('Tamboril')
     end
 
     it 'should parse x' do
-      spot.x.should be_within(0.001).of(-40.26738)
+      expect(spot.x).to be_within(0.001).of(-40.26738)
     end
 
     it 'should parse y' do
-      spot.y.should be_within(0.001).of(-4.9931)
+      expect(spot.y).to be_within(0.001).of(-4.9931)
     end
 
     it 'should parse tz' do
-      spot.tz.should eql('America/Fortaleza')
+      expect(spot.tz).to eql('America/Fortaleza')
     end
 
     it 'should parse kind' do
-      spot.kind.should eql(:city)
+      expect(spot.kind).to eql(:city)
     end
 
     it 'should parse nation' do
-      spot.nation.should eql('BR')
+      expect(spot.nation).to eql('BR')
     end
 
     it 'should parse region' do
-      spot.region.should eql('06')
+      expect(spot.region).to eql('06')
     end
 
     it 'should parse pop' do
-      spot.pop.should eql('25455')
+      expect(spot.pop).to eql('25455')
     end
 
   end
@@ -170,39 +168,39 @@ describe Spot do
     let(:spot) {  Spot.new "6322846\tLondrina\tLondrina\t\t-23.58643\t-51.08739\tA\tADM2\tBR\t\t18\t4113700\t\t\t506645\t\t544\tAmerica/Sao_Paulo\t2011-04-21" }
 
     it 'should parse name' do
-      spot.name.should eql('Londrina')
+      expect(spot.name).to eql('Londrina')
     end
 
     it 'should parse ascii name' do
-      spot.name.should eql('Londrina')
+      expect(spot.name).to eql('Londrina')
     end
 
     it 'should parse x' do
-      spot.x.should be_within(0.001).of(-51.08739)
+      expect(spot.x).to be_within(0.001).of(-51.08739)
     end
 
     it 'should parse y' do
-      spot.y.should be_within(0.001).of(-23.58643)
+      expect(spot.y).to be_within(0.001).of(-23.58643)
     end
 
     it 'should parse tz' do
-      spot.tz.should eql('America/Sao_Paulo')
+      expect(spot.tz).to eql('America/Sao_Paulo')
     end
 
     it 'should parse kind' do
-      spot.kind.should eql(:city)
+      expect(spot.kind).to eql(:city)
     end
 
     it 'should parse nation' do
-      spot.nation.should eql('BR')
+      expect(spot.nation).to eql('BR')
     end
 
     it 'should parse region' do
-      spot.region.should eql('18')
+      expect(spot.region).to eql('18')
     end
 
     it 'should parse pop' do
-      spot.pop.should eql('506645')
+      expect(spot.pop).to eql('506645')
     end
 
   end
@@ -212,32 +210,32 @@ describe Spot do
     let(:spot) { Geonames::Spot.new("BR\t76375-000\tHidrolina\tGoias\t\t5209804\t29\t\t\t-14.7574\t-49.3596\t\n", :zip) }
 
     it 'should parse zip oO' do
-      spot.zip.should eql('76375-000')
+      expect(spot.zip).to eql('76375-000')
     end
 
     it 'should be a city' do
-      spot.kind.should eql(:city)
+      expect(spot.kind).to eql(:city)
     end
 
     it 'should parse code' do
-      spot.code.should eql('29')
+      expect(spot.code).to eql('29')
     end
 
     it 'should parse geoid integer' do
-      spot.gid.should be_nil # eql(3384862)
+      expect(spot.gid).to be_nil # eql(3384862)
     end
 
     it 'should parse name' do
-      spot.name.should eql('Hidrolina')
-      spot.ascii.should be_nil # eql("Hidrolina")
+      expect(spot.name).to eql('Hidrolina')
+      expect(spot.ascii).to be_nil # eql("Hidrolina")
     end
 
     it 'should parse lat' do
-      spot.lat.should be_within(0.001).of(-14.7574)
+      expect(spot.lat).to be_within(0.001).of(-14.7574)
     end
 
     it 'should parse lon' do
-      spot.lon.should be_within(0.001).of(-49.3596)
+      expect(spot.lon).to be_within(0.001).of(-49.3596)
     end
 
   end
@@ -247,28 +245,28 @@ describe Spot do
     let(:spot) { Spot.from_hash('id' => 9, 'name' => 'Sao Rock', 'geom' => [15, 15], 'kind' => 'city', 'nation' => 'BR', 'gid' => 13_232, 'tz' => 'America/Foo', 'ascii' => 'Rock') }
 
     it 'should be an spot' do
-      spot.should be_instance_of Spot
+      expect(spot).to be_instance_of Spot
     end
 
     it 'should set the name' do
-      spot.name.should eql('Sao Rock')
+      expect(spot.name).to eql('Sao Rock')
     end
 
     it 'should set the geom' do
-      spot.geom.should be_instance_of(GeoRuby::SimpleFeatures::Point)
-      spot.geom.x.should eql(15)
+      expect(spot.geom).to be_instance_of(GeoRuby::SimpleFeatures::Point)
+      expect(spot.geom.x).to eql(15)
     end
 
     it 'should set the tz' do
-      spot.tz.should eql('America/Foo')
+      expect(spot.tz).to eql('America/Foo')
     end
 
     it 'should set the ascii' do
-      spot.ascii.should eql('Rock')
+      expect(spot.ascii).to eql('Rock')
     end
 
     it 'should set the nation abbr' do
-      spot.nation.should eql('BR')
+      expect(spot.nation).to eql('BR')
     end
 
   end

@@ -13,8 +13,8 @@ describe SHP do
     pending
     @s = SHP.new(nil)
     r = @s.reduce!
-    r.length.should eql(1)
-    r[0].geom.as_hex_ewkb.should_not eql(Cache[:roads][0].geom.as_hex_ewkb)
+    expect(r.length).to eql(1)
+    expect(r[0].geom.as_hex_ewkb).not_to eql(Cache[:roads][0].geom.as_hex_ewkb)
   end
 
 end
