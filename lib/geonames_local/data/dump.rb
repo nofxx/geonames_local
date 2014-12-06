@@ -1,5 +1,7 @@
 module Geonames
   class Dump
+    attr_reader :data
+
     # Geonames base URL
     URL = 'http://download.geonames.org/export/'
     # Work temporary files
@@ -8,11 +10,9 @@ module Geonames
     def initialize(target, kind)
       @kind = kind
       @data = []
-      if target.respond_to? :each
-        target.each { |n| work(n) }
-      elsif target == :all
-        nations
-      end
+
+      target.each { |n| work(n) } if target.respond_to? :each
+      nations if target == :all
     end
 
     def nations
@@ -29,8 +29,6 @@ module Geonames
       uncompress file
       parse file
     end
-
-    attr_reader :data
 
     def get_file(nation)
       nation == 'nation' ? 'countryInfo.txt' : "#{nation.upcase}.zip"
@@ -52,32 +50,27 @@ module Geonames
     def parse_line(l)
       return if l =~ /^#|^iso/i
       if @kind == :dump
-        if l =~ /^\D/
-          return l
-        else
-          if Opt[:level] != 'all'
-            return unless l =~ /ADM\d/ # ADM2 => cities
-          end
+        return l if l =~ /^\D/
+        if Opt[:level] != 'all'
+          return unless l =~ /ADM\d/ # ADM2 => cities
         end
       end
       Spot.new(l, @kind)
     end
 
     def parse(file)
-      red = 0
       start = Time.now
       File.open("/tmp/geonames/#{@kind}/#{file.gsub('zip', 'txt')}") do |f|
         while line = f.gets
           if record = parse_line(line)
             @data << record
-            red += 1
           end
         end
         total = Time.now - start
-        info "#{red} #{@kind} spots parsed #{total}s (#{(red / total).to_i}/s)"
+        info "#{@data.size} #{@kind} spots parsed #{total}s (#{(@data.size / total).to_i}/s)"
       end
-      rescue Errno::ENOENT => e
-        info "Failed to download #{file}, skipping. #{e}"
+    rescue Errno::ENOENT => e
+      info "Failed to download #{file}, skipping. #{e}"
     end
   end
 end

@@ -2,6 +2,7 @@
 # Geonames Local
 #
 require 'optparse'
+require 'benchmark'
 # Require CLI Stuff
 require 'geonames_local/data/shp'
 require 'geonames_local/data/dump'
@@ -20,7 +21,7 @@ module Geonames
         opts.banner = 'Geonames Command Line Usage\n\n    geonames <nation code(s)> <opts>\n\n\n'
 
         opts.on('-l', '--level LEVEL', String, 'The level of logging to report') { |level| options[:level] = level }
-        opts.on('-d', '--dump', 'Dump DB before all') { options[:dump] = true }
+        opts.on('-d', '--dump', 'Dump DB before all') { options[:clean] = true }
         opts.separator ''
         opts.separator 'Config file:'
         opts.on('-c', '--config CONFIG', String, 'Geonames Config file path') { |file|  options[:config] = file }
@@ -71,12 +72,42 @@ module Geonames
         exit
       end
 
-      # Ugly but works?
-      def work(argv)
-        info 'Geopolitical Local Start!'
-
+      def trap_signals
+        puts 'Geopolitical Local Start!'
         trap(:INT) { stop! }
         trap(:TERM) { stop! }
+      end
+
+      def wrapper
+        Geonames::Models::MongoWrapper
+      end
+
+      def work_nations
+        info "\nPopulating 'nations' database..."
+        dump = Geonames::Dump.new(:all, :dump)
+        info "\n---\nTotal #{dump.data.length} parsed."
+
+        info 'Writing to nations DB'
+        wrapper.nations dump.data
+      end
+
+      def work_spots
+        info "\nPopulating 'regions' and 'cities' database..."
+        zip = Geonames::Dump.new(Opt[:nations], :zip).data
+        dump = Geonames::Dump.new(Opt[:nations], :dump).data
+        info "\n---\nTotal #{dump.size} parsed. #{zip.size} zip codes."
+
+        info 'Join dump << zip'
+        dump = unify!(dump, zip).group_by(&:kind)
+
+        info 'Writing to DB...'
+        wrapper.batch dump
+      end
+
+      # Ugly but works?
+      def work(argv)
+        start = Time.now
+        trap_signals
         Opt.merge! parse_options(argv)
         if Opt[:locales].nil? || Opt[:locales].empty?
           Opt[:locales] = ['en']
@@ -115,78 +146,40 @@ module Geonames
           exit
         end
 
-        #
-        # Require georuby optionally
-        #
-        require 'geo_ruby' if Opt[:mapping] && Opt[:mapping][:geom]
-
-        #
         # Load config if we got til here
-        #
         load_config
 
-        #
         # Export Data as CSV or JSON
-        #
-        if argv[0] =~ /csv|json/
-          Geonames::Export.new(Nation.all).to_csv
+        return Geonames::Export.new(Nation.all).to_csv if argv[0] =~ /csv|json/
 
-          #
-          # Do the magic! Import Geonames Data
-          #
-        else
-          load_adapter(Opt[:store])
-          info "Using adapter #{Opt[:store]}.."
-
-          # Nations
-          if Opt[:nations].empty? || argv[0] =~ /coun|nati/
-            info "\nPopulating 'nations' database..."
-            dump = Geonames::Dump.new(:all, :dump)
-            info "\n---\nTotal #{dump.data.length} parsed."
-
-            info 'Writing to nations DB'
-            Geonames::Models::MongoWrapper.nations dump.data, Opt[:clean]
-
-            # Regions, Cities....
-          else
-            zip = Geonames::Dump.new(Opt[:nations], :zip).data
-            dump = Geonames::Dump.new(Opt[:nations], :dump).data
-            info "\n---\nTotal #{dump.size} parsed. #{zip.size} zips."
-
-            info 'Join dump << zip'
-            dump = unify!(dump, zip).group_by(&:kind)
-
-            info 'Writing to DB...'
-            Geonames::Models::MongoWrapper.batch dump, Opt[:clean]
-            # info "Writing cities..."
-            # Geonames::Models::City.from_batch dump[:city]
-          end
-        end
+        # Do the magic! Import Geonames Data
+        load_adapter(Opt[:store])
+        info "Using adapter #{Opt[:store]}.."
+        wrapper.clean if Opt[:clean]
+        Benchmark.measure { work_nations } unless wrapper.nations_populated?
+        Benchmark.measure { work_spots }
       end
 
       def load_adapter(name)
-        require "geonames_local/models/#{name}"
-      rescue LoadError
-        info "Can't find adapter for #{name}"
+        require_relative "models/#{name}"
+      rescue LoadError => e
+        info "Can't find adapter for #{name} #{e}"
         stop!
       end
 
       def unify!(dump, zip)
         start = Time.now
         dump.map! do |spot|
-          if other = zip.find { |d| d.code == spot.code }
-            spot.zip = other.zip
-            spot
-          else
-            spot
-          end
+          next spot unless (other = zip.find { |z| z.code == spot.code })
+          spot.zip = other.zip
+          spot
         end
         info "Done. #{(Time.now - start).to_i}s"
         dump
       end
 
       def stop!
-        puts 'Closing Geonames...'
+        info 'Closing Geonames...'
         exit
       end
     end # class < self

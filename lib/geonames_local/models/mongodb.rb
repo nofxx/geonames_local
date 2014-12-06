@@ -1,6 +1,10 @@
-require 'mongoid'
 require 'mongoid_geospatial'
-require 'geopolitical/helpers'
+require 'geopolitical'
+require 'geopolitical/../../app/models/concerns/geopolitocracy'
+require 'geopolitical/../../app/models/nation'
+require 'geopolitical/../../app/models/region'
+require 'geopolitical/../../app/models/city'
+require 'geopolitical/../../app/models/hood'
 
 Mongoid.configure do |config|
   # config.master = Mongo::Connection.new.db("symbolize_test")
@@ -11,18 +15,16 @@ end
 
 module Geonames
   module Models
-    require 'geopolitical/../../app/models/hood'
-    require 'geopolitical/../../app/models/city'
-    require 'geopolitical/../../app/models/region'
-    require 'geopolitical/../../app/models/nation'
     module MongoWrapper
       class << self
-        def batch(data, clean = false)
-          [Region, City].each(&:delete_all) if clean
-
+        def batch(data)
           @regions, @cities = data[:region], data[:city]
           @regions.each { |r| create Region, parse_region(r) }
           @cities.each  { |c| create City, parse_city(c) }
+        end
+
+        def clean
+          [Nation, Region, City].each(&:delete_all)
         end
 
         def create(klass, data)
@@ -41,11 +43,14 @@ module Geonames
         #
         # Parse Nations
         #
-        def nations(data, clean)
-          Nation.delete_all if clean
+        def nations(data)
           data.each do |row|
             create Nation, parse_nation(row) rescue nil
           end
+        end
+
+        def nations_populated?
+          Nation.count > 0
         end
 
         def parse_nation(row)
@@ -65,13 +70,13 @@ module Geonames
         #
         # Parse Regions
         #
-        def parse_region(s)
-          nation = Nation.find_by(abbr: /#{s.nation}/i)
-          info "Region: #{s.name} / #{s.abbr}"
+        def parse_region(r)
+          nation = Nation.find_by(abbr: /#{r.nation}/i)
+          info "Region: #{r.name} / #{r.abbr}"
           {
-            name_translations: translate(s.name),
-            gid: s.gid, abbr: s.abbr,
-            nation: nation, code: s.region
+            name_translations: translate(r.name),
+            gid: r.gid, abbr: r.abbr,
+            nation: nation, code: r.region
           }
         end
 
@@ -95,7 +100,7 @@ module Geonames
             name_translations: translate(s.name),
             slug: attempt, gid: s.gid, code: s.code,
             souls: s.pop, geom: [s.lon, s.lat],
-            region: region, abbr: region.abbr, zip: s.zip # tz
+            region: region, zip: s.zip # tz
           }
         end
       end

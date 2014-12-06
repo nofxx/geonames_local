@@ -4,8 +4,7 @@ module Geonames
   Codes = YAML.load(File.read(File.join(File.dirname(__FILE__), 'config', 'codes.yml')))
 
   def info(txt)
-    if Opt[:verbose]
-      puts(txt)
-    end
+    return unless Opt[:verbose]
+    puts(txt) # Logger.info...
   end
 end

@@ -3,7 +3,7 @@
 #
 :store: mongodb
 :level: city
-:nations: [br]
+:nations: [br, it, nl]
 :locales: [pt, en]
 :min_pop: 100000
 :mapping:
@@ -11,7 +11,7 @@
   :geom: true
 :db:
   :host: localhost
-  :name: baccafe_development
+  :name: geonames_test
   :user:
   :pass:
   :purge: false
