@@ -85,20 +85,12 @@ module Geonames
         #
         def parse_city(s)
           region = Region.find_by(code: s.region)
-          slug = City.new(slug: s.ascii).slug
-          attempt = slug.dup
-          try = 1
-          until City.where(slug: attempt.downcase).first.nil?
-            attempt = "#{slug}-#{region.abbr}-#{try}"
-            try += 1
-            break if try > 7
-          end
           # ---
           # info s.inspect
-          info "City: #{s.zip} | #{slug} - #{s.name} / #{region.try(:abbr)}"
+          info "City: #{s.zip} | #{s.name} / #{region.try(:abbr)}"
           {
             name_translations: translate(s.name),
-            slug: attempt, gid: s.gid, code: s.code,
+            gid: s.gid, code: s.code,
             souls: s.pop, geom: [s.lon, s.lat],
             region: region, zip: s.zip # tz
           }
