@@ -2,6 +2,7 @@ source 'http://rubygems.org'
 gemspec # Specify  gem's dependencies in mongoid_geospatial.gemspec
 
 gem 'rake'
+gem 'pry'
 gem 'dbf'
 
 platforms :ruby do
@@ -9,10 +10,7 @@ platforms :ruby do
 end
 
 gem 'georuby'
-
-gem 'mongoid'
 gem 'mongoid_geospatial'
 
-gem 'pry'
 gem 'rspec'
 gem 'guard-rspec'
