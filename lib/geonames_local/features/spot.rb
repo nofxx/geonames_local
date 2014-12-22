@@ -20,20 +20,9 @@ module Geonames
       kind == :zip ? parse_zip(params) : parse(params)
       if @kind == :region
         @name.gsub!(/Estado d\w\s/, '')
-        @abbr = get_abbr
-      end
-    end
+        @name.gsub!(/Federal District/, 'Distrito Federal')
 
-    #
-    # Geonames does not have region/state abbr..#fail!
-    # This works 75% of the time in brazil heh
-    #
-    def get_abbr
-      s = @name.split(' ')
-      if s.length > 1
-        [s[0][0].chr, s[-1][0].chr].map(&:upcase).join
-      else
-        s[0][0..1].upcase
+        @abbr = Geonames::Regions.abbr(@name)
       end
     end
 
@@ -41,10 +30,11 @@ module Geonames
     # Parse Geonames Dump Export
     #
     def parse(row)
-      gid, @name, @ascii, @alternates, lat, lon, feat, kind,
+      gid, name, @ascii, @alternates, lat, lon, feat, kind,
       @nation, _cc2, @region, @code, _adm3, _adm4, @pop, @ele,
       @gtop, @tz, @up = row.split(/\t/)
 
+      @name = name #name.encode(Encoding::ISO_8859_1)
       @gid = @geoname_id = gid.to_i
       @kind = human_code(kind)
 
