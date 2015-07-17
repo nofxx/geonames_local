@@ -27,22 +27,16 @@ Create a config yml file:
 
     geonames init
 
-Will generate a "geonames.yml" file on your folder.
+Will generate a `geonames.yml` file on your folder.
 The file is self explanatory.
 
-Geonames splits the nations/countries database from the rest, so:
+Geonames *splits the nations/countries database* from the rest, so:
+It'll also populate the nations collection automatically: `252` nations.
 
-
-To populate the nations database for the first time use:
-
-    geonames -c geoconfig.yml nations
-
-
-Then you can run geonames to populate regions/cities...
 
     geonames -c geonames.yml
 
-To run it. Use -v for verbose.
+To run it. Use `-v` for verbose.
 
 
 If you are not sure your country/nation code, use:
@@ -50,21 +44,14 @@ If you are not sure your country/nation code, use:
     geonames list <search>
 
 
+Mongoid
+-------
 
-Adapters
---------
+Using **http://github.com/fireho/geopolitical** models:
 
-So, supposing Mongoid, something like this is possible:
 
-  City.first.province.country.abbr
+  City.first.region.nation.abbr
   => "BR"
-
-
-== Postgis
-
-TBD (by someone else)
-Be sure to use a database based on the PostGIS template.
-
 
 
 
@@ -72,3 +59,5 @@ Next
 ----
 
 - IP Geonames? http://ipinfodb.com
+- Hoods? ftp://geoftp.ibge.gov.br/malhas_digitais/censo_2010/setores_censitarios/
+- ActiveRecord/PostGIS - someone else

@@ -62,7 +62,7 @@ module Geonames
           # info "------------------------"
           {
             name_translations: translate(name),
-            zip: pos_code, cash: cur_code, gid: gid,
+            postal: pos_code, cash: cur_code, gid: gid,
             abbr: abbr, slug: name.downcase, code: iso3, lang: langs
           }
         end
@@ -92,7 +92,7 @@ module Geonames
             name_translations: translate(s.name),
             gid: s.gid, code: s.code,
             souls: s.pop, geom: [s.lon, s.lat],
-            region: region, zip: s.zip # tz
+            region: region, postal: s.zip # tz
           }
         end
       end

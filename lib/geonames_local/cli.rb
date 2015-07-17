@@ -95,7 +95,7 @@ module Geonames
         info "\nPopulating 'regions' and 'cities' database..."
         zip = Geonames::Dump.new(Opt[:nations], :zip).data
         dump = Geonames::Dump.new(Opt[:nations], :dump).data
-        info "\n---\nTotal #{dump.size} parsed. #{zip.size} zip codes."
+        info "\n---\nTotal #{dump.size} parsed. #{zip.size} postal codes."
 
         info 'Join dump << zip'
         dump = unify!(dump, zip).group_by(&:kind)
@@ -156,8 +156,8 @@ module Geonames
         load_adapter(Opt[:store])
         info "Using adapter #{Opt[:store]}.."
         wrapper.clean if Opt[:clean]
-        Benchmark.measure { work_nations } unless wrapper.nations_populated?
-        Benchmark.measure { work_spots }
+        puts Benchmark.measure { work_nations } unless wrapper.nations_populated?
+        puts Benchmark.measure { work_spots }
       end
 
       def load_adapter(name)

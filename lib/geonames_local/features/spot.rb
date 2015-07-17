@@ -21,8 +21,6 @@ module Geonames
       if @kind == :region
         @name.gsub!(/Estado d\w\s/, '')
         @name.gsub!(/Federal District/, 'Distrito Federal')
-
-        @abbr = Geonames::Regions.abbr(@name)
       end
     end
 
@@ -37,6 +35,8 @@ module Geonames
       @name = name #name.encode(Encoding::ISO_8859_1)
       @gid = @geoname_id = gid.to_i
       @kind = human_code(kind)
+
+      @abbr = @alternates.split(',').find { |n| n =~ /^[A-Z]{2,3}$/ }
 
       parse_geom(lat, lon)
       # puts "#{@kind} - #{@code} - #{@region}"

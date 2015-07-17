@@ -61,7 +61,7 @@
 
 #   add_index :cities, :name
 #   add_index :cities, :gid
-#   add_index :cities, :zip
+#   add_index :cities, :postal
 #   add_index :cities, :country_id
 #   add_index :cities, :region_id
 #   add_index :cities, :geom, :spatial => true

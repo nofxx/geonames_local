@@ -29,7 +29,7 @@ CREATE TABLE cities (
     region_id integer,
     name character varying(255) NOT NULL,
     gid integer,
-    zip integer,
+    postal integer,
     geom geometry,
     CONSTRAINT enforce_dims_geom CHECK ((st_ndims(geom) = 2)),
     CONSTRAINT enforce_geotype_geom CHECK (((geometrytype(geom) = 'POINT'::text) OR (geom IS NULL))),
@@ -127,10 +127,10 @@ CREATE INDEX index_cities_on_region_id ON cities USING btree (region_id);
 --
 -- TOC entry 2554 (class 1259 OID 21696)
 -- Dependencies: 2245
--- Name: index_cities_on_zip; Type: INDEX; Schema: public; Owner: -; Tablespace:
+-- Name: index_cities_on_postal; Type: INDEX; Schema: public; Owner: -; Tablespace:
 --
 
-CREATE INDEX index_cities_on_zip ON cities USING btree (zip);
+CREATE INDEX index_cities_on_postal ON cities USING btree (postal);
 
 
 --

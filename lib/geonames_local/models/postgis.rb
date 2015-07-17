@@ -63,7 +63,7 @@ end
 #       t.references :province
 #       t.string  :name,   :null => false
 #       t.point   :geom,   :srid => 4326
-#       t.integer :gid, :zip
+#       t.integer :gid, :postal
 #     end
 
 #     create_table :provinces do |t|
@@ -79,7 +79,7 @@ end
 #     end
 
 #     add_index :cities, :name
-#     add_index :cities, :zip
+#     add_index :cities, :postal
 #     add_index :cities, :country_id
 #     add_index :cities, :province_id
 #     add_index :cities, :gid,  :unique  => true
