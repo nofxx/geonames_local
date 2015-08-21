@@ -3,7 +3,12 @@ Geonames Local
 
 Downloads and store Geonames.org data locally (MongoDB, Mongoid).
 Making every Geoname API operation possible on your servers.
-No hit limit, fast as possible.
+**No hit limit, fast as possible.**
+
+
+* Download all country data
+* Merges ZIP into cities, so you have masks
+* Updates using geonames IDs, no duplication
 
 
 Use

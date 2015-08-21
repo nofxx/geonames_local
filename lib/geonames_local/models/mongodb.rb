@@ -74,8 +74,8 @@ module Geonames
           nation = Nation.find_by(abbr: /#{r.nation}/i)
           info "Region: #{r.name} / #{r.abbr}"
           {
+            id: r.gid.to_s, abbr: r.abbr,
             name_translations: translate(r.name),
-            gid: r.gid, abbr: r.abbr,
             nation: nation, code: r.region
           }
         end
@@ -89,10 +89,10 @@ module Geonames
           # info s.inspect
           info "City: #{s.zip} | #{s.name} / #{region.try(:abbr)}"
           {
+            id: s.gid.to_s, code: s.code,
             name_translations: translate(s.name),
-            gid: s.gid, code: s.code,
             souls: s.pop, geom: [s.lon, s.lat],
-            region: region, postal: s.zip # tz
+            region_id: region.id.to_s, postal: s.zip # tz
           }
         end
       end
