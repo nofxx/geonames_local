@@ -1,6 +1,7 @@
 #
 # Geonames Local
 #
+require 'zip'
 require 'optparse'
 require 'benchmark'
 # Require CLI Stuff
@@ -69,7 +70,7 @@ module Geonames
       end
 
       def trap_signals
-        puts 'Geopolitical Local Start!'
+        puts '󰣩 Geopolitical Local Start!'
         trap(:INT) { stop! }
         trap(:TERM) { stop! }
       end
@@ -79,24 +80,24 @@ module Geonames
       end
 
       def work_nations
-        info "\nPopulating 'nations' database..."
+        info "\n[NATIONS] Populating main 'nations' database..."
         dump = Geonames::Dump.new(:all, :dump)
         info "\n---\nTotal #{dump.data.length} parsed."
 
-        info 'Writing to nations DB'
+        info '[NATIONS] Writing to nations DB'
         wrapper.nations dump.data
       end
 
       def work_spots
-        info "\nPopulating 'regions' and 'cities' database..."
+        info "\n[SPOTS] Populating 'regions' and 'cities' database..."
         zip = Geonames::Dump.new(Opt[:nations], :zip).data
         dump = Geonames::Dump.new(Opt[:nations], :dump).data
         info "\n---\nTotal #{dump.size} parsed. #{zip.size} postal codes."
 
-        info 'Join dump << zip'
+        info '[SPOTS] Join dump << zip'
         dump = unify!(dump, zip).group_by(&:kind)
 
-        info 'Writing to DB...'
+        info '[SPOTS] Writing to DB...'
         wrapper.batch dump
       end
 
@@ -112,9 +113,7 @@ module Geonames
           exit
         end
 
-        #
-        # Return Codes and Exit
-        #
+        # Step 6: Handle list/codes command
         if argv[0] =~ /list|codes/
           Codes.each do |key, val|
             str = [val.values, key.to_s].join(' ').downcase

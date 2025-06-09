@@ -6,6 +6,7 @@ require 'geopolitical/../../app/models/region'
 require 'geopolitical/../../app/models/city'
 require 'geopolitical/../../app/models/hood'
 require_relative '../regions/abbr' # Added to access the new Abbr module
+require 'active_support/inflector' # For ActiveSupport::Inflector.parameterize
 
 Mongoid.configure do |config|
   # config.master = Mongo::Connection.new.db("symbolize_test")

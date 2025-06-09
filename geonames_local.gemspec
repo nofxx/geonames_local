@@ -23,7 +23,8 @@ Gem::Specification.new do |s|
     'README.md'
   ]
 
-  s.add_development_dependency('mongoid', ['>= 4.0.0'])
+  s.add_dependency('rubyzip', ['>= 2.0.0'])
+  s.add_development_dependency('mongoid', ['>= 7.0.0'])
 
   s.post_install_message = '
 Geonames Local
