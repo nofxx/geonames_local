@@ -1,16 +1,17 @@
 #
 # Geonames Local Config Example
 #
-:store: mongodb
-:level: city
-:nations: [br, us] # [] to populate nations database
-:locales: [pt, en]
-:mapping:
-  :name: name
-  :geom: true
-:db:
-  :host: localhost
-  :name: geonames_local
+store: mongodb
+level: city
+nations: [br, us] # [] to populate nations database
+locales: [pt, en]
+min_pop: 10
+mapping:
+  name: name
+  geom: true
+db:
+  host: localhost
+  name: geonames_local
   # :user:
   # :password:
   # :purge: false
