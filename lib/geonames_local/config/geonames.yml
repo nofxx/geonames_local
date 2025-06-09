@@ -2,7 +2,7 @@
 # Geonames Local Config Example
 #
 :store: mongodb
-:level: city
+:level: city # hood, city, state, nation
 :nations: [br] #, us] # [] to populate nations database
 :locales: [pt, en, es]
 :min_pop: 10_000
