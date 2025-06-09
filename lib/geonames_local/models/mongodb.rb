@@ -101,6 +101,7 @@ module Geonames
           # info "#{klass}.new #{data}"
           dup = klass.find(data[:id])
           dup.assign_attributes(data)
+          return if dup.changes.empty?
           warn "[DUP CHANGES]...#{dup.changes}..."
         rescue Mongoid::Errors::DocumentNotFound
           klass.create! data
@@ -109,10 +110,34 @@ module Geonames
           warn "[SPOT #{klass}] #{data}"
         end
 
-        def translate(txt)
-          name_i18n = Opt[:locales].reduce({}) do |h, l|
-            h.merge(l => txt)
+        private
+
+        def generate_slug(text)
+          return nil if text.nil?
+          ActiveSupport::Inflector.parameterize(text)
+        end
+
+        public
+
+        def translate(primary_name, geoname_id_str)
+          # Ensure geoname_id is an integer for cache lookup
+          geoname_id = geoname_id_str.to_s.match?(/^\d+$/) ? geoname_id_str.to_i : nil
+
+          name_i18n = Opt[:locales].reduce({}) do |h, locale_code|
+            translated_name = primary_name # Default to primary name
+
+            if geoname_id &&
+               Geonames::Cache[:alternate_names] &&
+               Geonames::Cache[:alternate_names][geoname_id] &&
+               (cached_entry = Geonames::Cache[:alternate_names][geoname_id][locale_code]) # Assign to var
+              translated_name = cached_entry[:name] # Access the name from the hash
+            elsif geoname_id.nil?
+              # This case should ideally not happen if GID is always available
+              # Geonames.info "[WARN] translate called with nil geoname_id for primary_name: #{primary_name}"
+            end
+            h.merge(locale_code => translated_name)
           end
+          name_i18n
         end
 
         #
@@ -137,13 +162,13 @@ module Geonames
           # info "------------------------"
           {
             id: abbr,
-            name_translations: translate(name),
+            name_translations: translate(name, gid), # Existing translations
             postal: pos_code,
             cash: cur_code,
             gid: gid,
             pop: pop.to_i,
             abbr: abbr,
-            slug: name.downcase,
+            slug: generate_slug(name), # Use new slug generation
             code: iso3,
             lang: langs
           }
@@ -160,12 +185,13 @@ module Geonames
 
           parsed_data = {
             id: r.gid.to_s,
+            name_translations: translate(r.name, r.gid), # Existing translations
+            slug: generate_slug(r.name), # Use new slug generation for region
             # The r.abbr might be from the input data source,
             # we prioritize our new logic via region_abbr.
             # If the Region model itself has an 'abbr' field, this will set it.
             abbr: region_abbr,
             pop: r.pop.to_i,
-            name_translations: translate(r.name),
             nation: nation,
             code: r.region # This is often the admin1_code
           }
@@ -196,8 +222,9 @@ module Geonames
 
           city_data = {
             id: s.gid.to_s,
+            name_translations: translate(s.name, s.gid), # Existing translations
+            slug: generate_slug(s.name), # Use new slug generation for city
             code: s.code, # feature code
-            name_translations: translate(s.name),
             pop: s.pop.to_i,
             geom: [s.lon.to_f, s.lat.to_f], # Ensure float for geoJSON
             postal: s.zip # tz
