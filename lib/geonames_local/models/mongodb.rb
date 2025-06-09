@@ -94,7 +94,7 @@ module Geonames
         end
 
         def clean
-          [Nation, Region, City].each(&:delete_all)
+          [Nation, Region, City, Hood].each(&:delete_all)
         end
 
         def create(klass, data)
@@ -132,7 +132,7 @@ module Geonames
           abbr, iso3, ison, fips, name, capital, area, pop, continent,
           tld, cur_code, cur_name, phone, pos_code, pos_regex,
           langs, gid, neighbours = row.split(/\t/)
-          info "[GEO NATION] #{name}/#{abbr}"
+          info "[NATION] #{name}/#{abbr}"
           # info "#{row}"
           # info "------------------------"
           {
@@ -154,9 +154,9 @@ module Geonames
         #
         def parse_region(r)
           nation = Nation.find_by(abbr: /#{r.nation}/i)
-          info "[GEO REGION] #{r.gid} | #{r.inspect}"
+          info "[REGION] #{r.gid} | #{r.inspect}"
           region_abbr = Geonames::Regions::Abbr.get_abbr(r.name, r.nation)
-          info "[GEO REGION ABBR] For '#{r.name}' in '#{r.nation}', found abbr: '#{region_abbr}'"
+          info "[REGION ABBR] For '#{r.name}' in '#{r.nation}', found abbr: '#{region_abbr}'"
 
           parsed_data = {
             id: r.gid.to_s,
@@ -191,7 +191,7 @@ module Geonames
             region = Region.find_by(code: s.region, nation_id: nation_obj.id)
           end
 
-          info "[GEO CITY] #{s.gid} | #{s.name} / #{region.try(:name)} in #{s.nation}"
+          info "[CITY] #{s.gid} | #{s.name} / #{region&.abbr} #{region&.name} (Pop: #{s.pop}) in #{s.nation}"
           # info s.inspect # Verbose
 
           city_data = {
@@ -209,12 +209,11 @@ module Geonames
             # by the 'parse_region' method when it was created/updated.
             if region.respond_to?(:abbr) && region.abbr.present?
               city_data[:region_abbr] = region.abbr
-              info "[GEO CITY] Region '#{region.name}' (ID: #{region.id}) has abbr: '#{region.abbr}' for City '#{s.name}'"
             else
-              info "[GEO CITY] Region '#{region.name}' (ID: #{region.id}) does NOT have an abbr for City '#{s.name}'"
+              warn "[CITY] Region '#{region.name}' (ID: #{region.id}) does NOT have an abbr for City '#{s.name}'"
             end
           else
-            warn "[GEO CITY WARN] No region found for city #{s.name} (Admin1 code: #{s.region}, Nation: #{s.nation})"
+            warn "[CITY WARN] No region found for city #{s.name} (Admin1 code: #{s.region}, Nation: #{s.nation})"
           end
           city_data
         end
