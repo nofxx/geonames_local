@@ -78,7 +78,17 @@ module Geonames
         def batch(data)
           @regions, @cities = data[:region], data[:city]
           @regions.each { |r| create Region, parse_region(r) }
-          @cities.each  { |c| create City, parse_city(c) }
+          @cities.each do |c|
+            city_pop = c.pop.to_i
+            # Opt[:min_pop] is read from geonames.yml, default to 0 if not found or not an integer
+            min_pop_threshold = Opt[:min_pop].to_i
+
+            if city_pop >= min_pop_threshold
+              create City, parse_city(c)
+            else
+              info "[GEO CITY SKIP] #{c.name} (Pop: #{city_pop}) does not meet min_pop: #{min_pop_threshold}"
+            end
+          end
         end
 
         def clean
@@ -176,3 +186,4 @@ module Geonames
     end
   end
 end
+
