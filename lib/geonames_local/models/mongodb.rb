@@ -195,7 +195,7 @@ module Geonames
             pop: pop.to_i,
             abbr: abbr,
             code: iso3,
-            lang: langs
+            langs: langs.to_s.split(',')
           }
         end
 
