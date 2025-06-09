@@ -16,10 +16,11 @@ module Geonames
     end
 
     def nations
-      info "\nDumping nation database"
+      info "\nDumping nation DB"
       file = get_file('nation')
       download file
       parse file
+      info "Done nation DB"
     end
 
     def work(nation)

@@ -11,6 +11,7 @@ end
 
 gem 'georuby'
 gem 'mongoid_geospatial'
+gem 'geopolitical', path: '../geopolitical'
 
 gem 'rspec'
 gem 'guard-rspec'

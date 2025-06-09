@@ -7,7 +7,6 @@ Gem::Specification.new do |s|
   s.homepage = 'http://github.com/nofxx/geonames_local'
 
   s.authors = ['Marcos Piccinini']
-  s.default_executable = 'geonames'
   s.description = 'Dumps geonames data to feed a local db'
   s.email = 'x@nofxx.com'
   s.license = 'MIT'
@@ -24,8 +23,7 @@ Gem::Specification.new do |s|
     'README.md'
   ]
 
-  s.add_dependency('mongoid', ['>= 4.0.0'])
-  s.add_dependency('geopolitical', ['> 0.8.4'])
+  s.add_development_dependency('mongoid', ['>= 4.0.0'])
 
   s.post_install_message = '
 Geonames Local
