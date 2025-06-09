@@ -4,7 +4,8 @@ module Geonames
   #
   class Spot
     attr_accessor :gid, :name, :ascii, :lat, :lon, :nation, :kind,
-                  :code,  :pop, :tz, :geom, :region, :zip, :abbr, :id
+                  :code,  :pop, :tz, :geom, :region, :zip, :abbr, :id,
+                  :feature_class, :feature_code # Added new attributes
     alias_method :x, :lon
     alias_method :y, :lat
     alias_method :geoname_id, :gid
@@ -30,15 +31,29 @@ module Geonames
     def parse(row)
       row = row.split(/\t/)
       info "[SPOT] #{row.join(' | ')}"
-      gid, name, @ascii, @alternates, lat, lon, _feat, kind,
-      @nation, _cc2, @region, @code, _adm3, _adm4, @pop, @ele,
-      @gtop, @tz, @up = row
+      # Assign to local variables first to preserve original feature_code
+      gid_str, name_str, ascii_str, alternates_str, lat_str, lon_str, feat_class_str, feat_code_str,
+      nation_str, _cc2, region_str, admin2_code_str, _adm3, _adm4, pop_str, _ele,
+      _gtop, tz_str, up_str = row
 
-      @name = name #name.encode(Encoding::ISO_8859_1)
-      @gid = @geoname_id = gid.to_i
-      @kind = human_code(kind)
+      @name = name_str
+      @ascii = ascii_str
+      @alternates = alternates_str
+      @lat = lat_str.to_f
+      @lon = lon_str.to_f
+      @feature_class = feat_class_str # Store raw feature class
+      @feature_code = feat_code_str   # Store raw feature code
+      @nation = nation_str
+      @region = region_str # This is admin1 code
+      @code = admin2_code_str # This is admin2 code, used for Spot's @code
+      @pop = pop_str.to_i
+      @tz = tz_str
+      @up = up_str # For updated_at
 
-      @abbr = @alternates.split(',').find { |n| n =~ /^[A-Z]{2,3}$/ }
+      @gid = @geoname_id = gid_str.to_i
+      @kind = human_code(@feature_code) # Determine :region, :city, :other based on original feature_code
+
+      @abbr = @alternates.split(',').find { |n| n =~ /^[A-Z]{2,3}$/ } if @alternates
 
       parse_geom(lat, lon)
       # puts "#{@kind} - #{@code} - #{@region}"

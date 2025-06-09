@@ -176,7 +176,7 @@ module Geonames
       return if l =~ /^#|^iso/i
       if @kind == :dump
         return l if l =~ /^\D/
-        if Opt[:level] != 'all'
+        if Opt[:level] != 'hood'
           return unless l =~ /ADM\d/ # ADM2 => cities
         end
       end
