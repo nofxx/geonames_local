@@ -104,10 +104,35 @@ module Geonames
       # Ugly but works?
       def work(argv)
         trap_signals
-        Opt.merge! parse_options(argv)
+        Opt.merge! parse_options(argv) # Step 1: Parse CLI options
 
+        # Step 2: Load config file. This will populate Opt[:locales] if defined in YAML.
+        # load_config uses Opt[:config] if provided by CLI, otherwise defaults.
+        # We need to handle the case where scaffold/init commands are run *before* config is strictly needed.
+        # For other commands, config (and thus Opt[:locales]) should be loaded early.
+
+        # Special handling for scaffold/init commands which don't need full config load yet
+        if argv[0] =~ /scaff|conf|init/
+          fname = (argv[1] || 'geonames') + '.yml'
+          if File.exist?(fname)
+            puts "File exists: #{fname}"
+          else
+            puts "Writing to #{fname}"
+            `cp #{File.join(File.dirname(__FILE__), 'config', 'geonames.yml')} #{fname}`
+          end
+          exit
+        end
+
+        # For all other commands, load config now
+        load_config # This populates Opt from YAML, including Opt[:locales]
+
+        # Step 3: Set default locales if not already set by CLI or config
         Opt[:locales] = ['en'] if Opt[:locales].nil? || Opt[:locales].empty?
 
+        # Step 4: Load alternate names using the now correctly prioritized Opt[:locales]
+        Geonames::Dump.load_alternate_names_to_cache(Opt[:locales])
+
+        # Step 5: Handle SHP import if specified
         if (shp = Opt[:shp])
           SHP.import(shp)
           exit
@@ -124,25 +149,6 @@ module Geonames
           end
           exit
         end
-
-        #
-        # If arguments scaffold, config, write down yml.
-        #
-        if argv[0] =~ /scaff|conf|init/
-          fname = (argv[1] || 'geonames') + '.yml'
-          if File.exist?(fname)
-            puts "File exists: #{fname}"
-          else
-            puts "Writing to #{fname}"
-            `cp #{File.join(File.dirname(__FILE__), 'config', 'geonames.yml')} #{fname}`
-          end
-          exit
-        end
-
-        # Load config if we got til here
-        load_config
-        puts Opt[:store]
-        puts Opt
 
         # Export Data as CSV or JSON
         return Geonames::Export.new(Nation.all).to_csv if argv[0] =~ /csv|json/
