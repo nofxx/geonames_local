@@ -113,7 +113,7 @@ module Geonames
           Opt[:locales] = ['en']
         end
 
-        if shp = Opt[:shp]
+        if (shp = Opt[:shp])
           SHP.import(shp)
           exit
         end

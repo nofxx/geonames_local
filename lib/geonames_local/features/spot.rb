@@ -28,9 +28,11 @@ module Geonames
     # Parse Geonames Dump Export
     #
     def parse(row)
-      gid, name, @ascii, @alternates, lat, lon, feat, kind,
+      row = row.split(/\t/)
+      info "[SPOT] #{row.join(' | ')}"
+      gid, name, @ascii, @alternates, lat, lon, _feat, kind,
       @nation, _cc2, @region, @code, _adm3, _adm4, @pop, @ele,
-      @gtop, @tz, @up = row.split(/\t/)
+      @gtop, @tz, @up = row
 
       @name = name #name.encode(Encoding::ISO_8859_1)
       @gid = @geoname_id = gid.to_i
