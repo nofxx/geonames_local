@@ -78,17 +78,47 @@ module Geonames
     module MongoWrapper
       class << self
         def batch(data)
-          @regions, @cities = data[:region], data[:city]
-          @regions.each { |r| create Region, parse_region(r) }
-          @cities.each do |c|
-            city_pop = c.pop.to_i
-            # Opt[:min_pop] is read from geonames.yml, default to 0 if not found or not an integer
-            min_pop_threshold = Opt[:min_pop].to_i
+          # Separate spots by their determined kind (:region, :city, :other)
+          # Note: data is already grouped by kind from CLI's unify! and group_by(&:kind)
+          # However, the 'kind' from Spot.human_code might be too coarse.
+          # We need to re-evaluate based on feature_class and feature_code for hoods.
 
+          # First, process regions and cities as before
+          # The `data` parameter is expected to be a hash like { :region => [...], :city => [...] }
+          # or potentially { :other => [...] } if human_code produced that.
+
+          (data[:region] || []).each { |r_spot| create Region, parse_region(r_spot) }
+
+          (data[:city] || []).each do |c_spot|
+            city_pop = c_spot.pop.to_i
+            min_pop_threshold = Opt[:min_pop].to_i
             if city_pop >= min_pop_threshold
-              create City, parse_city(c)
+              create City, parse_city(c_spot)
             else
-              info "[GEO CITY SKIP] #{c.inspect} (Pop: #{city_pop}) does not meet min_pop: #{min_pop_threshold}"
+              info "[CITY SKIP] (#{c_spot.gid}) #{c_spot.name} (Pop: #{city_pop}) does not meet min_pop: #{min_pop_threshold}"
+            end
+          end
+
+          # Now, process potential hoods from spots that were not primary regions or cities.
+          # This assumes `data` might contain an array of all spots if not pre-grouped,
+          # or we might need to access all original spots before they were grouped by human_code.
+          # For this iteration, let's assume `data[:other]` might contain them,
+          # or we iterate through all spots if `data` is a flat array.
+          # A better approach would be to get *all* spots from the Dump.new result before grouping.
+
+          # Let's refine this: the `data` passed to batch is already grouped by the output of `human_code`.
+          # So, spots classified as `:other` by `human_code` are candidates for hoods.
+          (data[:other] || []).each do |spot|
+            # Identify neighborhoods based on feature class and code
+            # Example: PPLX (Section of populated place)
+            # You might want to add other codes like ADM3, ADM4 if they represent neighborhoods in your target areas.
+            if spot.feature_class == 'P' && spot.feature_code == 'PPLX'
+              info "[HOOD CANDIDATE] Parsing PPLX: #{spot.name} (GID: #{spot.gid})"
+              create Hood, parse_hood(spot)
+            # Add other conditions for neighborhood feature codes if needed
+            # elsif spot.feature_class == 'A' && ['ADM3', 'ADM4'].include?(spot.feature_code)
+            #   info "[GEO HOOD CANDIDATE] Parsing ADM: #{spot.name} (GID: #{spot.gid})"
+            #   create Hood, parse_hood(spot)
             end
           end
         end
@@ -243,6 +273,55 @@ module Geonames
             warn "[CITY WARN] No region found for city #{s.name} (Admin1 code: #{s.region}, Nation: #{s.nation})"
           end
           city_data
+        end
+
+        #
+        # Parse Hoods (Neighborhoods)
+        #
+        def parse_hood(s) # s is a Geonames::Spot object
+          info "[GEO HOOD] #{s.gid} | #{s.name}"
+
+          # Attempt to find parent city - THIS IS A COMPLEX PART and needs specific logic
+          # For now, let's assume we might try to find it via admin codes if available on the spot
+          parent_city = nil
+          if s.nation && s.region # s.region is admin1_code
+            # We'd need a way to map s.nation (country_abbr) and s.region (admin1_code)
+            # and potentially s.code (admin2_code on spot) to a City record.
+            # This is highly dependent on how City records store their hierarchy.
+            # Example placeholder:
+            # nation_obj = Nation.find_by(abbr: /#{s.nation}/i)
+            # if nation_obj
+            #   city_region_obj = Region.find_by(code: s.region, nation_id: nation_obj.id) # Find ADM1
+            #   if city_region_obj && s.code # s.code is admin2_code
+            #      parent_city = City.where(admin2_code: s.code, region_id: city_region_obj.id).first # Hypothetical
+            #   end
+            # end
+            # if parent_city
+            #   info "[GEO HOOD] Found potential parent city for #{s.name}: #{parent_city.name}"
+            # else
+            #   warn "[GEO HOOD WARN] No parent city found for hood #{s.name} (Admin1: #{s.region}, Admin2: #{s.code}, Nation: #{s.nation})"
+            # end
+          end
+
+          hood_data = {
+            id: s.gid.to_s, # Use Geonames ID as the hood's ID
+            name: s.name,
+            slug: generate_slug(s.name),
+            name_translations: translate(s.name, s.gid),
+            pop: s.pop.to_i, # Population, if available for the PPLX
+            geom: [s.lon.to_f, s.lat.to_f],
+            # feature_class: s.feature_class, # Optionally store these if your Hood model has fields for them
+            # feature_code: s.feature_code,
+          }
+
+          # if parent_city
+          #   hood_data[:city_id] = parent_city.id.to_s # Or however your Hood model links to City
+          # end
+
+          # Add other hood-specific fields from the Spot object if needed
+          # hood_data[:some_other_field] = s.some_other_attribute
+
+          hood_data
         end
       end
     end
