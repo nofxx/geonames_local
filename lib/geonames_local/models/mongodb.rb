@@ -87,9 +87,14 @@ module Geonames
 
         def create(klass, data)
           # info "#{klass}.new #{data}"
+          dup = klass.find(data[:id])
+          dup.assign_attributes(data)
+          warn "[DUP CHANGES]...#{dup.changes}..."
+        rescue Mongoid::Errors::DocumentNotFound
           klass.create! data
         rescue => e
-          warn "Prob com spot #{e} #{e.backtrace.join("\n")}"
+          warn "[SPOT ERR] #{e} #{e.backtrace.reverse.join("\n")}"
+          warn "[SPOT #{klass}] #{data}"
         end
 
         def translate(txt)
@@ -108,20 +113,27 @@ module Geonames
         end
 
         def nations_populated?
-          Nation.count > 0
+          Nation.count > 10
         end
 
         def parse_nation(row)
           abbr, iso3, ison, fips, name, capital, area, pop, continent,
           tld, cur_code, cur_name, phone, pos_code, pos_regex,
           langs, gid, neighbours = row.split(/\t/)
-          info "Nation: #{name}/#{abbr}"
+          info "[GEO NATION] #{name}/#{abbr}"
           # info "#{row}"
           # info "------------------------"
           {
+            id: abbr,
             name_translations: translate(name),
-            postal: pos_code, cash: cur_code, gid: gid,
-            abbr: abbr, slug: name.downcase, code: iso3, lang: langs
+            postal: pos_code,
+            cash: cur_code,
+            gid: gid,
+            pop: pop.to_i,
+            abbr: abbr,
+            slug: name.downcase,
+            code: iso3,
+            lang: langs
           }
         end
 
@@ -130,11 +142,14 @@ module Geonames
         #
         def parse_region(r)
           nation = Nation.find_by(abbr: /#{r.nation}/i)
-          info "Region: #{r.name} / #{r.abbr}"
+          info "[GEO REGION] #{r.gid} | #{r.inspect}"
           {
-            id: r.gid.to_s, abbr: r.abbr,
+            id: r.gid.to_s,
+            abbr: r.abbr,
+            pop: r.pop.to_i,
             name_translations: translate(r.name),
-            nation: nation, code: r.region
+            nation: nation,
+            code: r.region
           }
         end
 
@@ -142,45 +157,22 @@ module Geonames
         # Parse Cities
         #
         def parse_city(s)
-          region = Region.find_by(code: s.region)
+          region = Region.find_by(code: s.region, nation: s.nation)
           # ---
           # info s.inspect
-          info "City: #{s.zip} | #{s.name} / #{region.try(:abbr)}"
+          info "[GEO CITY] #{s.gid} | #{s.name} / #{region} / #{s.nation}"
+          info s.inspect
           {
-            id: s.gid.to_s, code: s.code,
+            id: s.gid.to_s,
+            code: s.code,
             name_translations: translate(s.name),
-            souls: s.pop, geom: [s.lon, s.lat],
-            region_id: region.id.to_s, postal: s.zip # tz
+            pop: s.pop,
+            geom: [s.lon, s.lat],
+            region_id: region.id.to_s,
+            postal: s.zip # tz
           }
         end
       end
     end
-
-    # class Nation < Geonames::Spot
-
-    #   def parse row
-    #   end
-
-    #   def to_hash
-    #     { "gid" => @gid.to_s, "name" => @name,
-    #     "kind" => "nation", "code" => @code}
-    #   end
-
-    #   def export
-    #     [@gid, @code, @name]
-    #   end
-
-    #   def export_header
-    #     ["gid", "code", "name"]
-    #   end
-    # end
-
-    # class Zip
-    #   include Mongoid::Document
-
-    #   field :code
-    #   belongs_to :city
-
-    # end
   end
 end

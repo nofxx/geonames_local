@@ -57,19 +57,15 @@ module Geonames
     class << self
       def load_config
         info 'Loading config file...'
-        if Opt[:config]
+        if Opt[:config] && File.exist?(Opt[:config])
           Opt.merge! YAML.load(File.read(Opt[:config]))
-        else
+        elsif File.exist?(cfg = File.join('config', 'geonames.yml'))
           # Load config/geonames.yml if there's one
-          if File.exist?(cfg = File.join('config', 'geonames.yml'))
-            Opt.merge! YAML.load(File.read(cfg))
-          else
-            fail
-          end
+          Opt.merge! YAML.load(File.read(cfg))
+        else
+          STDERR.puts "No config file...'#{Opt[:config] || 'geonames.yml'}'"
+          exit 1
         end
-      rescue
-        info "Can't find config file"
-        exit
       end
 
       def trap_signals
@@ -106,12 +102,10 @@ module Geonames
 
       # Ugly but works?
       def work(argv)
-        start = Time.now
         trap_signals
         Opt.merge! parse_options(argv)
-        if Opt[:locales].nil? || Opt[:locales].empty?
-          Opt[:locales] = ['en']
-        end
+
+        Opt[:locales] = ['en'] if Opt[:locales].nil? || Opt[:locales].empty?
 
         if (shp = Opt[:shp])
           SHP.import(shp)
@@ -148,6 +142,8 @@ module Geonames
 
         # Load config if we got til here
         load_config
+        puts Opt[:store]
+        puts Opt
 
         # Export Data as CSV or JSON
         return Geonames::Export.new(Nation.all).to_csv if argv[0] =~ /csv|json/
@@ -156,7 +152,7 @@ module Geonames
         load_adapter(Opt[:store])
         info "Using adapter #{Opt[:store]}.."
         wrapper.clean if Opt[:clean]
-        puts Benchmark.measure { work_nations } unless wrapper.nations_populated?
+        puts Benchmark.measure { work_nations }# unless wrapper.nations_populated?
         puts Benchmark.measure { work_spots }
       end
 
