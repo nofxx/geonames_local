@@ -4,7 +4,7 @@ module Geonames
   module Regions
     module Abbr
       # Path to the YML files for region abbreviations.
-      ABBR_DATA_PATH = File.expand_path('../region/abbr', __dir__)
+      ABBR_DATA_PATH = File.expand_path('abbr', __dir__)
       @loaded_abbrs = nil
 
       # Loads all .yml files from the ABBR_DATA_PATH.
