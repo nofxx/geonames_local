@@ -156,7 +156,10 @@ module Geonames
         # Do the magic! Import Geonames Data
         load_adapter(Opt[:store])
         info "Using adapter #{Opt[:store]}.."
-        wrapper.clean if Opt[:clean]
+        if Opt[:clean] || (Opt[:db] && Opt[:db][:clean])
+          info "Cleaning database before import..."
+          wrapper.clean
+        end
         puts Benchmark.measure { work_nations }# unless wrapper.nations_populated?
         puts Benchmark.measure { work_spots }
       end

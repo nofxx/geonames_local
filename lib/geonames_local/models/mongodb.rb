@@ -6,7 +6,6 @@ require 'geopolitical/../../app/models/region'
 require 'geopolitical/../../app/models/city'
 require 'geopolitical/../../app/models/hood'
 require_relative '../regions/abbr' # Added to access the new Abbr module
-require 'active_support/inflector' # For ActiveSupport::Inflector.parameterize
 
 Mongoid.configure do |config|
   # config.master = Mongo::Connection.new.db("symbolize_test")
@@ -140,14 +139,6 @@ module Geonames
           warn "[SPOT #{klass}] #{data}"
         end
 
-        private
-
-        def generate_slug(text)
-          return nil if text.nil?
-          ActiveSupport::Inflector.parameterize(text)
-        end
-
-        public
 
         def translate(primary_name, geoname_id_str)
           # Ensure geoname_id is an integer for cache lookup
@@ -198,7 +189,6 @@ module Geonames
             gid: gid,
             pop: pop.to_i,
             abbr: abbr,
-            slug: generate_slug(name), # Use new slug generation
             code: iso3,
             lang: langs
           }
@@ -209,14 +199,12 @@ module Geonames
         #
         def parse_region(r)
           nation = Nation.find_by(abbr: /#{r.nation}/i)
-          info "[REGION] #{r.gid} | #{r.inspect}"
           region_abbr = Geonames::Regions::Abbr.get_abbr(r.name, r.nation)
-          info "[REGION ABBR] For '#{r.name}' in '#{r.nation}', found abbr: '#{region_abbr}'"
+          info "[REGION] #{r.gid} | #{r.name} (Pop: #{r.pop}) in #{r.nation} (#{nation&.name})"
 
           parsed_data = {
             id: r.gid.to_s,
             name_translations: translate(r.name, r.gid), # Existing translations
-            slug: generate_slug(r.name), # Use new slug generation for region
             # The r.abbr might be from the input data source,
             # we prioritize our new logic via region_abbr.
             # If the Region model itself has an 'abbr' field, this will set it.
@@ -253,7 +241,6 @@ module Geonames
           city_data = {
             id: s.gid.to_s,
             name_translations: translate(s.name, s.gid), # Existing translations
-            slug: generate_slug(s.name), # Use new slug generation for city
             code: s.code, # feature code
             pop: s.pop.to_i,
             geom: [s.lon.to_f, s.lat.to_f], # Ensure float for geoJSON
@@ -262,15 +249,17 @@ module Geonames
 
           if region
             city_data[:region_id] = region.id.to_s
-            # The Region object 'region' should now have its 'abbr' field populated
-            # by the 'parse_region' method when it was created/updated.
             if region.respond_to?(:abbr) && region.abbr.present?
               city_data[:region_abbr] = region.abbr
+              # Construct slug with city name and region abbreviation
+              # Slug will be handled by Geopolitical
             else
-              warn "[CITY] Region '#{region.name}' (ID: #{region.id}) does NOT have an abbr for City '#{s.name}'"
+              info "[CITY] Region '#{region.name}' (ID: #{region.id}) does NOT have an abbr for City '#{s.name}'"
+              # Slug will be handled by Geopolitical
             end
           else
-            warn "[CITY WARN] No region found for city #{s.name} (Admin1 code: #{s.region}, Nation: #{s.nation})"
+            info "[CITY WARN] No region found for city #{s.name} (Admin1 code: #{s.region}, Nation: #{s.nation})"
+            # Slug will be handled by Geopolitical
           end
           city_data
         end
@@ -306,7 +295,6 @@ module Geonames
           hood_data = {
             id: s.gid.to_s, # Use Geonames ID as the hood's ID
             name: s.name,
-            slug: generate_slug(s.name),
             name_translations: translate(s.name, s.gid),
             pop: s.pop.to_i, # Population, if available for the PPLX
             geom: [s.lon.to_f, s.lat.to_f],

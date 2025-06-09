@@ -14,4 +14,4 @@
   :name: geonames_local
   # :user: YOUR_USERNAME
   # :password: YOUR_PASSWORD
-  # :purge: false
+  :clean: true # true to remove all data before importing
