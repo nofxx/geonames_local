@@ -5,6 +5,7 @@ require 'geopolitical/../../app/models/nation'
 require 'geopolitical/../../app/models/region'
 require 'geopolitical/../../app/models/city'
 require 'geopolitical/../../app/models/hood'
+require_relative '../regions/abbr' # Added to access the new Abbr module
 
 Mongoid.configure do |config|
   # config.master = Mongo::Connection.new.db("symbolize_test")
@@ -86,7 +87,7 @@ module Geonames
             if city_pop >= min_pop_threshold
               create City, parse_city(c)
             else
-              info "[GEO CITY SKIP] #{c.name} (Pop: #{city_pop}) does not meet min_pop: #{min_pop_threshold}"
+              info "[GEO CITY SKIP] #{c.inspect} (Pop: #{city_pop}) does not meet min_pop: #{min_pop_threshold}"
             end
           end
         end
@@ -153,34 +154,68 @@ module Geonames
         def parse_region(r)
           nation = Nation.find_by(abbr: /#{r.nation}/i)
           info "[GEO REGION] #{r.gid} | #{r.inspect}"
-          {
+          region_abbr = Geonames::Regions::Abbr.get_abbr(r.name, r.nation)
+          info "[GEO REGION ABBR] For '#{r.name}' in '#{r.nation}', found abbr: '#{region_abbr}'"
+
+          parsed_data = {
             id: r.gid.to_s,
-            abbr: r.abbr,
+            # The r.abbr might be from the input data source,
+            # we prioritize our new logic via region_abbr.
+            # If the Region model itself has an 'abbr' field, this will set it.
+            abbr: region_abbr,
             pop: r.pop.to_i,
             name_translations: translate(r.name),
             nation: nation,
-            code: r.region
+            code: r.region # This is often the admin1_code
           }
+          # If r.abbr exists from source and our logic didn't find one, consider using it or logging.
+          # For now, our logic takes precedence. If region_abbr is nil, :abbr will be nil.
+          # If the original r.abbr was different, it gets overwritten.
+          # If the Region model expects a field named 'original_abbr' or similar, that could be added.
+          parsed_data
         end
 
         #
         # Parse Cities
         #
         def parse_city(s)
-          region = Region.find_by(code: s.region, nation: s.nation)
-          # ---
-          # info s.inspect
-          info "[GEO CITY] #{s.gid} | #{s.name} / #{region} / #{s.nation}"
-          info s.inspect
-          {
+          # s.nation is country_code (e.g., 'US', 'BR')
+          # s.region is admin1_code (e.g., 'CA', 'SP')
+          # We need to find the Region object using its code and the nation object (or nation's abbr)
+          nation_obj = Nation.find_by(abbr: /#{s.nation}/i)
+          region = nil
+          if nation_obj
+            # Assuming Region.code stores the admin1_code like 'CA', 'SP'
+            # And Region.nation stores the Nation object
+            region = Region.find_by(code: s.region, nation_id: nation_obj.id)
+          end
+
+          info "[GEO CITY] #{s.gid} | #{s.name} / #{region.try(:name)} in #{s.nation}"
+          # info s.inspect # Verbose
+
+          city_data = {
             id: s.gid.to_s,
-            code: s.code,
+            code: s.code, # feature code
             name_translations: translate(s.name),
-            pop: s.pop,
-            geom: [s.lon, s.lat],
-            region_id: region.id.to_s,
+            pop: s.pop.to_i,
+            geom: [s.lon.to_f, s.lat.to_f], # Ensure float for geoJSON
             postal: s.zip # tz
           }
+
+          if region
+            city_data[:region_id] = region.id.to_s
+            # The Region object 'region' should now have its 'abbr' field populated
+            # by the 'parse_region' method when it was created/updated.
+            if region.respond_to?(:abbr) && region.abbr.present?
+              city_data[:region_abbr] = region.abbr
+              info "[GEO CITY] Region '#{region.name}' (ID: #{region.id}) has abbr: '#{region.abbr}' for City '#{s.name}'"
+            else
+              info "[GEO CITY] Region '#{region.name}' (ID: #{region.id}) does NOT have an abbr for City '#{s.name}'"
+            end
+          else
+            warn "[GEO CITY WARN] No region found for city #{s.name} (Admin1 code: #{s.region}, Nation: #{s.nation})"
+          end
+          city_data
         end
       end
     end
