@@ -129,6 +129,12 @@ module Geonames
         # Step 3: Set default locales if not already set by CLI or config
         Opt[:locales] = ['en'] if Opt[:locales].nil? || Opt[:locales].empty?
 
+        puts "Ok, downloading nations: #{Opt[:nations] || 'all'}"
+        puts "With locales: #{Opt[:locales] || 'all'}"
+        puts "Level: #{Opt[:level] || 'all'}"
+        puts "Min population: #{Opt[:min_pop]}" if Opt[:min_pop]
+
+
         # Step 4: Load alternate names using the now correctly prioritized Opt[:locales]
         Geonames::Dump.load_alternate_names_to_cache(Opt[:locales])
 

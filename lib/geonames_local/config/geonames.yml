@@ -1,17 +1,17 @@
 #
 # Geonames Local Config Example
 #
-:store: mongodb
+:store: mongodb # soon pg too?
 :level: city # hood, city, state, nation
-:nations: [br] #, us] # [] to populate nations database
-:locales: [pt, en, es]
-:min_pop: 10_000
+:nations: [br] #, us] # which nations to include
+:locales: [pt, en, es] # which locales to include
+:min_pop: 7_000 # minimum population for cities
 :mapping:
   :name: name
   :geom: true
 :db:
   :host: localhost:28017
   :name: geonames_local
-  # :user: YOUR_USERNAME
-  # :password: YOUR_PASSWORD
-  :clean: true # true to remove all data before importing
+  # :user: MONGO_USERNAME
+  # :password: MONGO_PASSWORD
+  # :clean: true # defaults to false

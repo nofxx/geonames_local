@@ -94,7 +94,8 @@ module Geonames
             if city_pop >= min_pop_threshold
               create City, parse_city(c_spot)
             else
-              info "[CITY SKIP] (#{c_spot.gid}) #{c_spot.name} (Pop: #{city_pop}) does not meet min_pop: #{min_pop_threshold}"
+              # info "[CITY SKIP] (#{c_spot.gid}) #{c_spot.name} (Pop: #{city_pop}) does not meet min_pop: #{min_pop_threshold}"
+              print "."
             end
           end
 
@@ -130,9 +131,13 @@ module Geonames
           # info "#{klass}.new #{data}"
           dup = klass.find(data[:id])
           dup.assign_attributes(data)
-          return if dup.changes.empty?
-          warn "[DUP CHANGES]...#{dup.changes}..."
+          if dup.changes.empty?
+            print ""
+          else
+            warn " #{dup.changes}..."
+          end
         rescue Mongoid::Errors::DocumentNotFound
+          print ""
           klass.create! data
         rescue => e
           warn "[SPOT ERR] #{e} #{e.backtrace.reverse.join("\n")}"
@@ -235,7 +240,7 @@ module Geonames
             region = Region.find_by(code: s.region, nation_id: nation_obj.id)
           end
 
-          info "[CITY] #{s.gid} | #{s.name} / #{region&.abbr} #{region&.name} (Pop: #{s.pop}) in #{s.nation}"
+          # info "[CITY] #{s.gid} | #{s.name} / #{region&.abbr} #{region&.name} (Pop: #{s.pop}) in #{s.nation}"
           # info s.inspect # Verbose
 
           city_data = {
