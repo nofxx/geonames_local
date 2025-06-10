@@ -192,7 +192,7 @@ module Geonames
             postal: pos_code,
             cash: cur_code,
             gid: gid,
-            pop: pop.to_i,
+            souls: pop.to_i,
             abbr: abbr,
             code: iso3,
             langs: langs.to_s.split(',')
@@ -214,7 +214,7 @@ module Geonames
             # we prioritize our new logic via region_abbr.
             # If the Region model itself has an 'abbr' field, this will set it.
             abbr: region_abbr,
-            pop: r.pop.to_i,
+            souls: r.pop.to_i,
             nation: nation,
             code: r.region # This is often the admin1_code
           }
@@ -247,7 +247,7 @@ module Geonames
             id: s.gid.to_s,
             name_translations: translate(s.name, s.gid), # Existing translations
             code: s.code, # feature code
-            pop: s.pop.to_i,
+            souls: s.pop.to_i,
             geom: [s.lon.to_f, s.lat.to_f], # Ensure float for geoJSON
             postal: s.zip # tz
           }
@@ -301,7 +301,7 @@ module Geonames
             id: s.gid.to_s, # Use Geonames ID as the hood's ID
             name: s.name,
             name_translations: translate(s.name, s.gid),
-            pop: s.pop.to_i, # Population, if available for the PPLX
+            souls: s.pop.to_i, # Population, if available for the PPLX
             geom: [s.lon.to_f, s.lat.to_f],
             # feature_class: s.feature_class, # Optionally store these if your Hood model has fields for them
             # feature_code: s.feature_code,
