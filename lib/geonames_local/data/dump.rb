@@ -38,7 +38,7 @@ module Geonames
         Geonames.info("#{zip_filename} already downloaded.")
       else
         Geonames.info("Downloading #{zip_filename}...")
-        # Note: The URL for alternateNamesV2.zip is under /dump/ not /export/
+        # NOTE: The URL for alternateNamesV2.zip is under /dump/ not /export/
         download_url = "#{URL}dump/#{zip_filename}"
         cmd = "curl #{download_url} -o #{zip_filepath}"
         Geonames.info "Executing: #{cmd}"
@@ -169,9 +169,9 @@ module Geonames
       # Check if file exists and is not empty to prevent re-downloading corrupted/empty files.
       return if File.exist?(fname) && File.size?(fname)
 
-      info "Downloading #{file} to #{fname}..."
+      Geonames.info "Downloading #{file} to #{fname}..."
       cmd = "curl -fSsv #{URL}#{@kind}/#{file} -o #{fname}" # Added -fSsv for better error reporting from curl
-      Geonames.info "Executing: #{cmd}" # Use Geonames.info for consistency
+      Geonames.info "Executing: #{cmd}"
       system(cmd)
 
       unless $?.success? && File.exist?(fname) && File.size?(fname)
@@ -189,7 +189,7 @@ module Geonames
     end
 
     def uncompress(file)
-      info "Uncompressing #{file}"
+      Geonames.info "Uncompressing #{file}"
       `unzip -quo /tmp/geonames/#{@kind}/#{file} -d /tmp/geonames/#{@kind}`
     end
 
