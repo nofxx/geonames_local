@@ -76,7 +76,7 @@ module Geonames
         # Find the key (abbreviation) whose value exactly matches r_name.
         found_entry = country_specific_abbrs.find { |_abbr, name_from_yml| name_from_yml == r_name }
 
-        found_entry ? found_entry.first : nil # Returns the abbreviation (key) or nil
+        found_entry ? found_entry.first : raise("Cant find abbr for region #{r_name} in country #{c_code}") # Returns the abbreviation (key) or nil
       end
 
       # Clears the loaded abbreviations cache. Useful for testing or reloading data.

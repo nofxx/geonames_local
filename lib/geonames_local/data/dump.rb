@@ -108,29 +108,29 @@ module Geonames
           end
           geoname_id = geoname_id_str.to_i
 
-
           # Store if the language is one we care about and the name is not empty
-          if locales_to_keep.include?(language_code) && alternate_name && !alternate_name.empty?
-            is_preferred = parts[4] == '1' # isPreferredName is column 5 (index 4)
+          next unless locales_to_keep.include?(language_code) && alternate_name && !alternate_name.empty?
 
-            Geonames::Cache[:alternate_names][geoname_id] ||= {}
-            existing_entry = Geonames::Cache[:alternate_names][geoname_id][language_code]
+          is_preferred = parts[4] == '1' # isPreferredName is column 5 (index 4)
 
-            should_store = false
-            if existing_entry.nil?
-              should_store = true
-            elsif is_preferred # New name is preferred, always overwrite
-              should_store = true
-            elsif !existing_entry[:preferred] # New name is not preferred, existing is also not preferred, overwrite (last wins for non-preferred)
-              should_store = true
-            end
-            # If new is not preferred AND existing is preferred, should_store remains false (don't overwrite)
+          Geonames::Cache[:alternate_names][geoname_id] ||= {}
+          existing_entry = Geonames::Cache[:alternate_names][geoname_id][language_code]
 
-            if should_store
-              Geonames::Cache[:alternate_names][geoname_id][language_code] = { name: alternate_name, preferred: is_preferred }
-              count += 1 # Count unique geonameid/language pairs stored/updated
-            end
+          should_store = false
+          if existing_entry.nil?
+            should_store = true
+          elsif is_preferred # New name is preferred, always overwrite
+            should_store = true
+          elsif !existing_entry[:preferred] # New name is not preferred, existing is also not preferred, overwrite (last wins for non-preferred)
+            should_store = true
           end
+          # If new is not preferred AND existing is preferred, should_store remains false (don't overwrite)
+
+          next unless should_store
+
+          Geonames::Cache[:alternate_names][geoname_id][language_code] =
+            { name: alternate_name, preferred: is_preferred }
+          count += 1 # Count unique geonameid/language pairs stored/updated
         end
       end
       end_time = Time.now
