@@ -43,7 +43,6 @@ Mongoid.configure do |config|
   if effective_config_log.key?(:password) && effective_config_log[:password]
     effective_config_log[:password] = '********'
   end
-  info "Mongoid default client configured with: #{effective_config_log.inspect}"
 
   # The config.connect_to call is generally not needed when setting config.clients.default
   # directly, as the database name is part of the client's configuration.
@@ -110,12 +109,13 @@ module Geonames
           dup = klass.find(data[:id])
           dup.assign_attributes(data)
           if dup.changes.empty?
-            print ""
+            print " "
           else
             warn " #{dup.changes}..."
           end
         rescue Mongoid::Errors::DocumentNotFound
-          print ""
+          print " "
+          print data.inspect if Opt[:verbose]
           klass.create! data
         rescue => e
           warn "[SPOT ERR] #{e} #{e.backtrace.reverse.join("\n")}"
@@ -161,7 +161,6 @@ module Geonames
           abbr, iso3, ison, fips, name, capital, area, pop, continent,
           tld, cur_code, cur_name, phone, pos_code, pos_regex,
           langs, gid, neighbours = row.split(/\t/)
-          info "[NATION] #{name}/#{abbr}"
           # info "#{row}"
           # info "------------------------"
           {
@@ -183,7 +182,6 @@ module Geonames
         def parse_region(r)
           nation = Nation.find_by(abbr: /#{r.nation}/i)
           region_abbr = Geonames::Regions::Abbr.get_abbr(r.name, r.nation)
-          info "[REGION] #{r.gid} | #{r.name} (Pop: #{r.pop}) in #{r.nation} (#{nation&.name})"
 
           parsed_data = {
             id: r.gid.to_s,
@@ -236,13 +234,7 @@ module Geonames
               city_data[:region_abbr] = region.abbr
               # Construct slug with city name and region abbreviation
               # Slug will be handled by Geopolitical
-            else
-              info "[CITY] Region '#{region.name}' (ID: #{region.id}) does NOT have an abbr for City '#{s.name}'"
-              # Slug will be handled by Geopolitical
             end
-          else
-            info "[CITY WARN] No region found for city #{s.name} (Admin1 code: #{s.region}, Nation: #{s.nation})"
-            # Slug will be handled by Geopolitical
           end
           city_data
         end
@@ -251,7 +243,6 @@ module Geonames
         # Parse Hoods (Neighborhoods)
         #
         def parse_hood(s) # s is a Geonames::Spot object
-          info "[GEO HOOD] #{s.gid} | #{s.name}"
 
           # Attempt to find parent city - THIS IS A COMPLEX PART and needs specific logic
           # For now, let's assume we might try to find it via admin codes if available on the spot

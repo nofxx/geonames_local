@@ -3,7 +3,7 @@
 #
 :store: mongodb # soon pg too?
 :level: city # hood, city, state, nation
-:nations: [br] #, us] # which nations to include
+:nations: [br, ar] #, us] # which nations to include
 :locales: [pt, en, es] # which locales to include
 :min_pop: 7_000 # minimum population for cities
 :mapping:

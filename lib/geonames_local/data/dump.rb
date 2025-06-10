@@ -1,6 +1,9 @@
+# frozen_string_literal: true
+
 module Geonames
   class Dump
     attr_reader :data
+
     # Geonames base URL
     URL = 'http://download.geonames.org/export/'
     # Work temporary files
@@ -31,7 +34,9 @@ module Geonames
       Dir.mkdir(tmp_dir) unless File.exist?(tmp_dir)
 
       # Download alternateNamesV2.zip if not already present
-      unless File.exist?(zip_filepath)
+      if File.exist?(zip_filepath)
+        Geonames.info("#{zip_filename} already downloaded.")
+      else
         Geonames.info("Downloading #{zip_filename}...")
         # Note: The URL for alternateNamesV2.zip is under /dump/ not /export/
         download_url = "#{URL}dump/#{zip_filename}"
@@ -42,8 +47,6 @@ module Geonames
           Geonames.info "Failed to download #{zip_filename} from #{download_url}"
           return
         end
-      else
-        Geonames.info("#{zip_filename} already downloaded.")
       end
 
       # Uncompress alternateNamesV2.txt if not already present or if zip is newer
@@ -65,7 +68,6 @@ module Geonames
               Geonames.info("#{txt_filename} extracted successfully.")
             else
               Geonames.info("Could not find #{txt_filename} in #{zip_filepath}")
-              return # Exit load_alternate_names_to_cache if file not found in zip
             end
           end
         rescue StandardError => e # This will catch Zip::Error if defined, or other StandardErrors
@@ -88,8 +90,10 @@ module Geonames
       File.open(txt_filepath, 'r:UTF-8') do |f|
         while line = f.gets
           next if line.start_with?('#') # Skip comments
+
           parts = line.strip.split("\t")
-          # alternateNameId, geonameid, isolanguage, alternate name, isPreferredName, isShortName, isColloquial, isHistoric, from, to
+          # alternateNameId, geonameid, isolanguage, alternate name,
+          # isPreferredName, isShortName, isColloquial, isHistoric, from, to
           # We need geonameid (parts[1]), isolanguage (parts[2]), alternate name (parts[3])
           next if parts.length < 4
 
@@ -133,22 +137,21 @@ module Geonames
       Geonames.info("Finished parsing alternate names. Loaded #{count} names for #{Geonames::Cache[:alternate_names].keys.size} unique geoname IDs. Skipped #{skipped_invalid_gid} invalid GIDs. Took #{(end_time - start_time).round(2)}s.")
     rescue Errno::ENOENT
       Geonames.info("Failed to open #{txt_filepath} for parsing.")
-    rescue => e
+    rescue StandardError => e
       Geonames.info("An error occurred during alternate names processing: #{e.message}")
       Geonames.info(e.backtrace.join("\n"))
     end
 
-
     def nations
-      info "\nDumping nation DB"
+      Geonames.info "\nDumping nation DB"
       file = get_file('nation')
       download file
       parse file
-      info "Done nation DB"
+      Geonames.info 'Done nation DB'
     end
 
     def work(nation)
-      info "\nWorking on #{@kind} for #{nation}"
+      Geonames.info "\nWorking on #{@kind} for #{nation}"
       file = get_file(nation)
       download file
       uncompress file
@@ -162,9 +165,27 @@ module Geonames
     def download(file)
       Dir.mkdir(TMP) unless File.exist?(TMP)
       Dir.mkdir(TMP + @kind.to_s) unless File.exist?(TMP + @kind.to_s)
-      fname = TMP + "#{@kind}/#{file}"
-      return if File.exist?(fname)
-      `curl #{URL}/#{@kind}/#{file} -o #{fname}`
+      fname = File.join(TMP, @kind.to_s, file) # Use File.join for robustness
+      # Check if file exists and is not empty to prevent re-downloading corrupted/empty files.
+      return if File.exist?(fname) && File.size?(fname)
+
+      info "Downloading #{file} to #{fname}..."
+      cmd = "curl -fSsv #{URL}#{@kind}/#{file} -o #{fname}" # Added -fSsv for better error reporting from curl
+      Geonames.info "Executing: #{cmd}" # Use Geonames.info for consistency
+      system(cmd)
+
+      unless $?.success? && File.exist?(fname) && File.size?(fname)
+        Geonames.info "ERROR: Failed to download #{file}. Curl exit status: #{$?.exitstatus}."
+        Geonames.info "Command executed: #{cmd}"
+        # Attempt to clean up potentially empty/corrupted file
+        File.delete(fname) if File.exist?(fname)
+        # The subsequent File.open in parse method will raise Errno::ENOENT if download failed,
+        # which is handled there. Or, we could raise a specific error here.
+        # For now, logging the error is an improvement.
+        return false # Indicate failure
+      end
+      Geonames.info "#{file} downloaded successfully."
+      true # Indicate success
     end
 
     def uncompress(file)
@@ -172,30 +193,47 @@ module Geonames
       `unzip -quo /tmp/geonames/#{@kind}/#{file} -d /tmp/geonames/#{@kind}`
     end
 
-    def parse_line(l)
-      return if l =~ /^#|^iso/i
+    def parse_line(line)
+      # Skip comments (starting with '#') or ISO header lines (e.g., "ISO	ISO3	...")
+      return nil if line.start_with?('#') || line.match?(/^iso/i)
+
       if @kind == :dump
-        return l if l =~ /^\D/
-        if Opt[:level] != 'hood'
-          return unless l =~ /ADM\d/ # ADM2 => cities
+        # This block handles lines from files processed with @kind = :dump.
+        # This includes:
+        # 1. 'countryInfo.txt': Its data lines (e.g., "US\tUSA...") start with non-digits.
+        #    These should be returned as raw strings.
+        # 2. Specific country files (e.g., 'US.txt', 'BR.txt'): Their data lines start with
+        #    a digit (the geonameid). These are processed into Spot objects,
+        #    potentially filtered by Opt[:level].
+
+        return line if line.match?(/^\D/)
+        # This line starts with a non-digit. It's assumed to be a data line
+        # from 'countryInfo.txt' that should be returned raw.
+
+        # This line starts with a digit, so it's from a specific country file (e.g., 'US.txt').
+        # Apply filtering based on Opt[:level].
+        if Opt[:level] != 'hood' && !line.match?(/ADM\d/)
+          # If not at 'hood' level, and it's not an ADM line, skip it.
+          return nil
         end
+        # If at 'hood' level, or if it's an ADM line, it will proceed to Spot.new below.
+
       end
-      Spot.new(l, @kind)
+
+      # For @kind == :zip, or for @kind == :dump lines that passed the filters above.
+      Spot.new(line, @kind)
     end
 
     def parse(file)
-      start = Time.now
       File.open("/tmp/geonames/#{@kind}/#{file.gsub('zip', 'txt')}") do |f|
-        while line = f.gets
-          if record = parse_line(line)
+        while (line = f.gets)
+          if (record = parse_line(line))
             @data << record
           end
         end
-        total = Time.now - start
-        info "#{@data.size} #{@kind} spots parsed #{total}s (#{(@data.size / total).to_i}/s)"
       end
     rescue Errno::ENOENT => e
-      info "Failed to download #{file}, skipping. #{e}"
+      Geonames.info "Failed to download #{file}, skipping. #{e}"
     end
   end
 end

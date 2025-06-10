@@ -4,12 +4,12 @@ module Geonames
   #
   class Spot
     attr_accessor :gid, :name, :ascii, :lat, :lon, :nation, :kind,
-                  :code,  :pop, :tz, :geom, :region, :zip, :abbr, :id,
+                  :code, :pop, :tz, :geom, :region, :zip, :abbr, :id,
                   :feature_class, :feature_code # Added new attributes
-    alias_method :x, :lon
-    alias_method :y, :lat
-    alias_method :geoname_id, :gid
-    alias_method :table, :kind
+    alias x lon
+    alias y lat
+    alias geoname_id gid
+    alias table kind
 
     #
     # = Geonames Spot
@@ -18,19 +18,19 @@ module Geonames
     #
     def initialize(params = nil, kind = nil)
       return unless params.instance_of? String
+
       kind == :zip ? parse_zip(params) : parse(params)
-      if @kind == :region
-        @name.gsub!(/Estado d\w\s/, '')
-        @name.gsub!(/Federal District/, 'Distrito Federal')
-      end
+      return unless @kind == :region
+
+      @name.gsub!(/Estado d\w\s/, '')
+      @name.gsub!('Federal District', 'Distrito Federal')
     end
 
     #
     # Parse Geonames Dump Export
     #
     def parse(row)
-      row = row.split(/\t/)
-      info "[SPOT] #{row.join(' | ')}"
+      row = row.split("\t")
       # Assign to local variables first to preserve original feature_code
       gid_str, name_str, ascii_str, alternates_str, lat_str, lon_str, feat_class_str, feat_code_str,
       nation_str, _cc2, region_str, admin2_code_str, _adm3, _adm4, pop_str, _ele,
@@ -64,7 +64,7 @@ module Geonames
     #
     def parse_zip(row)
       _nation, @zip, @name, _a1, _a1c, _a2, @code, _a3, _a3c,
-      lat, lon, _acc = row.split(/\t/)
+      lat, lon, _acc = row.split("\t")
 
       @kind = :city
       parse_geom(lat, lon)
@@ -75,13 +75,14 @@ module Geonames
     # Parse Geom to float or GeoRuby Point
     #
     def parse_geom(lat, lon)
-      @lat, @lon = lat.to_f, lon.to_f
+      @lat = lat.to_f
+      @lon = lon.to_f
 
-      if defined? GeoRuby
-        @geom = GeoRuby::SimpleFeatures::Point.from_x_y(@lon, @lat)
-      else
-        @geom = { lat: @lat, lon: @lon }
-      end
+      @geom = if defined? GeoRuby
+                GeoRuby::SimpleFeatures::Point.from_x_y(@lon, @lat)
+              else
+                { lat: @lat, lon: @lon }
+              end
     end
 
     def alt
