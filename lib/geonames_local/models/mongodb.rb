@@ -9,31 +9,9 @@ require_relative '../regions/abbr' # Added to access the new Abbr module
 
 Mongoid.configure do |config|
   # config.master = Mongo::Connection.new.db("symbolize_test")
-  info "Using Mongoid v#{Mongoid::VERSION}"
 
-  db_settings = Opt[:db]
+  db_settings = Geonames::Opt[:db]
   puts db_settings.inspect #if Opt[:debug]
-  unless db_settings.is_a?(Hash)
-    msg = "FATAL: Opt[:db] is not configured correctly in your geonames.yml"
-    STDERR.puts msg
-    info msg # also log it if logger is configured
-    raise ArgumentError, "Opt[:db] configuration error: #{msg}"
-  end
-
-  # Critical validation for host and database name from db_settings
-  unless db_settings[:host].is_a?(String) && !db_settings[:host].empty?
-    msg = "FATAL: MongoDB host (db_settings[:host]) is not a valid non-empty string. Value: #{db_settings[:host].inspect}"
-    STDERR.puts msg
-    info msg # Log it if logger is configured
-    raise ArgumentError, msg
-  end
-
-  unless db_settings[:name].is_a?(String) && !db_settings[:name].empty?
-    msg = "FATAL: MongoDB database name (db_settings[:name]) is not a valid non-empty string. Value: #{db_settings[:name].inspect}"
-    STDERR.puts msg
-    info msg # Log it if logger is configured
-    raise ArgumentError, msg
-  end
 
   # Configure the default client in the modern Mongoid way (Mongoid 4.0+)
   client_config_options = {}
