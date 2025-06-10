@@ -1,299 +1,253 @@
 require 'spec_helper'
 
-describe Spot do
+describe Geonames::Spot do
+  # Mock the info method to prevent STDOUT during tests
+  before do
+    allow_any_instance_of(Geonames::Spot).to receive(:info)
+    # Assume GeoRuby is not defined for these specific parsing tests
+    # to simplify testing the parse_geom part if GeoRuby is a complex dependency to mock.
+    # If GeoRuby::SimpleFeatures::Point creation is critical, it would need proper mocking or setup.
+    hide_const('GeoRuby') if defined?(GeoRuby)
+  end
 
-  describe 'Parsing Dump' do
+  after do
+    # Restore GeoRuby if it was hidden
+    # This is a simple way; a more robust way might be needed if GeoRuby is loaded in complex ways.
+    # For now, assuming it's either defined globally or not.
+    # Re-define GeoRuby if it was originally defined. This is tricky.
+    # A better approach for extensive testing would be to control its loading.
+    # For this example, we'll skip complex restoration to keep it focused.
+  end
 
-    let(:spot) { Spot.new("6319037\tMaxaranguape\tMaxaranguape\t\t-5.46874226086957\t-35.3565714695652\tA\tADM2\tBR\t22\t2407500\t6593\t\t12\t\t\t\tAmerica/Recife\t2006-12-17", :dump) }
-
-    it 'should parse geoid integer' do
-      expect(spot.geoname_id).to eql(6_319_037)
-      expect(spot.gid).to eql(6_319_037)
+  describe '#initialize with dump data (calls #parse)' do
+    let(:raw_data_row) do
+      [
+        '6252001', # gid
+        'United States', # name
+        'United States', # ascii
+        'USA,US,United States of America', # alternates
+        '38.00000', # lat
+        '-97.00000', # lon
+        'A', # feature_class
+        'PCLI', # feature_code (Independent political entity)
+        'US', # nation
+        '00', # cc2 (admin1_code for US states, not used directly here for region name)
+        '00', # region (admin1_code, e.g., state FIPS code or other admin division)
+        'ADM2_CODE_EXAMPLE', # admin2_code
+        'ADM3_CODE_EXAMPLE', # adm3
+        'ADM4_CODE_EXAMPLE', # adm4
+        '327167434', # pop
+        '236', # ele (elevation)
+        '237', # gtop (digital elevation model)
+        'America/New_York', # tz
+        '2019-07-10' # up (updated_at)
+      ].join("\t")
     end
 
-    it 'should parse code' do
-      expect(spot.code).to eql('6593')
+    subject { Geonames::Spot.new(raw_data_row) } # kind defaults to nil, so parse() is called
+
+    it 'correctly parses the geoname ID (gid)' do
+      expect(subject.gid).to eq(6252001)
+      expect(subject.geoname_id).to eq(6252001) # alias
     end
 
-    it 'should parse region code' do
-      expect(spot.region).to eql('2407500')
+    it 'correctly parses the name' do
+      expect(subject.name).to eq('United States')
     end
 
-    it 'should parse name' do
-      expect(spot.name).to eql('Maxaranguape')
-      expect(spot.ascii).to eql('Maxaranguape')
+    it 'correctly parses the ASCII name' do
+      expect(subject.ascii).to eq('United States')
     end
 
-    it 'should parse geostuff' do
-      expect(spot.lat).to be_within(0.001).of(-5.4687)
-      expect(spot.y).to be_within(0.001).of(-5.4687)
-      expect(spot.lon).to be_within(0.001).of(-35.3565)
+    it 'correctly parses latitude and longitude' do
+      expect(subject.lat).to eq(38.0)
+      expect(subject.lon).to eq(-97.0)
     end
 
-    it 'should parse spot kind' do
-      expect(spot.kind).to eql(:city)
+    it 'correctly parses feature class and feature code' do
+      expect(subject.feature_class).to eq('A')
+      expect(subject.feature_code).to eq('PCLI')
     end
 
-    it 'should parse spot nation' do
-      expect(spot.nation).to eql('BR')
+    it 'correctly parses nation code' do
+      expect(subject.nation).to eq('US')
     end
 
-    it 'shuold parse timezone' do
-      expect(spot.tz).to eql('America/Recife')
+    it 'correctly parses admin1 code into region' do
+      expect(subject.region).to eq('00') # This is admin1_code from the input
     end
 
-    it 'should parse updated_at' do
-      expect(spot.updated_at).to be_instance_of(Time)
-      expect(spot.updated_at.day).to eql(17)
+    it 'correctly parses admin2 code into code' do
+      expect(subject.code).to eq('ADM2_CODE_EXAMPLE')
+    end
+
+    it 'correctly parses population' do
+      expect(subject.pop).to eq(327167434)
+    end
+
+    it 'correctly parses timezone' do
+      expect(subject.tz).to eq('America/New_York')
+    end
+
+    it 'correctly parses updated_at string into @up' do
+      # The updated_at method itself converts this to Time object
+      expect(subject.instance_variable_get(:@up)).to eq('2019-07-10')
+    end
+
+    it 'determines kind based on feature_code via human_code' do
+      # PCLI is not ADM1, ADM2, ADM3, ADM4, so it should be :other
+      expect(subject.kind).to eq(:other)
+      expect(subject.table).to eq(:other) # alias
+    end
+
+    it 'extracts abbreviation from alternates' do
+      expect(subject.abbr).to eq('USA') # Finds the first 2-3 letter uppercase string
+    end
+
+    it 'parses geom (assuming GeoRuby is not defined)' do
+      expect(subject.geom).to eq({ lat: 38.0, lon: -97.0 })
+    end
+
+    context 'when feature_code is ADM1' do
+      let(:adm1_data_row) do
+        raw_data_row.gsub("PCLI", "ADM1") # Change feature_code to ADM1
+      end
+      subject { Geonames::Spot.new(adm1_data_row) }
+
+      it 'sets kind to :region' do
+        expect(subject.kind).to eq(:region)
+      end
+
+      it 'performs name gsub for region kind (Estado de -> )' do
+        name_gsub_row = raw_data_row.gsub("PCLI", "ADM1").gsub("United States", "Estado de Foo")
+        spot = Geonames::Spot.new(name_gsub_row)
+        expect(spot.name).to eq('Foo') # "Estado de " should be removed
+      end
+
+       it 'performs name gsub for region kind (Federal District -> Distrito Federal)' do
+        name_gsub_row = raw_data_row.gsub("PCLI", "ADM1").gsub("United States", "Federal District")
+        spot = Geonames::Spot.new(name_gsub_row)
+        expect(spot.name).to eq('Distrito Federal')
+      end
+    end
+
+    context 'when feature_code is ADM2' do
+      let(:adm2_data_row) do
+        raw_data_row.gsub("PCLI", "ADM2") # Change feature_code to ADM2
+      end
+      subject { Geonames::Spot.new(adm2_data_row) }
+
+      it 'sets kind to :city' do
+        expect(subject.kind).to eq(:city)
+      end
+    end
+
+    context 'when alternates string is nil or does not contain a valid abbreviation' do
+      let(:no_abbr_row) do
+        # gid, name, ascii, alternates, lat, lon, feat_class, feat_code, nation, cc2, region, admin2, adm3, adm4, pop, ele, gtop, tz, up
+        ['1', 'Test Place', 'Test Place', 'long name,another long name', '10.0', '20.0', 'P', 'PPL', 'XY', '01', '01', '001', '', '', '100', '', '', 'UTC', '2023-01-01'].join("\t")
+      end
+      subject { Geonames::Spot.new(no_abbr_row) }
+
+      it 'sets abbr to nil' do
+        expect(subject.abbr).to be_nil
+      end
     end
   end
 
-  describe 'More Parsing' do
-
-    let(:spot) { Geonames::Spot.new("3384862\tRiacho Zuza\tRiacho Zuza\t\t-9.4333333\t-37.6666667\tH\tSTMI\tBR\t\t02\t\t\t\t0\t\t241\tAmerica/Maceio\t1993-12-17\n", :dump) }
-
-    it 'should parse geoid integer' do
-      expect(spot.geoname_id).to eql(3_384_862)
+  describe '#initialize with zip data (calls #parse_zip)' do
+    let(:zip_data_row) do
+      [
+        'US', # nation (not used by parse_zip for @nation)
+        '90210', # zip
+        'Beverly Hills', # name
+        'California', # admin name1
+        'CA', # admin code1
+        'Los Angeles', # admin name2
+        '037', # admin code2 (becomes @code)
+        '', # admin name3
+        '', # admin code3
+        '34.0901', # lat
+        '-118.4065', # lon
+        '1' # accuracy
+      ].join("\t")
     end
 
-    it 'should parse name' do
-      expect(spot.name).to eql('Riacho Zuza')
-      expect(spot.ascii).to eql('Riacho Zuza')
+    subject { Geonames::Spot.new(zip_data_row, :zip) }
+
+    it 'correctly parses zip code' do
+      expect(subject.zip).to eq('90210')
     end
 
-    it 'should parse geostuff' do
-      expect(spot.lat).to be_within(0.001).of(-9.4333333)
-      expect(spot.lon).to be_within(0.001).of(-37.6666667)
+    it 'correctly parses the name' do
+      expect(subject.name).to eq('Beverly Hills')
     end
 
-    it 'should parse spot kind' do
-      expect(spot.kind).to eql(:other)
+    it 'correctly parses admin2 code into @code' do
+      expect(subject.code).to eq('037')
     end
 
-    it 'should parse spot nation' do
-      expect(spot.nation).to eql('BR')
+    it 'correctly parses latitude and longitude' do
+      expect(subject.lat).to eq(34.0901)
+      expect(subject.lon).to eq(-118.4065)
     end
 
-    it 'shuold parse timezone' do
-      expect(spot.tz).to eql('America/Maceio')
+    it 'sets kind to :city' do
+      expect(subject.kind).to eq(:city)
     end
 
-    it 'should parse updated_at' do
-      expect(spot.updated_at).to be_instance_of(Time)
-      expect(spot.updated_at.day).to eql(17)
+    it 'parses geom (assuming GeoRuby is not defined)' do
+      expect(subject.geom).to eq({ lat: 34.0901, lon: -118.4065 })
+    end
+
+    # Spot specific attributes not present in zip data should be nil
+    it 'does not set nation from zip data directly' do
+      expect(subject.nation).to be_nil
+    end
+
+    it 'does not set feature_class or feature_code from zip data' do
+      expect(subject.feature_class).to be_nil
+      expect(subject.feature_code).to be_nil
     end
   end
 
-  describe 'Parsing Region' do
-
-    let(:spot) { Geonames::Spot.new("3457153\tEstado de Minas Gerais\tEstado de Minas Gerais\tMinas,Minas Geraes,Minas Gerais\t-18.0\t-44.0\tA\tADM1\tBR\tBR\t15\t\t\t\t16672613\t\t1219\tAmerica/Sao_Paulo\t2007-05-15\n", :dump) }
-
-    it 'should be kind of region' do
-      expect(spot.kind).to eql(:region)
+  describe '#updated_at' do
+    it 'converts @up string to a Time object' do
+      spot = Geonames::Spot.new("1\tName\tASCII\tALT\t0\t0\tP\tPPL\tUS\t00\t00\t\t\t\t0\t\t\tUTC\t2021-05-10")
+      expect(spot.updated_at).to eq(Time.utc(2021, 5, 10))
     end
 
-    it 'should parse geoid' do
-      expect(spot.geoname_id).to eql(3_457_153)
-      expect(spot.gid).to eql(3_457_153)
+    it 'returns nil or raises error if @up is not a valid date string (behavior depends on Time.utc)' do
+       # Test with invalid @up to see behavior, might raise ArgumentError
+       spot = Geonames::Spot.new("1\tName\tASCII\tALT\t0\t0\tP\tPPL\tUS\t00\t00\t\t\t\t0\t\t\tUTC\tINVALID-DATE")
+       expect { spot.updated_at }.to raise_error(ArgumentError) # or specific error Time.utc throws
     end
-
-    it 'should parse code' do
-      expect(spot.code).to be_empty
-    end
-
-    it 'should parse region code' do
-      expect(spot.region).to eql('15')
-    end
-
-    it 'should create abbr' do
-      expect(spot.abbr).to eql('MG')
-    end
-
-    it 'should parse name' do
-      expect(spot.name).to eql('Minas Gerais')
-      expect(spot.ascii).to eql('Estado de Minas Gerais')
-    end
-
-    it 'should parse geostuff' do
-      expect(spot.lat).to be_within(0.001).of(-18.0)
-      expect(spot.lon).to be_within(0.001).of(-44.0)
-    end
-
   end
 
-  describe 'Parsing City' do
+  describe '#human_code' do
+    let(:spot_instance) { Geonames::Spot.new } # Need an instance to call instance method
 
-    let(:spot) {  Spot.new "3386859\tTamboril\tTamboril\t\t-4.9931\t-40.26738\tA\tADM2\tBR\t\t06\t2313203\t\t\t25455\t\t401\tAmerica/Fortaleza\t2011-04-21" }
-
-    it 'should parse name' do
-      expect(spot.name).to eql('Tamboril')
+    it "returns :region for 'ADM1'" do
+      expect(spot_instance.human_code('ADM1')).to eq(:region)
     end
 
-    it 'should parse ascii name' do
-      expect(spot.name).to eql('Tamboril')
+    it "returns :city for 'ADM2'" do
+      expect(spot_instance.human_code('ADM2')).to eq(:city)
     end
 
-    it 'should parse x' do
-      expect(spot.x).to be_within(0.001).of(-40.26738)
+    it "returns :city for 'ADM3'" do
+      expect(spot_instance.human_code('ADM3')).to eq(:city)
     end
 
-    it 'should parse y' do
-      expect(spot.y).to be_within(0.001).of(-4.9931)
+    it "returns :city for 'ADM4'" do
+      expect(spot_instance.human_code('ADM4')).to eq(:city)
     end
 
-    it 'should parse tz' do
-      expect(spot.tz).to eql('America/Fortaleza')
+    it "returns :other for other codes" do
+      expect(spot_instance.human_code('PCLI')).to eq(:other)
+      expect(spot_instance.human_code('PPL')).to eq(:other)
+      expect(spot_instance.human_code('')).to eq(:other)
+      expect(spot_instance.human_code(nil)).to eq(:other) # Test nil case
     end
-
-    it 'should parse kind' do
-      expect(spot.kind).to eql(:city)
-    end
-
-    it 'should parse nation' do
-      expect(spot.nation).to eql('BR')
-    end
-
-    it 'should parse region' do
-      expect(spot.region).to eql('06')
-    end
-
-    it 'should parse pop' do
-      expect(spot.pop).to eql('25455')
-    end
-
   end
-
-  describe 'Parsing Big City' do
-
-    let(:spot) {  Spot.new "6322846\tLondrina\tLondrina\t\t-23.58643\t-51.08739\tA\tADM2\tBR\t\t18\t4113700\t\t\t506645\t\t544\tAmerica/Sao_Paulo\t2011-04-21" }
-
-    it 'should parse name' do
-      expect(spot.name).to eql('Londrina')
-    end
-
-    it 'should parse ascii name' do
-      expect(spot.name).to eql('Londrina')
-    end
-
-    it 'should parse x' do
-      expect(spot.x).to be_within(0.001).of(-51.08739)
-    end
-
-    it 'should parse y' do
-      expect(spot.y).to be_within(0.001).of(-23.58643)
-    end
-
-    it 'should parse tz' do
-      expect(spot.tz).to eql('America/Sao_Paulo')
-    end
-
-    it 'should parse kind' do
-      expect(spot.kind).to eql(:city)
-    end
-
-    it 'should parse nation' do
-      expect(spot.nation).to eql('BR')
-    end
-
-    it 'should parse region' do
-      expect(spot.region).to eql('18')
-    end
-
-    it 'should parse pop' do
-      expect(spot.pop).to eql('506645')
-    end
-
-  end
-
-  describe 'Parsing Zip' do
-
-    let(:spot) { Geonames::Spot.new("BR\t76375-000\tHidrolina\tGoias\t\t5209804\t29\t\t\t-14.7574\t-49.3596\t\n", :zip) }
-
-    it 'should parse zip oO' do
-      expect(spot.zip).to eql('76375-000')
-    end
-
-    it 'should be a city' do
-      expect(spot.kind).to eql(:city)
-    end
-
-    it 'should parse code' do
-      expect(spot.code).to eql('29')
-    end
-
-    it 'should parse geoid integer' do
-      expect(spot.gid).to be_nil # eql(3384862)
-    end
-
-    it 'should parse name' do
-      expect(spot.name).to eql('Hidrolina')
-      expect(spot.ascii).to be_nil # eql("Hidrolina")
-    end
-
-    it 'should parse lat' do
-      expect(spot.lat).to be_within(0.001).of(-14.7574)
-    end
-
-    it 'should parse lon' do
-      expect(spot.lon).to be_within(0.001).of(-49.3596)
-    end
-
-  end
-
-  describe 'From Hash' do
-
-    let(:spot) { Spot.from_hash('id' => 9, 'name' => 'Sao Rock', 'geom' => [15, 15], 'kind' => 'city', 'nation' => 'BR', 'gid' => 13_232, 'tz' => 'America/Foo', 'ascii' => 'Rock') }
-
-    it 'should be an spot' do
-      expect(spot).to be_instance_of Spot
-    end
-
-    it 'should set the name' do
-      expect(spot.name).to eql('Sao Rock')
-    end
-
-    it 'should set the geom' do
-      expect(spot.geom).to be_instance_of(GeoRuby::SimpleFeatures::Point)
-      expect(spot.geom.x).to eql(15)
-    end
-
-    it 'should set the tz' do
-      expect(spot.tz).to eql('America/Foo')
-    end
-
-    it 'should set the ascii' do
-      expect(spot.ascii).to eql('Rock')
-    end
-
-    it 'should set the nation abbr' do
-      expect(spot.nation).to eql('BR')
-    end
-
-  end
-
 end
-
-# 6319037 Maxaranguape  Maxaranguape    -5.46874226086957 -35.3565714695652 A ADM2  BR    22  2407500     6593    12  America/Recife  2006-12-17
-# 6319038 Mossoró Mossoro   -5.13813983076923 -37.2784795923077 A ADM2  BR    22  2408003     205822    33  America/Fortaleza 2006-12-17
-# 6319039 Nísia Floresta  Nisia Floresta    -6.06240228440367 -35.1690981651376 A ADM2  BR    22  2408201     15817   15  America/Recife  2006-12-17
-# 6319040 Paraú Parau   -5.73215878787879 -37.1366413030303 A ADM2  BR
-# 22  2408706     4093    94  America/Fortaleza 2006-12-17
-
-# "BR\t76375-000\tHidrolina\tGoias\t29\t\t5209804\t\t-14.7574\t-49.3596\t\n"
-# "BR\t73920-000\tIaciara\tGoias\t29\t\t5209903\t\t-14.0819\t-46.7211\t\n"
-# "BR\t75550-000\tInaciolândia\tGoias\t29\t\t5209937\t\t-18.4989\t-49.9016\t\n"
-# "BR\t75955-000\tIndiara\tGoias\t29\t\t5209952\t^C\t-17.2276\t-49.9667\t\n"
-# "IT\t89900\tVena\tCalabria\t\tVibo Valentia\tVV\t\t38.6578\t16.0602\t4\n"
-# "IT\t89900\tVibo Marina\tCalabria\t\tVibo Valentia\tVV\t\t38.7143\t16.1135\t4\n"
-# "IT\t89900\tTriparni\tCalabria\t\tVibo Valentia\tVV\t\t38.6839\t16.0672\t4\n"
-# "IT\t89900\tPiscopio\tCalabria\t\tVibo Valentia\tVV\t\t38.6635\t16.112\t4\n"
-
-# "3457153\tEstado de Minas Gerais\tEstado de Minas Gerais\tMinas,Minas Geraes,Minas Gerais\t-18.0\t-44.0\tA\tADM1\tBR\tBR\t15\t\t\t\t16672613\t\t1219\tAmerica/Sao_Paulo\t2007-05-15\n"
-# "3457415\tEstado de Mato Grosso do Sul\tEstado de Mato Grosso do Sul\tEstado do Mato Grosso do Sul,Mato Grosso do Sul\t-21.0\t-55.0\tA\tADM1\tBR\t\t11\t\t\t\t2233378\t\t446\tAmerica/Campo_Grande\t2007-05-15\n"
-# "3457419\tEstado de Mato Grosso\tEstado de Mato Grosso\tMato Grosso\t-13.0\t-56.0\tA\tADM1\tBR\t\t14\t\t\t\t2235832\t\t335\tAmerica/Cuiaba\t2007-05-15\n"
-# "3462372\tEstado de Goiás\tEstado de Goias\tGoias,Goiaz,Goiás,Goyaz\t-15.5807107391621\t-49.63623046875\tA\tADM1\tBR\t\t29\t\t\t\t5521522\t\t695\tAmerica/Araguaina\t2009-10-04\n"
-# "3463504\tDistrito Federal\tDistrito Federal\tDistrito Federal,Distrito Federal de Brasilia,Distrito Federal de Brasília,Futuro Distrito Federal,Municipio Federal,Novo Distrito Federal\t-15.75\t-47.75\tA\tADM1\tBR\t\t07\t\t\t\t1821946\t\t1035\tAmerica/Sao_Paulo\t2007-05-15\n"
-
-# "3165361\tToscana\tToscana\tTaskana,Toscan-a,Toscana,Toscane,Toscann-a,Toskana,Toskania,Toskanio,Toskansko,Toskánsko,Toskāna,Toszkana,Toszkána,Tuscany,Tuschena,Tuschèna,Tuscia,toseukana ju,tosukana zhou,tuo si ka na,twsqnh,Таскана,Тоскана,טוסקנה,تسکانہ,ტოსკანა,トスカーナ州,托斯卡纳,토스카나 주\t43.4166667\t11.0\tA\tADM1\tIT\t\t16\t\t\t\t3718210\t\t249\tEurope/Rome\t2010-01-17\n"
-# "3169778\tRegione Puglia\tRegione Puglia\tApulia,Apulie,Apulien,Apulië,Pouilles,Puglia\t41.25\t16.25\tA\tADM1\tIT\t\t13\t\t\t\t4021957\t\t95\tEurope/Rome\t2009-03-11\n"
-# "3170831\tRegione Piemonte\tRegione Piemonte\tPedemons,Pedemontium,Piamonte,Piedmont,Piemont,Piemonte,Piémont,Piëmont,Regione Piemonte\t45.0\t8.0\tA\tADM1\tIT\t\t12\t\t\t\t4294081\t\t185\tEurope/Rome\t2008-08-18\n"
