@@ -172,7 +172,8 @@ module Geonames
             souls: pop.to_i,
             abbr: abbr,
             code: iso3,
-            langs: langs.to_s.split(',')
+            langs: langs.to_s.split(','),
+            phone: phone
           }
         end
 

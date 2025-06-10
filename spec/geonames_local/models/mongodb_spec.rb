@@ -73,7 +73,7 @@ describe Geonames::Models::MongoWrapper do
   describe '#parse_nation' do
     context 'with Brazil data' do
       let(:data) do
-        "BR\tBRA\t076\tBR\tBrazil\tBrasilia\t8511965\t206135893\tSA\t.br\tBRL\tReal\t55\t^(\\d{5}-\\d{3})$\tpt-BR,es,en,fr\t3469034\tAR,BO,CO,GF,GY,PY,PE,SR,UY,VE"
+        "BR\tBRA\t076\tBR\tBrazil\tBrasilia\t8511965\t206135893\tSA\t.br\tBRL\tReal\t55\t^(\\d{5}-\\d{3})$\t^(\\d{5}-\\d{3})$\tpt-BR,es,en,fr\t3469034\tAR,BO,CO,GF,GY,PY,PE,SR,UY,VE"
       end
       it 'parses nation data correctly' do
         result = Geonames::Models::MongoWrapper.parse_nation(data)
@@ -86,12 +86,13 @@ describe Geonames::Models::MongoWrapper do
         expect(result[:abbr]).to eq('BR')
         expect(result[:code]).to eq('BRA')
         expect(result[:langs]).to eq(%w[pt-BR es en fr])
+        expect(result[:phone]).to eq('55')
       end
     end
 
     context 'with US data' do
       let(:data) do
-        "US\tUSA\t840\tUS\tUnited States\tWashington\t9629091\t327167434\tNA\t.us\tUSD\tDollar\t1\t^(\\d{5}(-\\d{4})?)$\ten-US,es-US,haw,fr\t6252001\tCA,MX,CU"
+        "US\tUSA\t840\tUS\tUnited States\tWashington\t9629091\t327167434\tNA\t.us\tUSD\tDollar\t1\t^(\\d{5}(-\\d{4})?)$\t^(\\d{5}(-\\d{4})?)$\ten-US,es-US,haw,fr\t6252001\tCA,MX,CU"
       end
       it 'parses nation data correctly' do
         result = Geonames::Models::MongoWrapper.parse_nation(data)
@@ -100,12 +101,13 @@ describe Geonames::Models::MongoWrapper do
         expect(result[:souls]).to eq(327_167_434)
         expect(result[:abbr]).to eq('US')
         expect(result[:code]).to eq('USA')
+        expect(result[:phone]).to eq('1')
       end
     end
 
     context 'with Antigua and Barbuda data' do
       let(:data) do
-        "AG\tATG\t028\tAG\tAntigua and Barbuda\tSaint John's\t443\t97118\tNA\t.ag\tXCD\tDollar\t1-268\t\t\ten-AG\t3576396\t"
+        "AG\tATG\t028\tAG\tAntigua and Barbuda\tSaint John's\t443\t97118\tNA\t.ag\tXCD\tDollar\t1-268\t\t\ten-AG\t3576396\t" # Corrected tabs for languages field
       end
       it 'parses nation data correctly' do
         result = Geonames::Models::MongoWrapper.parse_nation(data)
@@ -115,6 +117,7 @@ describe Geonames::Models::MongoWrapper do
         expect(result[:abbr]).to eq('AG')
         expect(result[:code]).to eq('ATG')
         expect(result[:langs]).to eq(['en-AG'])
+        expect(result[:phone]).to eq('1-268')
       end
     end
   end
